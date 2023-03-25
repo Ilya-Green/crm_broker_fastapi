@@ -23,7 +23,7 @@ SQLAlchemy==1.4.41
 sqlalchemy2-stubs==0.0.2a32
 sqlmodel==0.0.8
 starlette==0.26.1
-starlette-admin @ git+https://github.com/Ilya-Green/starlette-admin.git@0789b9495d5b50132c0082724aab07daee0ca77e
+starlette-admin @ git+https://github.com/Ilya-Green/starlette-admin.git@92403b6a139c79f082dd989c69d400b0a25238e0
 typing_extensions==4.5.0
 urllib3==1.26.15
 uvicorn==0.21.1
