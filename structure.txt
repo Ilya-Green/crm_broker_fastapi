@@ -1,0 +1,41 @@
+-> Интеграция из aff crm
+
+System admin: (инвестор, )
+    Head:   CRM Manager:
+        Desk:
+            Conversion team leader:
+                sales:
+                    Client:
+                        info
+                        notes (серверное время)
+                        status
+                    calendar
+                    tasks
+                    notifications
+            Retain team leader:
+                sales:
+                    Client
+                    calendar
+                    tasks
+                        Integration platform:
+                            (6 действий)
+                                websocket:(?)
+
+Affiliate:
+    Clients
+    statistic
+
+
+
+Интеграция в платформу ->
+
+
+
+
+support
+
+
+сайт:
+    main
+    документы
+    торговля

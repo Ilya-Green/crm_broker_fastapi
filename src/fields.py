@@ -28,4 +28,4 @@ class PasswordField(StringField):
     exclude_from_list: Optional[bool] = True
     exclude_from_detail: Optional[bool] = True
     exclude_from_create: Optional[bool] = False
-    exclude_from_edit: Optional[bool] = True
+    exclude_from_edit: Optional[bool] = False

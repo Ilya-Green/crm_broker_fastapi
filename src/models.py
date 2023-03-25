@@ -22,7 +22,7 @@ class Employee(SQLModel, table=True):
     notes: "Note" = Relationship(back_populates="employee")
 
     desk_id: Optional[int] = Field(foreign_key="desk.id")
-    desk: "Desk" = Relationship(back_populates="responsible")
+    desk: "Desk" = Relationship(back_populates="employee")
 
     clients_responsible: "Client" = Relationship(back_populates="responsible")
 
@@ -36,6 +36,7 @@ class Role(SQLModel, table=True):
     sys_admin: bool = Field(default=0)
     name: str = Field(default=0)
     head: bool = Field(default=0)
+    department_leader: bool = Field(default=0)
     desk_leader: bool = Field(default=0)
     accounts_can_access: bool = Field(default=0)
     roles_can_access: bool = Field(default=0)
@@ -53,6 +54,8 @@ class Affiliate(SQLModel, table=True):
     id: Optional[int] = Field(primary_key=True)
     name: Optional[str] = Field()
     auth_key: Optional[str] = Field(default=secrets.token_hex(32))
+
+    clients: "Client" = Relationship(back_populates="affiliate")
 
 
 class Client(SQLModel, table=True):
@@ -87,6 +90,9 @@ class Client(SQLModel, table=True):
     responsible: "Employee" = Relationship(back_populates="clients_responsible")
 
     actions: "Action" = Relationship(back_populates="client")
+
+    affiliate_id: Optional[int] = Field(foreign_key="affiliate.id")
+    affiliate: Affiliate = Relationship(back_populates="clients")
 
 
 class Status(SQLModel, table=True):
@@ -137,11 +143,11 @@ class Desk(SQLModel, table=True):
 
     client: Client = Relationship(back_populates="desk")
 
-    department_id: Optional[int] = Field(foreign_key="department.id")
+    department_id: Optional[int] = Field(foreign_key="department.id", default=0)
     department: "Department" = Relationship(back_populates="desk")
 
     # responsible_id: Optional[int] = Field(foreign_key="employee.id")
-    responsible: Employee = Relationship(back_populates="desk")
+    employee: Employee = Relationship(back_populates="desk")
 
 
 class Department(SQLModel, table=True):

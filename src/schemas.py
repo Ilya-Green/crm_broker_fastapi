@@ -19,10 +19,11 @@ class Gender(str, enum.Enum):
 
 
 class ClientCreate(SQLModel):
+    auth_key: str = Field()
     first_name: str = Field(min_length=3)
     email: EmailStr = Field()
     phone_number: str = Field(min_length=4, default="+1111111111")
-    status_id: int = Field(default=1)
+    status_id: int = Field(default=None)
 
     title: Optional[str] = Field(min_length=3)
     # # login: Optional[str] = Field(min_length=3)
@@ -36,3 +37,18 @@ class ClientCreate(SQLModel):
     region: Optional[str] = Field(min_length=3)
     postcode: Optional[int] = Field()
     additional_contact: Optional[str] = Field(min_length=3)
+
+
+class ClientList(SQLModel):
+    auth_key: str = Field()
+    use_pattern: Optional[bool] = Field(default=0)
+    admin_pattern_id: Optional[int] = Field()
+    user_pattern_id: Optional[int] = Field()
+    keyword: Optional[str] = Field()
+    offset: Optional[int] = Field(default=-1)
+    limit: Optional[int] = Field(default=-1)
+    pattern_check: Optional[str] = Field()
+    sorting_field: Optional[str] = Field(default="id")
+    sorting_order: Optional[str] = Field(default="asc", description="asc or desc. forward or reverse order")
+    ignoreClientIds: Optional[List[int]] = Field()
+    count: Optional[bool] = Field(default=0)

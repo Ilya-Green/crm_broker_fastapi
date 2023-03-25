@@ -81,7 +81,7 @@ admin.add_view(ClientsView(Client, label="Clients"))
 
 admin.add_view(MyModelView(Note))
 admin.add_view(MyModelView(Action))
-admin.add_view(MyModelView(Status))
+admin.add_view(MyModelView(Status, label="Statuses"))
 
 # Mount to admin to app
 admin.mount_to(app)

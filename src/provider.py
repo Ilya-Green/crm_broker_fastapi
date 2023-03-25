@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from sqlmodel import Session, select, join
 import pprint
 
-from .models import Employee, Role, Desk
+from .models import Employee, Role, Desk, Department
 from . import engine
 
 
@@ -41,6 +41,7 @@ class MyAuthProvider(AuthProvider):
                     {"username": "the role must be assigned by the system administrator"}
                 )
             request.session.update({"username": username})
+            request.session.update({"password": password})
             return response
         raise LoginFailed("Invalid username or password")
 
@@ -51,8 +52,9 @@ class MyAuthProvider(AuthProvider):
         #     session.commit()
         # request.state.user = users.get(request.session["username"])
         username = request.session.get("username", None)
+        password = request.session.get("password", None)
         with Session(engine) as session:
-            user = select(Employee).where(Employee.login == username)
+            user = select(Employee).where(Employee.login == username, Employee.password == password)
             result = session.exec(user).first()
         if result:
             """
@@ -64,6 +66,7 @@ class MyAuthProvider(AuthProvider):
                     "role_id": result.role_id,
                     "desk_id": None,
                     "department_id": None,
+                    # "department_head": result.department_head
                     }
             with Session(engine) as session:
                 user = select(Desk).where(Desk.id == result.desk_id)
@@ -71,6 +74,11 @@ class MyAuthProvider(AuthProvider):
             if desk:
                 data["desk_id"] = desk.id
                 data["department_id"] = desk.department_id
+            with Session(engine) as session:
+                user = select(Department).where(Department.head_id == result.id)
+                department = session.exec(user).first()
+            if department:
+                data["department_id"] = department.id
 
             with Session(engine) as session:
                 user = select(Role).where(Role.id == result.role_id)
