@@ -13,7 +13,7 @@ from sqlmodel import Field, Relationship, SQLModel, MetaData
 
 class Employee(SQLModel, table=True):
     id: Optional[int] = Field(primary_key=True)
-    login: str = Field(min_length=3)
+    login: str = Field(min_length=3, unique=True)
     password: str = Field(min_length=8)
 
     role_id: Optional[int] = Field(foreign_key="role.id")
@@ -28,7 +28,8 @@ class Employee(SQLModel, table=True):
 
     actions: "Action" = Relationship(back_populates="employee")
 
-    department_head: "Department" = Relationship(back_populates="head")
+    department_id: Optional[int] = Field(foreign_key="department.id")
+    department: "Department" = Relationship(back_populates="employee")
 
 
 class Role(SQLModel, table=True):
@@ -86,6 +87,9 @@ class Client(SQLModel, table=True):
     desk_id: Optional[int] = Field(foreign_key="desk.id")
     desk: "Desk" = Relationship(back_populates="client")
 
+    department_id: Optional[int] = Field(foreign_key="department.id")
+    department: "Department" = Relationship(back_populates="clients")
+
     responsible_id: Optional[int] = Field(foreign_key="employee.id")
     responsible: "Employee" = Relationship(back_populates="clients_responsible")
 
@@ -129,7 +133,7 @@ class Note(SQLModel, table=True):
     client_id: Optional[int] = Field(foreign_key="client.id")
     client: Client = Relationship(back_populates="notes")
 
-    # employee_name: Optional[str] = Field()
+    employee_name: Optional[str] = Field()
     employee_id: Optional[int] = Field(foreign_key="employee.id")
     employee: Employee = Relationship(back_populates="notes")
 
@@ -156,5 +160,6 @@ class Department(SQLModel, table=True):
 
     desk: Desk = Relationship(back_populates="department")
 
-    head_id: Optional[int] = Field(foreign_key="employee.id")
-    head: Employee = Relationship(back_populates="department_head")
+    employee: Employee = Relationship(back_populates="department")
+
+    clients: Client = Relationship(back_populates="department")

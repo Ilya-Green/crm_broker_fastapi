@@ -1,5 +1,6 @@
 from sqlmodel import Session, select, asc, desc
 from typing import Any, Dict, List, Optional, Set, Union
+import logging
 
 from .models import Employee, Role, Client, Status, Affiliate
 from . import engine
@@ -7,11 +8,13 @@ from . import engine
 from .schemas import ClientCreate, ClientList
 
 
+logger_api = logging.getLogger("api")
+
 def api_get_statuses():
     with Session(engine) as session:
         statement = select(Status)
         statuses = session.exec(statement).all()
-        return statuses
+    return statuses
 
 
 def api_client_create(data: ClientCreate):
@@ -24,8 +27,10 @@ def api_client_create(data: ClientCreate):
             session.add(new_client)
             session.commit()
             session.refresh(new_client)
-            return 'success', new_client
+        logger_api.warning(f"created {new_client}")
+        return 'success', new_client
     else:
+        logger_api.warning(f"incorrect auth_key {auth}")
         return 'incorrect auth_key'
 
 

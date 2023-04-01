@@ -1,18 +1,22 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 from starlette.applications import Starlette
-from starlette.responses import HTMLResponse
+from starlette.responses import HTMLResponse, PlainTextResponse
 from starlette.routing import Route
 from starlette_admin.contrib.sqlmodel import Admin, ModelView
 from starlette.middleware import Middleware
 from starlette.middleware.sessions import SessionMiddleware
 from .provider import MyAuthProvider
 from sqlmodel import Session, select
+import requests
+import traceback
+import logging
 
 from sqlmodel import SQLModel
 
-from .config import SECRET
+from .config import APP_SECRET, APP_NAME, TG_TOKEN, TG_CHAT_ID
 from .models import Employee, Role, Client, Note, Desk, Action, Department, Status, Affiliate
-from .views import MyModelView, EmployeeView, ClientsView, RolesView, DepartmentsView, DesksView, AffiliatesView
+from .views import MyModelView, EmployeeView, ClientsView, RolesView, DepartmentsView, DesksView, AffiliatesView, StatusesView
 from . import engine
 from .api import apiRouter
 
@@ -49,7 +53,6 @@ def init_database() -> None:
                 session.commit()
 
 
-
 app = FastAPI(
     routes=[
         # Route(
@@ -57,14 +60,47 @@ app = FastAPI(
         #     lambda r: HTMLResponse('<a href="/admin/">Click me to get to Admin!</a>'),
         # )
     ],
-    on_startup=[init_database],
 )
+
+logger_api = logging.getLogger("api")
+
+
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    response = await call_next(request)
+    if response.status_code >= 400:
+        print(request.body)
+        logger_api.error(f'Request to {request.url.path} returned status code {response.status_code}')
+    return response
+
+
+# url = f"https://api.telegram.org/bot{TOKEN}/getUpdates"
+
+logger = logging.getLogger("uvicorn.access")
+
+
+@app.on_event("startup")
+async def startup_event():
+    init_database()
+    logger.warning(f"{APP_NAME}: server_turned_on")
+    url = f"https://api.telegram.org/bot{TG_TOKEN}/sendMessage?chat_id={TG_CHAT_ID}&text={APP_NAME}: server_turned_on"
+    print(requests.get(url).json())
+
+
+@app.exception_handler(Exception)
+async def handle_exception(request, exc):
+    traceback_error = traceback.format_exc()
+    chunks = [traceback_error[i:i+4086] for i in range(0, len(traceback_error), 4086)]
+    for chunk in chunks:
+        url = f"https://api.telegram.org/bot{TG_TOKEN}/sendMessage?chat_id={TG_CHAT_ID}&text={APP_NAME}: {chunk}"
+        print(requests.get(url).json())
+    return PlainTextResponse("Oops! Something went wrong.", status_code=500)
 
 # Create admin
 admin = Admin(engine,
               title="CRM Broker",
               auth_provider=MyAuthProvider(),
-              middlewares=[Middleware(SessionMiddleware, secret_key=SECRET, max_age=60*60)],
+              middlewares=[Middleware(SessionMiddleware, secret_key=APP_SECRET, max_age=60*60)],
               base_url="/admin",
               templates_dir='src/templates',
               )
@@ -81,9 +117,16 @@ admin.add_view(ClientsView(Client, label="Clients"))
 
 admin.add_view(MyModelView(Note))
 admin.add_view(MyModelView(Action))
-admin.add_view(MyModelView(Status, label="Statuses"))
+admin.add_view(StatusesView(Status, label="Statuses"))
 
 # Mount to admin to app
 admin.mount_to(app)
 
 app.include_router(apiRouter, prefix="/api/v1",)
+
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    logger.warning(f"{APP_NAME}: server_turned_off")
+    url = f"https://api.telegram.org/bot{TG_TOKEN}/sendMessage?chat_id={TG_CHAT_ID}&text={APP_NAME}: server_turned_off"
+    print(requests.get(url).json())

@@ -1,0 +1,45 @@
+create table orders
+(
+    id          int auto_increment
+        primary key,
+    users_id    int                                 not null,
+    symbols_id  varchar(222)                        not null,
+    type        varchar(22)                         not null,
+    volume      float                               not null,
+    rate_open   float                               not null,
+    rate_real   float                               not null,
+    profit      float                               not null,
+    commission  float                               not null,
+    take_profit float                               not null,
+    stop_loss   float                               not null,
+    take        varchar(11)                         not null,
+    date_create timestamp default CURRENT_TIMESTAMP not null,
+    status      varchar(222)                        not null
+);
+
+create table rates
+(
+    id          int auto_increment
+        primary key,
+    type_orders varchar(11) not null,
+    symbol      varchar(11) not null,
+    name        varchar(22) not null,
+    last_price  float       not null
+);
+
+create table users
+(
+    id    
+    first_name 
+    last_name
+    pswd 
+    hash   
+    balance    
+    email     
+    phone     
+    avatar  
+    email
+        unique (email),
+    email_2
+        unique (email)
+);

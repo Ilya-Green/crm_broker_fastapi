@@ -1,10 +1,13 @@
 from fastapi import APIRouter
 from typing import List
+import logging
 
 from .services import api_get_statuses, api_client_create, api_client_list
 from .models import Employee, Client
 from .schemas import ClientCreate, ClientList
 
+
+logger = logging.getLogger("api")
 
 apiRouter = APIRouter(
     prefix="/client",
@@ -21,6 +24,7 @@ async def get_statuses():
 
 @apiRouter.post("/create/")
 async def create_client(data: ClientCreate):
+    logger.info(data)
     return api_client_create(data)
 
 

@@ -65,20 +65,21 @@ class MyAuthProvider(AuthProvider):
                     "name": result.login,
                     "role_id": result.role_id,
                     "desk_id": None,
-                    "department_id": None,
+                    "department_id": result.department_id,
                     # "department_head": result.department_head
                     }
             with Session(engine) as session:
+                # print(result.desk_id)
                 user = select(Desk).where(Desk.id == result.desk_id)
                 desk = session.exec(user).first()
             if desk:
                 data["desk_id"] = desk.id
                 data["department_id"] = desk.department_id
-            with Session(engine) as session:
-                user = select(Department).where(Department.head_id == result.id)
-                department = session.exec(user).first()
-            if department:
-                data["department_id"] = department.id
+            # with Session(engine) as session:
+            #     user = select(Department).where(Department.leader_id == result.id)
+            #     department = session.exec(user).first()
+            # if department:
+            #     data["department_id"] = department.id
 
             with Session(engine) as session:
                 user = select(Role).where(Role.id == result.role_id)
