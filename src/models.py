@@ -72,7 +72,7 @@ class Client(SQLModel, table=True):
     patronymic: Optional[str] = Field()
     country_id: Optional[int] = Field()
     city: Optional[str] = Field()
-    status_name: Optional[str] = Field()
+    # status_name: Optional[str] = Field()
     description: Optional[str] = Field()
     address: Optional[str] = Field()
     region: Optional[str] = Field()
@@ -80,6 +80,9 @@ class Client(SQLModel, table=True):
     additional_contact: Optional[str] = Field()
 
     creation_date: Optional[datetime] = Field(sa_column=Column(DateTime(timezone=True), default=datetime.utcnow))
+
+    type_id: Optional[int] = Field(foreign_key="type.id")
+    type: "Type" = Relationship(back_populates="client")
 
     status_id: Optional[int] = Field(foreign_key="status.id")
     status: "Status" = Relationship(back_populates="client")
@@ -99,6 +102,13 @@ class Client(SQLModel, table=True):
 
     affiliate_id: Optional[int] = Field(foreign_key="affiliate.id")
     affiliate: Affiliate = Relationship(back_populates="clients")
+
+
+class Type(SQLModel, table=True):
+    id: Optional[int] = Field(primary_key=True)
+    name: str = Field()
+
+    client: Client = Relationship(back_populates="type")
 
 
 class Status(SQLModel, table=True):

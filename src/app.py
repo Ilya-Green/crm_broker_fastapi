@@ -14,7 +14,7 @@ import logging
 
 from sqlmodel import SQLModel
 
-from .config import APP_SECRET, APP_NAME, TG_TOKEN, TG_CHAT_ID
+from .config import APP_SECRET, APP_NAME, ADMIN_PSWD, TG_TOKEN, TG_CHAT_ID
 from .models import Employee, Role, Client, Note, Desk, Action, Department, Status, Affiliate
 from .views import MyModelView, EmployeeView, ClientsView, RolesView, DepartmentsView, DesksView, AffiliatesView, StatusesView
 from . import engine
@@ -46,7 +46,7 @@ def init_database() -> None:
                     Employee(
                         id=1,
                         login="admin",
-                        password="12345678",
+                        password=ADMIN_PSWD,
                         role_id=1,
                     )
                 )
