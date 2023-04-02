@@ -418,7 +418,6 @@ class DesksView(MyModelView):
         if self.desk_leader:
             return super().get_count_query().where(Desk.id == self.desk_id)
 
-
     exclude_fields_from_create = [Desk.creation_date]
     exclude_fields_from_edit = [Desk.creation_date]
 
@@ -542,6 +541,7 @@ class ClientsView(MyModelView):
 
     exclude_fields_from_list = [Employee.notes]
     exclude_fields_from_edit = [Employee.notes]
+    exclude_fields_from_create = [Employee.notes]
 
     @action(
         name="set_department",

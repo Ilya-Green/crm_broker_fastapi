@@ -47,8 +47,10 @@ class Role(SQLModel, table=True):
 
     def to_dict(self):
         excluded_fields = ['id', 'name']
-        return {field_name: getattr(self, field_name) for field_name in self.__fields__.keys() if
-                field_name not in excluded_fields} | {'role': self.name}
+        data_dict = {field_name: getattr(self, field_name) for field_name in self.__fields__.keys() if
+                     field_name not in excluded_fields}
+        data_dict.update({'role': self.name})
+        return data_dict
 
 
 class Affiliate(SQLModel, table=True):

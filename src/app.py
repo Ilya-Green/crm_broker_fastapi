@@ -62,17 +62,6 @@ app = FastAPI(
     ],
 )
 
-logger_api = logging.getLogger("api")
-
-
-@app.middleware("http")
-async def log_requests(request: Request, call_next):
-    response = await call_next(request)
-    if response.status_code >= 400:
-        print(request.body)
-        logger_api.error(f'Request to {request.url.path} returned status code {response.status_code}')
-    return response
-
 
 # url = f"https://api.telegram.org/bot{TOKEN}/getUpdates"
 
@@ -82,19 +71,34 @@ logger = logging.getLogger("uvicorn.access")
 @app.on_event("startup")
 async def startup_event():
     init_database()
-    logger.warning(f"{APP_NAME}: server_turned_on")
-    url = f"https://api.telegram.org/bot{TG_TOKEN}/sendMessage?chat_id={TG_CHAT_ID}&text={APP_NAME}: server_turned_on"
-    print(requests.get(url).json())
+    if APP_NAME != "DEV":
+        logger.warning(f"{APP_NAME}: server_turned_on")
+        url = f"https://api.telegram.org/bot{TG_TOKEN}/sendMessage?chat_id={TG_CHAT_ID}&text={APP_NAME}: server_turned_on"
+        print(requests.get(url).json())
 
 
 @app.exception_handler(Exception)
 async def handle_exception(request, exc):
     traceback_error = traceback.format_exc()
-    chunks = [traceback_error[i:i+4086] for i in range(0, len(traceback_error), 4086)]
-    for chunk in chunks:
-        url = f"https://api.telegram.org/bot{TG_TOKEN}/sendMessage?chat_id={TG_CHAT_ID}&text={APP_NAME}: {chunk}"
-        print(requests.get(url).json())
+    if APP_NAME != "DEV":
+        chunks = [traceback_error[i:i+4086] for i in range(0, len(traceback_error), 4086)]
+        for chunk in chunks:
+            url = f"https://api.telegram.org/bot{TG_TOKEN}/sendMessage?chat_id={TG_CHAT_ID}&text={APP_NAME}: {chunk}"
+            print(requests.get(url).json())
     return PlainTextResponse("Oops! Something went wrong.", status_code=500)
+
+
+# logger_api = logging.getLogger("api")
+#
+#
+# @app.middleware("http")
+# async def log_requests(request: Request, call_next):
+#     response = await call_next(request)
+#     if response.status_code >= 400:
+#         print(request.body)
+#         logger_api.error(f'Request to {request.url.path} returned status code {response.status_code}')
+#     return response
+
 
 # Create admin
 admin = Admin(engine,
@@ -127,6 +131,7 @@ app.include_router(apiRouter, prefix="/api/v1",)
 
 @app.on_event("shutdown")
 async def shutdown_event():
-    logger.warning(f"{APP_NAME}: server_turned_off")
-    url = f"https://api.telegram.org/bot{TG_TOKEN}/sendMessage?chat_id={TG_CHAT_ID}&text={APP_NAME}: server_turned_off"
-    print(requests.get(url).json())
+    if APP_NAME != "DEV":
+        logger.warning(f"{APP_NAME}: server_turned_off")
+        url = f"https://api.telegram.org/bot{TG_TOKEN}/sendMessage?chat_id={TG_CHAT_ID}&text={APP_NAME}: server_turned_off"
+        print(requests.get(url).json())
