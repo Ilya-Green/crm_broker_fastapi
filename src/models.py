@@ -28,6 +28,8 @@ class Employee(SQLModel, table=True):
 
     clients_responsible: "Client" = Relationship(back_populates="responsible")
 
+    traders_responsible: "Trader" = Relationship(back_populates="responsible")
+
     actions: "Action" = Relationship(back_populates="employee")
 
     department_id: Optional[int] = Field(foreign_key="department.id")
@@ -44,6 +46,7 @@ class Role(SQLModel, table=True):
     accounts_can_access: bool = Field(default=0)
     roles_can_access: bool = Field(default=0)
     clients_can_access: bool = Field(default=0)
+    retain: bool = Field(default=0)
 
     user: "Employee" = Relationship(back_populates="role")
 
@@ -72,7 +75,6 @@ class Client(SQLModel, table=True):
     title: Optional[str] = Field()
     second_name: Optional[str] = Field()
     patronymic: Optional[str] = Field()
-    country_id: Optional[int] = Field()
     city: Optional[str] = Field()
     # status_name: Optional[str] = Field()
     description: Optional[str] = Field()
@@ -82,6 +84,8 @@ class Client(SQLModel, table=True):
     additional_contact: Optional[str] = Field()
 
     creation_date: Optional[datetime] = Field(sa_column=Column(DateTime(timezone=True), default=datetime.utcnow))
+
+    country_code: Optional[str] = Field()
 
     type_id: Optional[int] = Field(foreign_key="type.id")
     type: "Type" = Relationship(back_populates="client")
@@ -104,6 +108,43 @@ class Client(SQLModel, table=True):
 
     affiliate_id: Optional[int] = Field(foreign_key="affiliate.id")
     affiliate: Affiliate = Relationship(back_populates="clients")
+
+
+class Trader(SQLModel, table=True):
+    id: Optional[str] = Field(primary_key=True)
+    name: Optional[str] = Field()
+    email: EmailStr = Field()
+    phone_number: str = Field()
+    # id_tp:  str = Field()
+    balance: int = Field(default=0)
+    created_at_tp: Optional[datetime] = Field()
+
+    responsible_id: Optional[int] = Field(foreign_key="employee.id" )
+    responsible: "Employee" = Relationship(back_populates="traders_responsible")
+
+    orders: "Order" = Relationship(back_populates="trader")
+
+
+class Order(SQLModel, table=True):
+    wid: Optional[str] = Field()
+    id: Optional[str] = Field(primary_key=True)
+    asset_name: str = Field()
+    amount: float
+    opening_price: float
+    pledge: float
+    type: str
+    is_closed: bool = Field()
+    created_at: Optional[datetime] = Field()
+    take_profit: Optional[float] = Field()
+    stop_loss: Optional[float] = Field()
+    auto_close: bool = Field()
+    v: Optional[int] = Field()
+    closed_at: Optional[date] = Field()
+    closed_price: Optional[int] = Field()
+
+    user_id: Optional[str] = Field(foreign_key="trader.id")
+    trader: "Trader" = Relationship(back_populates="orders")
+
 
 
 class Type(SQLModel, table=True):
@@ -139,7 +180,7 @@ class Action(SQLModel, table=True):
 
 class Note(SQLModel, table=True):
     id: Optional[int] = Field(primary_key=True)
-    content: str = Field(sa_column=Column(Text), min_length=5)
+    content: str = Field(sa_column=Column(Text))
     created_at: Optional[datetime] = Field(
         sa_column=Column(DateTime(timezone=False), default=datetime.utcnow)
     )

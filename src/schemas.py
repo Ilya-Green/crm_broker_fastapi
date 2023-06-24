@@ -29,7 +29,7 @@ class ClientCreate(SQLModel):
     # # login: Optional[str] = Field(min_length=3)
     second_name: Optional[str] = Field(min_length=3)
     patronymic: Optional[str] = Field(min_length=3)
-    country_id: Optional[int] = Field()
+    country_code: Optional[str] = Field()
     city: Optional[str] = Field(min_length=3)
     # # status_name: Optional[str] = Field(sa_column=Column(Enum(Gender)), default="hot")
     description: Optional[str] = Field(min_length=3)

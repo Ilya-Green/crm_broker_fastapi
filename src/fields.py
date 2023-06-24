@@ -58,3 +58,28 @@ class NotesField(StringField):
     exclude_from_edit = True
     exclude_from_list = True
 
+
+@dataclass
+class EmailCopyField(EmailField):
+    """This field is used to represent a text content
+    that stores a single email address."""
+
+    # input_type: str = "email"
+    # render_function_key: str = "email"
+    # class_: str = "field-email form-control"
+    display_template: str = "displays/emailcopy.html"
+
+
+@dataclass
+class StatusField(StringField):
+    """This field is used to represent any kind of long text content.
+    For short text contents, use [StringField][starlette_admin.fields.StringField]"""
+
+    rows: int = 6
+    class_: str = "field-textarea form-control"
+    form_template: str = "forms/textarea.html"
+    display_template: str = "displays/status.html"
+    exclude_from_create = True
+    exclude_from_edit = True
+    exclude_from_list = True
+

@@ -3,7 +3,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-APP_NAME = os.environ.get("APP_NAME")
+APP_DOMAIN = os.environ.get("APP_DOMAIN")
+APP_TYPE = os.environ.get("APP_TYPE")
 APP_SECRET = os.environ.get("APP_SECRET")
 ADMIN_PSWD = os.environ.get("ADMIN_PSWD")
 

@@ -1,3 +1,9 @@
+import json
+from datetime import datetime
+
+import anyio
+import requests
+from sqlmodel.ext.asyncio.session import AsyncSession
 from starlette_admin import (
     CollectionField,
     ColorField,
@@ -14,16 +20,20 @@ from starlette_admin import (
     CollectionField,
     DateTimeField, RequestAction,
     # PasswordField,
+    CountryField,
+    PhoneField,
+    TimeField,
+    TimeZoneField,
 )
 from starlette_admin.fields import FileField, RelationField
-from .fields import PasswordField, CopyField, NotesField
+from .fields import PasswordField, CopyField, NotesField, EmailCopyField, StatusField
 from starlette_admin.contrib.sqlmodel import ModelView
 from starlette.requests import Request
 from sqlalchemy.orm import Session
 from sqlmodel import Session, select
 from starlette.requests import Request
 from sqlalchemy import or_, and_
-from typing import Optional, Dict
+from typing import Optional, Dict, Union
 from starlette_admin import action
 from typing import Any, List
 from urllib.parse import urlparse, parse_qs
@@ -37,10 +47,16 @@ from sqlalchemy.sql import Select
 from sqlalchemy import func
 from jinja2 import Template
 from starlette_admin.exceptions import ActionFailed, FormValidationError
+import aiohttp
+import asyncio
+import logging
 
 from starlette_admin.helpers import html_params
-from .models import Employee, Role, Client, Desk, Affiliate, Department, Note
+from .models import Employee, Role, Client, Desk, Affiliate, Department, Note, Trader, Order
 from . import engine
+
+
+logger = logging.getLogger("api")
 
 
 class MyModelView(ModelView):
@@ -347,7 +363,6 @@ class DepartmentsView(MyModelView):
     # ]
 
 
-
 class DesksView(MyModelView):
     responsive_table = True
     column_visibility = True
@@ -438,7 +453,328 @@ class AffiliatesView(MyModelView):
         return False
 
 
+def update_platform_data():
+    params = {'token': 'value1'}
+    response = requests.get(url='https://general-investment.com/api/admin/user/all', params=params)
+    data = json.loads(response.content)
+    for user_data in data:
+
+        with Session(engine) as session:
+            statement = select(Trader).where(Trader.id == user_data["id"])
+            current_trader = session.exec(statement).first()
+
+        new_trader = Trader(
+            id=user_data["id"],
+            name=user_data["name"],
+            email=user_data["email"],
+            phone_number=user_data["phone"],
+            balance=user_data["mainBalance"],
+            created_at_tp=datetime.fromtimestamp(user_data["createdAt"]/1000),
+        )
+        if current_trader is not None:
+            new_trader.responsible_id = current_trader.responsible_id
+        with Session(engine) as session:
+            session.merge(new_trader)
+            session.commit()
+
+    params = {'token': 'value1'}
+    response = requests.get(url='https://general-investment.com/api/admin/order/all', params=params)
+    data = json.loads(response.content)
+    for user_data in data:
+        new_order = Order(
+            wid=user_data["_id"],
+            id=user_data["id"],
+            asset_name=user_data["assetName"],
+            amount=user_data["amount"],
+            opening_price=user_data["openingPrice"],
+            pledge=user_data["pledge"],
+            user_id=user_data["userId"],
+            type=user_data["type"],
+            is_closed=user_data["isClosed"],
+            created_at=user_data["createdAt"],
+            take_profit=user_data["takeProfit"],
+            stop_loss=user_data["stopLoss"],
+            auto_close=user_data["autoClose"],
+            v=user_data["__v"],
+            closed_at=user_data.get("closedAt"),
+            closed_price=user_data.get("closedPrice")
+        )
+        with Session(engine) as session:
+            session.merge(new_order)
+            session.commit()
+
+
+def edit_order_platform(obj: Any,):
+    url = "https://general-investment.com/api/admin/order/edit"
+    query_params = {
+        "token": "value1",
+    }
+    body = {
+        "_id": obj.wid,
+        "assetName": obj.asset_name,
+        "amount": obj.amount,
+        "openingPrice": obj.opening_price,
+        "pledge": obj.pledge,
+        "userId": obj.user_id,
+        "type": obj.type,
+        "id": obj.id,
+        "isClosed": obj.is_closed,
+        "createdAt": obj.created_at,
+        "takeProfit": obj.take_profit,
+        "stopLoss": obj.stop_loss,
+        "autoClose": obj.auto_close,
+        "__v": obj.v,
+        "closedAt": obj.closed_at,
+        "closedPrice": obj.closed_price
+    }
+    response = requests.put(url, params=query_params, json=body)
+    if response.status_code == 200:
+        print("Запрос успешно выполнен")
+        logger.info(f'Обновлены данные ордера: {obj}')
+    else:
+        print(response.status_code)
+        logger.info(f'Неудачная попытка обновить данные ордера: {obj}')
+        print("Ошибка при выполнении запроса")
+
+
+class TradersView(MyModelView):
+    responsive_table = True
+    column_visibility = True
+    search_builder = True
+
+    def is_accessible(self, request: Request) -> bool:
+        referer_url = urlparse(request.headers.get("referer"))
+        query_dict = parse_qs(referer_url.query)
+        self.query = query_dict
+        self.id = request.state.user["id"]
+        self.desk_id = request.state.user["desk_id"]
+        self.department_id = request.state.user["department_id"]
+        self.desk_leader = request.state.user["desk_leader"]
+        self.department_leader = request.state.user["department_leader"]
+        self.head = request.state.user["head"]
+        self.sys_admin = request.state.user["sys_admin"]
+        self.retain = request.state.user["retain"]
+
+        with Session(engine) as session:
+            statement = select(Desk).where(Desk.department_id == request.state.user["department_id"])
+            desks = session.exec(statement).all()
+            # self.department_desks = desks
+            self.department_desks = [desk.id for desk in desks]
+        # self.role_name = request.state.user["id"]
+
+        if request.state.user["sys_admin"] is True:
+            return True
+        if request.state.user["head"] is True:
+            return True
+        if request.state.user["retain"] is True:
+            return True
+        return False
+
+    def can_create(self, request: Request) -> bool:
+        if request.state.user["sys_admin"] is True:
+            return True
+
+    def can_edit(self, request: Request) -> bool:
+        # update_platform_data()
+        if request.state.user["sys_admin"] is True:
+            return True
+        if request.state.user["head"] is True:
+            return True
+        if request.state.user["retain"] is True:
+            return True
+
+    def can_delete(self, request: Request) -> bool:
+        if request.state.user["sys_admin"] is True:
+            return True
+
+    def get_list_query(self):
+        update_platform_data()
+        if self.sys_admin:
+            return super().get_list_query()
+        if self.head:
+            return super().get_list_query()
+        if self.retain:
+            return super().get_list_query().where(Trader.responsible_id == self.id)
+
+    def get_count_query(self):
+        update_platform_data()
+        if self.sys_admin:
+            return super().get_count_query()
+        if self.head:
+            return super().get_count_query()
+        if self.retain:
+            return super().get_count_query().where(Trader.responsible_id == self.id)
+
+    # fields = [
+    #     Trader.
+    # ]
+
+    exclude_fields_from_list = [
+        Trader.id,
+    ]
+    exclude_fields_from_edit = [
+        Trader.email,
+        Trader.phone_number,
+        Trader.created_at_tp,
+        Trader.orders,
+    ]
+    # exclude_fields_from_create = [
+    #     Client.notes,
+    #     Client.creation_date,
+    #     Client.actions,
+    # ]
+
+    @action(
+        name="change_responsible",
+        text="Change responsible",
+        confirmation="Enter the user id you want to assign as responsible",
+        submit_btn_text="Yes, proceed",
+        submit_btn_class="btn-success",
+        #         <input name="id" class="form-control" id="floating-input" value="">
+        form="""<div class="input-group input-group-sm mb-3">,
+        <div class="input-group-prepend">
+        <span class="input-group-text" id="inputGroup-sizing-sm">id:</span>
+        </div>
+        <input  name="id" type="text" class="form-control" aria-label="Small" aria-describedby="inputGroup-sizing-sm">
+        </div>""",
+    )
+    async def change_responsible(self, request: Request, pks: List[Any]) -> str:
+        # with Session(engine) as session:
+        #     statement = select(Employee).where(Employee.id == request.query_params["id"])
+        #     desk_result = session.exec(statement).first()
+        #     if self.desk_leader:
+        #         if desk_result.desk_id != request.state.user["desk_id"] or desk_result.department_id != request.state.user["department_id"]:
+        #             raise ActionFailed("ID not from your desk or department")
+        #     if self.department_leader:
+        #         if desk_result.department_id != request.state.user["department_id"]:
+        #             raise ActionFailed("ID not from your department")
+        session: Session = request.state.session
+        for Trader in await self.find_by_pks(request, pks):
+            Trader.responsible_id = request.query_params["id"]
+            session.add(Trader)
+        session.commit()
+        return "{} clients were successfully changed to responsible with id: {}".format(
+            len(pks), request.query_params["id"]
+        )
+
+    async def is_action_allowed(self, request: Request, name: str) -> bool:
+        if name == "change_responsible":
+            if request.state.user["sys_admin"]:
+                return True
+            if request.state.user["head"]:
+                return True
+            return False
+        if name == "delete":
+            return self.can_delete(request)
+        return True
+
+
+class OrdersView(MyModelView):
+    responsive_table = True
+    column_visibility = True
+    search_builder = True
+
+    def is_accessible(self, request: Request) -> bool:
+        referer_url = urlparse(request.headers.get("referer"))
+        query_dict = parse_qs(referer_url.query)
+        self.query = query_dict
+        self.id = request.state.user["id"]
+        self.desk_id = request.state.user["desk_id"]
+        self.department_id = request.state.user["department_id"]
+        self.desk_leader = request.state.user["desk_leader"]
+        self.department_leader = request.state.user["department_leader"]
+        self.head = request.state.user["head"]
+        self.sys_admin = request.state.user["sys_admin"]
+        self.retain = request.state.user["retain"]
+
+        with Session(engine) as session:
+            statement = select(Desk).where(Desk.department_id == request.state.user["department_id"])
+            desks = session.exec(statement).all()
+            # self.department_desks = desks
+            self.department_desks = [desk.id for desk in desks]
+        # self.role_name = request.state.user["id"]
+
+        with Session(engine) as session:
+            statement = select(Trader).where(Trader.responsible_id == request.state.user["id"])
+            traders = session.exec(statement).all()
+            self.responsible_user_ids = [trader.id for trader in traders]
+
+        if request.state.user["sys_admin"] is True:
+            return True
+        if request.state.user["head"] is True:
+            return True
+        if request.state.user["retain"] is True:
+            return True
+        return False
+
+    def can_create(self, request: Request) -> bool:
+        if request.state.user["sys_admin"] is True:
+            return True
+
+    def can_edit(self, request: Request) -> bool:
+        update_platform_data()
+        if request.state.user["sys_admin"] is True:
+            return True
+
+    def can_delete(self, request: Request) -> bool:
+        if request.state.user["sys_admin"] is True:
+            return True
+
+    exclude_fields_from_list = [
+        Order.id,
+        Order.wid,
+        Order.v,
+    ]
+    # exclude_fields_from_edit = [
+    #     Trader.email,
+    #     Trader.phone_number,
+    #     Trader.created_at_tp,
+    #     Trader.orders,
+    # ]
+
+    def get_list_query(self):
+        update_platform_data()
+        if self.sys_admin:
+            return super().get_list_query()
+        if self.head:
+            return super().get_list_query()
+        if self.retain:
+            return super().get_list_query().where(Order.user_id.in_(self.responsible_user_ids))
+
+    def get_count_query(self):
+        update_platform_data()
+        if self.sys_admin:
+            return super().get_count_query()
+        if self.head:
+            return super().get_count_query()
+        if self.retain:
+            return super().get_count_query().where(Order.user_id.in_(self.responsible_user_ids))
+
+    async def edit(self, request: Request, pk: Any, data: Dict[str, Any]) -> Any:
+        try:
+            data = await self._arrange_data(request, data, True)
+            await self.validate(request, data)
+            session: Union[Session, AsyncSession] = request.state.session
+            obj = await self.find_by_pk(request, pk)
+
+            session.add(await self._populate_obj(request, obj, data, True))
+            obj = await self._populate_obj(request, obj, data, True)
+            edit_order_platform(await self._populate_obj(request, obj, data, True))
+            if isinstance(session, AsyncSession):
+                await session.commit()
+                await session.refresh(obj)
+            else:
+                await anyio.to_thread.run_sync(session.commit)
+                await anyio.to_thread.run_sync(session.refresh, obj)
+            return obj
+        except Exception as e:
+            self.handle_exception(e)
+
+
+
 class ClientsView(MyModelView):
+    detail_template: str = "clients_detail.html"
+
     responsive_table = True
     column_visibility = True
     search_builder = True
@@ -510,6 +846,7 @@ class ClientsView(MyModelView):
         #         return clients
         if self.head:
             # test = super().get_list_query().where(Desk.department_id == self.department_id)
+
             return super().get_list_query()
         if self.department_leader:
             return super().get_list_query().where(Client.department_id != 0).where(Client.department_id == self.department_id)
@@ -532,16 +869,45 @@ class ClientsView(MyModelView):
     fields = [
         Client.id,
         Client.first_name,
-        Client.email,
+        EmailCopyField("email"),
         CopyField("phone_number"),
         NotesField("notes"),
-        Client.notes,
+        StatusField("status"),
+        CountryField("country_code"),
+        Client.creation_date,
+
         Client.status,
+        Client.type,
+        Client.title,
+        Client.second_name,
+        Client.patronymic,
+        Client.city,
+        Client.region,
+        Client.address,
+        Client.postcode,
+        Client.description,
+        Client.additional_contact,
+
+        Client.desk,
+        Client.department,
+        Client.responsible,
+        Client.actions,
+        Client.affiliate,
+        Client.notes,
     ]
 
-    exclude_fields_from_list = [Employee.notes]
-    exclude_fields_from_edit = [Employee.notes]
-    exclude_fields_from_create = [Employee.notes]
+    exclude_fields_from_list = [
+        Client.notes,
+    ]
+    exclude_fields_from_edit = [
+        Client.notes,
+        Client.creation_date,
+    ]
+    exclude_fields_from_create = [
+        Client.notes,
+        Client.creation_date,
+        Client.actions,
+    ]
 
     @action(
         name="set_department",
@@ -776,3 +1142,14 @@ class StatusesView(MyModelView):
         if request.state.user["head"]:
             return True
 
+
+class TypesView(MyModelView):
+    responsive_table = True
+    column_visibility = True
+    search_builder = True
+
+    def can_delete(self, request: Request) -> bool:
+        if request.state.user["sys_admin"]:
+            return True
+        if request.state.user["head"]:
+            return True
