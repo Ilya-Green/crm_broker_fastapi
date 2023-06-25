@@ -82,6 +82,7 @@ class Client(SQLModel, table=True):
     region: Optional[str] = Field()
     postcode: Optional[int] = Field()
     additional_contact: Optional[str] = Field()
+    utm: Optional[str] = Field()
 
     creation_date: Optional[datetime] = Field(sa_column=Column(DateTime(timezone=True), default=datetime.utcnow))
 

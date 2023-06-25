@@ -30,5 +30,6 @@ uvicorn==0.21.1
 watchfiles==0.18.1
 websockets==10.4
 gunicorn
+starlette-admin[i18n]
 
 aiohttp~=3.8.4
