@@ -108,6 +108,7 @@ class EmployeeView(MyModelView):
         self.department_leader = request.state.user["department_leader"]
         self.head = request.state.user["head"]
         self.sys_admin = request.state.user["sys_admin"]
+        self.retain = request.state.user["retain"]
 
         if "accounts_can_access" in request.state.user:
             if request.state.user["sys_admin"] is True:
@@ -127,11 +128,27 @@ class EmployeeView(MyModelView):
         if self.sys_admin:
             return super().get_list_query()
         if self.head:
-            return super().get_list_query().where(Employee.role_id != 1)
+            if self.retain:
+                return super().get_list_query().where(Employee.role_id != 1)
+        if self.head:
+            return super().get_list_query().where(Employee.role_id != 1).where(Employee.role_id != 7)
         if self.department_leader:
-            return super().get_list_query().where(Employee.role_id != 1).where(Employee.department_id != 0).where(Employee.department_id == self.department_id)
+            return super().get_list_query().where(Employee.role_id != 1).where(Employee.department_id != 0).where(Employee.department_id == self.department_id).where(Employee.role_id != 7)
         if self.desk_leader:
-            return super().get_list_query().where(Employee.role_id != 1).where(Employee.desk_id != 0).where(Employee.department_id == self.department_id).where(Employee.desk_id == self.desk_id)
+            return super().get_list_query().where(Employee.role_id != 1).where(Employee.desk_id != 0).where(Employee.department_id == self.department_id).where(Employee.desk_id == self.desk_id).where(Employee.role_id != 7)
+
+    def get_count_query(self) -> Select:
+        if self.sys_admin:
+            return super().get_count_query()
+        if self.head:
+            if self.retain:
+                return super().get_count_query().where(Employee.role_id != 1)
+        if self.head:
+            return super().get_count_query().where(Employee.role_id != 1).where(Employee.role_id != 7)
+        if self.department_leader:
+            return super().get_count_query().where(Employee.role_id != 1).where(Employee.department_id != 0).where(Employee.department_id == self.department_id)
+        if self.desk_leader:
+            return super().get_count_query().where(Employee.role_id != 1).where(Employee.desk_id != 0).where(Employee.department_id == self.department_id).where(Employee.desk_id == self.desk_id)
 
     def can_edit(self, request: Request) -> bool:
         if "accounts_can_access" in request.state.user:
@@ -564,8 +581,6 @@ class TradersView(MyModelView):
 
         if request.state.user["sys_admin"] is True:
             return True
-        if request.state.user["head"] is True:
-            return True
         if request.state.user["retain"] is True:
             return True
         return False
@@ -700,8 +715,6 @@ class OrdersView(MyModelView):
             self.responsible_user_ids = [trader.id for trader in traders]
 
         if request.state.user["sys_admin"] is True:
-            return True
-        if request.state.user["head"] is True:
             return True
         if request.state.user["retain"] is True:
             return True
