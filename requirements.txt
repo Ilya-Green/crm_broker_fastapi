@@ -31,5 +31,6 @@ watchfiles==0.18.1
 websockets==10.4
 gunicorn
 starlette-admin[i18n]
+sentry-sdk[fastapi]==1.26.0
 
 aiohttp~=3.8.4

@@ -51,6 +51,7 @@ class NotesField(StringField):
     For short text contents, use [StringField][starlette_admin.fields.StringField]"""
 
     rows: int = 6
+    render_function_key: str = "notes"
     class_: str = "field-textarea form-control"
     form_template: str = "forms/textarea.html"
     display_template: str = "displays/note.html"
@@ -76,10 +77,13 @@ class StatusField(StringField):
     For short text contents, use [StringField][starlette_admin.fields.StringField]"""
 
     rows: int = 6
+    render_function_key: str = "status"
     class_: str = "field-textarea form-control"
     form_template: str = "forms/textarea.html"
     display_template: str = "displays/status.html"
     exclude_from_create = True
     exclude_from_edit = True
     exclude_from_list = True
+
+
 

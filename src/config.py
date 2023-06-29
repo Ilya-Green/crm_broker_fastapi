@@ -13,3 +13,6 @@ DB_URI = os.environ.get("DB_URI")
 
 TG_TOKEN = os.environ.get("TG_TOKEN")
 TG_CHAT_ID = os.environ.get("TG_CHAT_ID")
+
+SENTRY_TOKEN = os.environ.get("SENTRY_TOKEN")
+SENTRY_RATE = os.environ.get("SENTRY_RATE")

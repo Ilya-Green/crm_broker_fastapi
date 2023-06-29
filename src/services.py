@@ -2,7 +2,7 @@ from sqlmodel import Session, select, asc, desc
 from typing import Any, Dict, List, Optional, Set, Union
 import logging
 
-from .models import Employee, Role, Client, Status, Affiliate
+from .models import Employee, Role, Client, Status, Affiliate, Type
 from . import engine
 
 from .schemas import ClientCreate, ClientList
@@ -15,6 +15,12 @@ def api_get_statuses():
         statement = select(Status)
         statuses = session.exec(statement).all()
     return statuses
+
+def api_get_types():
+    with Session(engine) as session:
+        statement = select(Type)
+        types = session.exec(statement).all()
+    return types
 
 
 def api_client_create(data: ClientCreate):

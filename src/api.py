@@ -2,7 +2,7 @@ from fastapi import APIRouter
 from typing import List
 import logging
 
-from .services import api_get_statuses, api_client_create, api_client_list
+from .services import api_get_statuses, api_client_create, api_client_list, api_get_types
 from .models import Employee, Client
 from .schemas import ClientCreate, ClientList
 
@@ -20,6 +20,10 @@ apiRouter = APIRouter(
 @apiRouter.get("/statuses")
 async def get_statuses():
     return api_get_statuses()
+
+@apiRouter.get("/types")
+async def get_statuses():
+    return api_get_types()
 
 
 @apiRouter.post("/create/")

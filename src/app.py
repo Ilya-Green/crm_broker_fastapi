@@ -1,9 +1,14 @@
+from typing import Optional
+
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from starlette.applications import Starlette
 from starlette.responses import HTMLResponse, PlainTextResponse
 from starlette.routing import Route
-from starlette_admin.contrib.sqlmodel import Admin, ModelView
+from starlette.staticfiles import StaticFiles
+from starlette_admin.contrib.sqlmodel import ModelView, Admin
+# from starlette_admin import Admin
+from starlette.requests import Request
 from starlette.middleware import Middleware
 from starlette.middleware.sessions import SessionMiddleware
 from .provider import MyAuthProvider
@@ -11,10 +16,11 @@ from sqlmodel import Session, select
 import requests
 import traceback
 import logging
+import sentry_sdk
 
 from sqlmodel import SQLModel
 
-from .config import APP_SECRET, APP_DOMAIN, APP_TYPE, ADMIN_PSWD, TG_TOKEN, TG_CHAT_ID
+from .config import APP_SECRET, APP_DOMAIN, APP_TYPE, ADMIN_PSWD, TG_TOKEN, TG_CHAT_ID, SENTRY_TOKEN, SENTRY_RATE
 from .models import Employee, Role, Client, Note, Desk, Action, Department, Status, Affiliate, Type, Trader, Order
 from .views import MyModelView, EmployeeView, ClientsView, RolesView, DepartmentsView, DesksView, AffiliatesView, \
     StatusesView, TypesView, TradersView, OrdersView
@@ -81,10 +87,11 @@ async def startup_event():
 # @app.exception_handler(Exception)
 # async def handle_exception(request, exc):
 #     traceback_error = traceback.format_exc()
-#     if APP_NAME != "DEV":
+#     if APP_TYPE != "DEV":
+#         logger.warning(f"{APP_DOMAIN} : {APP_TYPE} : server_turned_on")
 #         chunks = [traceback_error[i:i+4086] for i in range(0, len(traceback_error), 4086)]
 #         for chunk in chunks:
-#             url = f"https://api.telegram.org/bot{TG_TOKEN}/sendMessage?chat_id={TG_CHAT_ID}&text={APP_NAME}: {chunk}"
+#             url = f"https://api.telegram.org/bot{TG_TOKEN}/sendMessage?chat_id={TG_CHAT_ID}&text={APP_TYPE}: {chunk}"
 #             print(requests.get(url).json())
 #     return PlainTextResponse("Oops! Something went wrong.", status_code=500)
 
@@ -102,8 +109,12 @@ async def log_requests(request: Request, call_next):
     return response
 
 
-# Create admin
-admin = Admin(engine,
+class CustomAdmin(Admin):
+    def custom_render_js(self, request: Request) -> Optional[str]:
+        return request.url_for("static", path="js/custom_render.js")
+
+
+admin = CustomAdmin(engine,
               title="CRM Broker",
               auth_provider=MyAuthProvider(),
               middlewares=[Middleware(SessionMiddleware, secret_key=APP_SECRET, max_age=60*60)],
@@ -132,6 +143,18 @@ admin.add_view(TypesView(Type, label="Types"))
 admin.mount_to(app)
 
 app.include_router(apiRouter, prefix="/api/v1",)
+
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+
+sentry_sdk.init(
+    dsn=SENTRY_TOKEN,
+
+    # Set traces_sample_rate to 1.0 to capture 100%
+    # of transactions for performance monitoring.
+    # We recommend adjusting this value in production,
+    traces_sample_rate=SENTRY_RATE,
+)
 
 
 @app.on_event("shutdown")

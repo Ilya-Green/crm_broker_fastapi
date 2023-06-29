@@ -786,7 +786,13 @@ class OrdersView(MyModelView):
 
 
 class ClientsView(MyModelView):
+    page_size_options = [5, 10, 25, 50, 100, 500, 1000]
+
+    # list_template = "client_list_template.html"
     detail_template: str = "clients_detail.html"
+
+    def custom_render_js(self, request: Request) -> Optional[str]:
+        return request.url_for("statics", path="js/custom_render.js")
 
     responsive_table = True
     column_visibility = True
@@ -803,6 +809,7 @@ class ClientsView(MyModelView):
         self.department_leader = request.state.user["department_leader"]
         self.head = request.state.user["head"]
         self.sys_admin = request.state.user["sys_admin"]
+        self.query_test = request.query_params
 
         with Session(engine) as session:
             statement = select(Desk).where(Desk.department_id == request.state.user["department_id"])
@@ -849,7 +856,10 @@ class ClientsView(MyModelView):
         #         return query
         #     else:
         #         return super().get_list_query()
-            return super().get_list_query()
+            query = super().get_list_query().where()
+            if "responsible_id" in self.query:
+                query = query.where(Client.responsible_id == self.query["responsible_id"][0])
+            return query
         # if self.head:
         #     with Session(engine) as session:
         #         statement = select(Desk).where(Desk.department_id == self.department_id)
@@ -860,12 +870,24 @@ class ClientsView(MyModelView):
         if self.head:
             # test = super().get_list_query().where(Desk.department_id == self.department_id)
 
-            return super().get_list_query()
+            query = super().get_list_query()
+            if "responsible_id" in self.query:
+                query = query.where(Client.responsible_id == self.query["responsible_id"][0])
+            return query
         if self.department_leader:
-            return super().get_list_query().where(Client.department_id != 0).where(Client.department_id == self.department_id)
+            query = super().get_list_query().where(Client.department_id != 0).where(Client.department_id == self.department_id)
+            if "responsible_id" in self.query:
+                query = query.where(Client.responsible_id == self.query["responsible_id"][0])
+            return query
         if self.desk_leader:
-            return super().get_list_query().where(Client.desk_id != 0).where(Client.department_id == self.department_id).where(Client.desk_id == self.desk_id)
-        return super().get_list_query().where(Client.department_id != 0).where(Client.desk_id != 0).where(Client.department_id == self.department_id).where(Client.desk_id == self.desk_id).where(Client.responsible_id == self.id)
+            query = super().get_list_query().where(Client.desk_id != 0).where(Client.department_id == self.department_id).where(Client.desk_id == self.desk_id)
+            if "responsible_id" in self.query:
+                query = query.where(Client.responsible_id == self.query["responsible_id"][0])
+            return query
+        query = super().get_list_query().where(Client.department_id != 0).where(Client.desk_id != 0).where(Client.department_id == self.department_id).where(Client.desk_id == self.desk_id).where(Client.responsible_id == self.id)
+        if "responsible_id" in self.query:
+            query = query.where(Client.responsible_id == self.query["responsible_id"][0])
+        return query
 
     def get_count_query(self) -> Select:
         if self.sys_admin:
@@ -880,6 +902,7 @@ class ClientsView(MyModelView):
         # return select(func.count(self._pk_column))
 
     fields = [
+
         Client.id,
         Client.first_name,
         EmailCopyField("email"),
@@ -900,18 +923,19 @@ class ClientsView(MyModelView):
         Client.postcode,
         Client.description,
         Client.additional_contact,
-
+        Client.status_id,
         Client.desk,
         Client.department,
         Client.responsible,
         Client.actions,
         Client.affiliate,
         Client.notes,
+        Client.responsible_id,
     ]
 
-    exclude_fields_from_list = [
-        Client.notes,
-    ]
+    # exclude_fields_from_list = [
+    #     Client.notes,
+    # ]
     exclude_fields_from_edit = [
         Client.notes,
         Client.creation_date,
@@ -1011,6 +1035,39 @@ class ClientsView(MyModelView):
         )
 
     @action(
+        name="clear_responsible",
+        text="Clear responsible",
+        # confirmation="Enter the user id you want to assign as responsible",
+        # submit_btn_text="Yes, proceed",
+        # submit_btn_class="btn-success",
+        #         <input name="id" class="form-control" id="floating-input" value="">
+        # form="""<div class="input-group input-group-sm mb-3">,
+        # <div class="input-group-prepend">
+        # <span class="input-group-text" id="inputGroup-sizing-sm">id:</span>
+        # </div>
+        # <input  name="id" type="text" class="form-control" aria-label="Small" aria-describedby="inputGroup-sizing-sm">
+        # </div>""",
+    )
+    async def clear_responsible(self, request: Request, pks: List[Any]) -> str:
+        with Session(engine) as session:
+            statement = select(Employee).where(Employee.id == request.query_params["id"])
+            desk_result = session.exec(statement).first()
+            if self.desk_leader:
+                if desk_result.desk_id != request.state.user["desk_id"] or desk_result.department_id != request.state.user["department_id"]:
+                    raise ActionFailed("ID not from your desk or department")
+            if self.department_leader:
+                if desk_result.department_id != request.state.user["department_id"]:
+                    raise ActionFailed("ID not from your department")
+        session: Session = request.state.session
+        for Client in await self.find_by_pks(request, pks):
+            Client.responsible_id = None
+            session.add(Client)
+        session.commit()
+        return "Responsible was successfully cleared to {} clients".format(
+            len(pks)
+        )
+
+    @action(
         name="add_note",
         text="Add note",
         confirmation="Enter note",
@@ -1038,7 +1095,7 @@ class ClientsView(MyModelView):
     @action(
         name="change_status",
         text="Change status",
-        confirmation="Enter note",
+        confirmation="Enter status id",
         submit_btn_text="Yes, proceed",
         submit_btn_class="btn-success",
         #         <input name="id" class="form-control" id="floating-input" value="">
@@ -1059,6 +1116,7 @@ class ClientsView(MyModelView):
             len(pks), request.query_params["id"]
         )
 
+
     async def is_action_allowed(self, request: Request, name: str) -> bool:
         if name == "set_department":
             if request.state.user["sys_admin"]:
@@ -1075,6 +1133,16 @@ class ClientsView(MyModelView):
                 return True
             return False
         if name == "change_responsible":
+            if request.state.user["sys_admin"]:
+                return True
+            if request.state.user["head"]:
+                return True
+            if request.state.user["department_leader"]:
+                return True
+            if request.state.user["desk_leader"]:
+                return True
+            return False
+        if name == "clear_responsible":
             if request.state.user["sys_admin"]:
                 return True
             if request.state.user["head"]:
