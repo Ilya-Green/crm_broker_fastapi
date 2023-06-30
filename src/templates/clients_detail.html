@@ -48,6 +48,45 @@
                                         </button>
                                     </a>
                                 {% endif %}
+<!--                                <button id="action-btn"-->
+<!--                                            type="button"-->
+<!--                                            class="btn btn-danger btn-block"-->
+<!--                                            data-bs-toggle="modal"-->
+<!--                                            data-bs-target="#modal-action">-->
+<!--                                        <i class="fas fa-trash-alt me-2"></i>-->
+<!--                                        {{ _("Delete") }}-->
+<!--                                    </button>-->
+<div class="modal modal-blur fade" id="modal-action" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div id="actionConfirmation"></div></br>
+                <div id="modal-form"></div>
+                <select name="id" id="status-select">
+<!--                                <option value="1">HOT</option>-->
+<!--                                <option value="2">START</option>-->
+<!--                                <option value="3">F</option>-->
+<!--                                <option value="4" name="id">HOT</option>-->
+<!--                                <option value="5">HOT</option>-->
+        </select>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-link link-secondary me-auto"
+                        data-bs-dismiss="modal">{{ _("Cancel") }}</button>
+                <button id="actionSubmit" type="button" class="btn btn-primary"
+                        data-bs-dismiss="modal">{{ _("Yes, Proceed") }}</button>
+            </div>
+        </div>
+    </div>
+</div>
+                                <a class="dropdown-item action-item" type="button" href="#" data-bs-toggle="modal" data-bs-target="#modal-action" data-confirmation="Enter status id" data-form="<div class=&quot;input-group input-group-sm mb-3&quot;>,
+        <div class=&quot;input-group-prepend&quot;>
+        <span class=&quot;input-group-text&quot; id=&quot;inputGroup-sizing-sm&quot;>id:</span>
+        </div>
+        <input  name=&quot;id&quot; type=&quot;text&quot; class=&quot;form-control&quot; aria-label=&quot;Small&quot; aria-describedby=&quot;inputGroup-sizing-sm&quot;>
+        </div>" data-name="change_status" data-submit-btn-text="Yes, proceed" data-submit-btn-class="btn-success">
+                                                Edit
+                                            </a>
                             </div>
                         </div>
                     </div>
@@ -162,8 +201,34 @@
     {% endfor %}
     <script>
     $(function () {
-        $("#modal-delete-btn").click(function () {
-            $("#modal-delete").modal('hide');
+        $("#action-btn").click(function () {
+            $("#modal-loading").modal('hide');
+            $("#modal-action").modal('show');
+            fetch("{{ url_for(__name__ ~ ':action', identity=model.identity)  | safe }}?name=change_status&pks={{ obj[pk] }}", {
+                method: "POST",
+            }).then(async response => {
+                if (response.ok) {
+                    await new Promise(r => setTimeout(r, 500));
+                    $("#modal-loading").modal('hide')
+                    window.location.replace("{{ url_for(__name__ ~ ':list', identity=model.identity)  | safe }}")
+                } else {
+                    if (response.status == 400) {
+                        return Promise.reject((await response.json())["msg"]);
+                    }
+                    return Promise.reject("Something went wrong!");
+                }
+
+            }).catch(async (error) => {
+                await new Promise(r => setTimeout(r, 500));
+                $("#modal-loading").modal('hide');
+                $("#error-body").text(error);
+                $("#modal-error").modal('show');
+            });
+        });
+    })
+    $(function () {
+        $("#modal-action1").click(function () {
+            $("#modal-action12").modal('hide');
             $("#modal-loading").modal('show');
             fetch("{{ url_for(__name__ ~ ':action', identity=model.identity)  | safe }}?name=delete&pks={{ obj[pk] }}", {
                 method: "POST",
@@ -187,5 +252,79 @@
             });
         });
     })
+  function submitAction(name, formData) {
+    $("#modal-loading").modal("show");
+    query = new URLSearchParams();
+      query.append("pks", {{ obj[pk] }});
+    query.append("name", name);
+
+    $('#modal-action :input').each(function() {
+        query.append(this.name, $(this).val());
+    });
+
+        const url = window.location.origin + "/admin/api/client/action?" + query.toString();
+        fetch(url, {
+            method: "POST",
+            body: formData,
+        })
+      .then(async (response) => {
+        await new Promise((r) => setTimeout(r, 500));
+        $("#modal-loading").modal("hide");
+        if (response.ok) {
+          table.rows().deselect();
+          table.ajax.reload();
+          successAlert((await response.json())["msg"]);
+        } else {
+          if (response.status == 400) {
+            return Promise.reject((await response.json())["msg"]);
+          }
+          return Promise.reject("Something went wrong!");
+        }
+      })
+      .catch(async (error) => {
+        await new Promise((r) => setTimeout(r, 500));
+        dangerAlert(error);
+      });
+  }
+     $("#modal-action").on("show.bs.modal", function (event) {
+    var button = $(event.relatedTarget); // Button that triggered the modal
+    var confirmation = button.data("confirmation");
+    var form = button.data("form");
+    var name = button.data("name");
+    var submit_btn_text = button.data("submit-btn-text");
+    var submit_btn_class = button.data("submit-btn-class");
+
+    var modal = $(this);
+    modal.find("#actionConfirmation").text(confirmation);
+    var modalForm = modal.find("#modal-form");
+    $('#modal-form').html(form);
+    var actionSubmit = modal.find("#actionSubmit");
+    actionSubmit.text(submit_btn_text);
+    actionSubmit.removeClass().addClass(`btn ${submit_btn_class}`);
+    actionSubmit.unbind();
+    actionSubmit.on("click", function (event) {
+      const formElement = modalForm.find("form");
+      const formData = formElement.length
+        ? new FormData(formElement.get(0))
+        : new FormData();
+      submitAction(name, formData);
+    });
+  });
+    fetch('/api/v1/client/statuses')
+  .then(response => response.json())
+  .then(data => {
+    const selectElement = document.getElementById('status-select');
+
+    data.forEach(status => {
+      const optionElement = document.createElement('option');
+      optionElement.value = status.id;
+      optionElement.textContent = status.name.toUpperCase();
+
+      selectElement.appendChild(optionElement);
+    });
+  })
+  .catch(error => {
+    console.error('Error:', error);
+  });
     </script>
 {% endblock %}
