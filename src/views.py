@@ -728,6 +728,8 @@ class OrdersView(MyModelView):
         update_platform_data()
         if request.state.user["sys_admin"] is True:
             return True
+        if request.state.user["retain"] is True:
+            return True
 
     def can_delete(self, request: Request) -> bool:
         if request.state.user["sys_admin"] is True:
