@@ -1018,8 +1018,8 @@ class ClientsView(MyModelView):
         if "clients_can_access" in request.state.user:
             if request.state.user["clients_can_access"] is True:
                 return True
-        if "reatin" in request.state.user:
-            if request.state.user["reatin"] is True:
+        if "retain" in request.state.user:
+            if request.state.user["retain"] is True:
                 return True
         return False
 
