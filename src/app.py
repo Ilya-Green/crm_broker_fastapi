@@ -149,14 +149,15 @@ app.include_router(apiRouter, prefix="/api/v1",)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
-sentry_sdk.init(
-    dsn=SENTRY_TOKEN,
+if APP_TYPE != "DEV":
+    sentry_sdk.init(
+        dsn=SENTRY_TOKEN,
 
-    # Set traces_sample_rate to 1.0 to capture 100%
-    # of transactions for performance monitoring.
-    # We recommend adjusting this value in production,
-    traces_sample_rate=SENTRY_RATE,
-)
+        # Set traces_sample_rate to 1.0 to capture 100%
+        # of transactions for performance monitoring.
+        # We recommend adjusting this value in production,
+        traces_sample_rate=SENTRY_RATE,
+    )
 
 
 @app.on_event("shutdown")
