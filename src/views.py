@@ -797,13 +797,13 @@ class TradersView(MyModelView):
         for trader in await self.find_by_pks(request, pks):
             responsible_id = request.query_params["id"]
             trader.responsible_id = responsible_id
+            session.commit()
             with Session(engine) as sqltable_session:
                 statement = select(Client).where(Client.trader_id == trader.id)
                 resp_client = sqltable_session.exec(statement).first()
             if resp_client:
                 resp_client.responsible_id = responsible_id
                 session.add(trader)
-                session.commit()
                 print('test')
                 with Session(engine) as sqltable_session:
                     sqltable_session.add(resp_client)
