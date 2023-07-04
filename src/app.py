@@ -1,3 +1,4 @@
+import json
 from typing import Optional
 
 from fastapi import FastAPI, Request
@@ -17,6 +18,10 @@ import requests
 import traceback
 import logging
 import sentry_sdk
+from fastapi import APIRouter, Response, Request
+from starlette.background import BackgroundTask
+from fastapi.routing import APIRoute
+from starlette.types import Message
 
 from sqlmodel import SQLModel
 
@@ -100,14 +105,47 @@ async def startup_event():
 logger_api = logging.getLogger("api")
 #
 #
-@app.middleware("http")
-async def log_requests(request: Request, call_next):
-    # print(request.)
-    response = await call_next(request)
-    # if response.status_code >= 400:
 
-        # logger_api.error(f'Request to {request.url.path} returned status code {response.status_code}')
-    return response
+
+def log_info(req_body, res_body, status_code):
+    if status_code >= 400:
+        logger_api.error(req_body)
+        logger_api.error(res_body)
+
+
+async def set_body(request: Request, body: bytes):
+    async def receive() -> Message:
+        return {'type': 'http.request', 'body': body}
+
+    request._receive = receive
+
+
+@app.middleware('http')
+async def some_middleware(request: Request, call_next):
+    req_body = await request.body()
+    await set_body(request, req_body)
+    response = await call_next(request)
+
+    res_body = b''
+    async for chunk in response.body_iterator:
+        res_body += chunk
+    path = request.url.path
+    if path == '/api/v1/client/create/':
+        task = BackgroundTask(log_info, req_body, res_body, response.status_code)
+        return Response(content=res_body, status_code=response.status_code,
+                        headers=dict(response.headers), media_type=response.media_type, background=task)
+    return Response(content=res_body, status_code=response.status_code,
+                    headers=dict(response.headers), media_type=response.media_type)
+
+
+# @app.middleware("http")
+# async def log_requests(request: Request, call_next):
+#     # print(request.)
+#     response = await call_next(request)
+#     # if response.status_code >= 400:
+#
+#         # logger_api.error(f'Request to {request.url.path} returned status code {response.status_code}')
+#     return response
 
 
 class CustomAdmin(Admin):
