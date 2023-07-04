@@ -110,18 +110,45 @@ class Client(SQLModel, table=True):
     affiliate_id: Optional[int] = Field(foreign_key="affiliate.id")
     affiliate: Affiliate = Relationship(back_populates="clients")
 
+    trader_id: Optional[str] = Field(foreign_key="trader.id")
+    trader: "Trader" = Relationship(back_populates="client")
+
 
 class Trader(SQLModel, table=True):
+    # id: Optional[str] = Field(primary_key=True)
+    # name: Optional[str] = Field()
+    # email: EmailStr = Field()
+    # phone_number: str = Field()
+    # balance: int = Field(default=0)
+    # created_at_tp: Optional[datetime] = Field()
     id: Optional[str] = Field(primary_key=True)
     name: Optional[str] = Field()
-    email: EmailStr = Field()
-    phone_number: str = Field()
-    # id_tp:  str = Field()
-    balance: int = Field(default=0)
+    surname: Optional[str] = Field()
+    email: Optional[EmailStr] = Field()
+    phone_number: Optional[str] = Field()
+    date: Optional[datetime] = Field()
+    password: Optional[str] = Field()
+    country: Optional[str] = Field()
+    accountNumber: Optional[str] = Field()
     created_at_tp: Optional[datetime] = Field()
+    balance: Optional[float] = Field()
+    mainBalance: Optional[float] = Field()
+    bonuses: Optional[float] = Field()
+    credFacilities: Optional[float] = Field()
+    accountStatus: Optional[str] = Field()
+    blocked: Optional[bool] = Field()
+    isActive: Optional[bool] = Field()
+    isVipStatus: Optional[bool] = Field()
+    autologin: Optional[str] = Field()
+    autologin_link: Optional[AnyHttpUrl] = Field()
 
-    responsible_id: Optional[int] = Field(foreign_key="employee.id" )
+    status_id: Optional[int] = Field(foreign_key="retainstatus.id")
+    status: "RetainStatus" = Relationship(back_populates="traders")
+
+    responsible_id: Optional[int] = Field(foreign_key="employee.id")
     responsible: "Employee" = Relationship(back_populates="traders_responsible")
+
+    client: "Client" = Relationship(back_populates="trader")
 
     orders: "Order" = Relationship(back_populates="trader")
 
@@ -147,7 +174,6 @@ class Order(SQLModel, table=True):
     trader: "Trader" = Relationship(back_populates="orders")
 
 
-
 class Type(SQLModel, table=True):
     id: Optional[int] = Field(primary_key=True)
     name: str = Field()
@@ -160,6 +186,13 @@ class Status(SQLModel, table=True):
     name: str = Field()
 
     client: Client = Relationship(back_populates="status")
+
+
+class RetainStatus(SQLModel, table=True):
+    id: Optional[int] = Field(primary_key=True)
+    name: str = Field()
+
+    traders: Trader = Relationship(back_populates="status")
 
 
 class Action(SQLModel, table=True):

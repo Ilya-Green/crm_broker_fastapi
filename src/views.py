@@ -62,7 +62,7 @@ logger = logging.getLogger("api")
 class MyModelView(ModelView):
     include_relationships: bool = True
     page_size = 20
-    page_size_options = [5, 10, 25, 50, 100]
+    page_size_options = [5, 10, 25, 50, 100, 500, 1000]
     export_types = [ExportType.EXCEL, ExportType.CSV, ExportType.PDF, ExportType.PRINT]
 
 
@@ -475,21 +475,52 @@ def update_platform_data():
     response = requests.get(url='https://general-investment.com/api/admin/user/all', params=params)
     data = json.loads(response.content)
     for user_data in data:
-
         with Session(engine) as session:
             statement = select(Trader).where(Trader.id == user_data["id"])
             current_trader = session.exec(statement).first()
-
+        autologin=user_data.get("autologin")
         new_trader = Trader(
+            # id=user_data["id"],
+            # name=user_data["name"],
+            # email=user_data["email"],
+            # phone_number=user_data["phone"],
+            # balance=user_data["mainBalance"],
+            # created_at_tp=datetime.fromtimestamp(user_data["createdAt"]/1000),
             id=user_data["id"],
             name=user_data["name"],
+            surname=user_data["surname"],
             email=user_data["email"],
             phone_number=user_data["phone"],
-            balance=user_data["mainBalance"],
+            date=datetime.fromtimestamp(user_data["date"]/1000),
+            password=user_data["password"],
+            country=user_data["country"],
+            accountNumber=user_data["accountNumber"],
             created_at_tp=datetime.fromtimestamp(user_data["createdAt"]/1000),
+            balance=user_data["balance"],
+            mainBalance=user_data["mainBalance"],
+            bonuses=user_data["bonuses"],
+            credFacilities=user_data["credFacilities"],
+            accountStatus=user_data["accountStatus"],
+            blocked=user_data["blocked"],
+            isActive=user_data["isActive"],
+            isVipStatus=user_data["isVipStatus"],
+            autologin=user_data.get("autologin"),
+            autologin_link="https://general-investment.com/autoologin?token=" + autologin if autologin else ""
         )
         if current_trader is not None:
             new_trader.responsible_id = current_trader.responsible_id
+            new_trader.status_id = current_trader.status_id
+            if user_data["balance"] > 0:
+                with Session(engine) as session:
+                    statement = select(Client).where(Client.trader_id == new_trader.id)
+                    current_client = session.exec(statement).first()
+                if current_client:
+                    current_client.type_id = 3
+                    session.merge(current_client)
+                    session.commit()
+            # if (user_data["balance"] == 0) and ((user_data["credFacilities"] > 0) or (user_data["bonuses"] > 0)):
+            #     new_trader.type_id = 2
+
         with Session(engine) as session:
             session.merge(new_trader)
             session.commit()
@@ -553,9 +584,45 @@ def edit_order_platform(obj: Any,):
         logger.info(f'Неудачная попытка обновить данные ордера: {obj}')
         print("Ошибка при выполнении запроса")
 
+def edit_account_platform(obj: Any,):
+    url = "https://general-investment.com/api/admin/user/edit"
+    query_params = {
+        "token": "value1",
+    }
+    body = {
+        "name": obj.name,
+        "surname": obj.surname,
+        "accountNumber": obj.accountNumber,
+        "email": obj.email,
+        "phone": obj.phone_number,
+        "country": obj.country,
+        # "city": obj.city,
+        # "address": obj.address,
+        # "dirName": obj.dirName,
+        "blocked": obj.blocked,
+        "accountStatus": obj.accountStatus,
+        "password": obj.password,
+        "isActive": obj.isActive,
+        "isVipStatus": obj.isVipStatus,
+        # "docs": {
+        #     "others": []
+        # },
+        "id": obj.id
+    }
+    response = requests.put(url, params=query_params, json=body)
+    if response.status_code == 200:
+        print("Запрос успешно выполнен")
+        print(response.content)
+        logger.info(f'Обновлены данные ордера: {obj}')
+    else:
+        print(response.status_code)
+        print(response.content)
+        logger.info(f'Неудачная попытка обновить данные ордера: {obj}')
+        print("Ошибка при выполнении запроса")
+
 
 class TradersView(MyModelView):
-    responsive_table = True
+    # responsive_table = True
     column_visibility = True
     search_builder = True
 
@@ -624,8 +691,34 @@ class TradersView(MyModelView):
     #     Trader.
     # ]
 
+    fields = [
+        Trader.name,
+        Trader.surname,
+        Trader.email,
+        Trader.phone_number,
+        Trader.date,
+        Trader.country,
+        Trader.created_at_tp,
+        Trader.balance,
+        Trader.status,
+        Trader.responsible,
+        Trader.client,
+        Trader.orders,
+        Trader.bonuses,
+        Trader.credFacilities,
+        Trader.mainBalance,
+        Trader.accountStatus,
+        Trader.blocked,
+        Trader.isActive,
+        Trader.isVipStatus,
+        URLField("autologin_link"),
+        # Trader.autologin_link,
+        Trader.autologin,
+    ]
+
     exclude_fields_from_list = [
-        Trader.id,
+        Trader.password,
+        Trader.accountNumber,
     ]
     exclude_fields_from_edit = [
         Trader.email,
@@ -638,6 +731,43 @@ class TradersView(MyModelView):
     #     Client.creation_date,
     #     Client.actions,
     # ]
+
+    # async def edit(self, request: Request, pk: Any, data: Dict[str, Any]) -> Any:
+    #     try:
+    #         data = await self._arrange_data(request, data, True)
+    #         await self.validate(request, data)
+    #         session: Union[Session, AsyncSession] = request.state.session
+    #         obj = await self.find_by_pk(request, pk)
+    #         session.add(await self._populate_obj(request, obj, data, True))
+    #         if isinstance(session, AsyncSession):
+    #             await session.commit()
+    #             await session.refresh(obj)
+    #         else:
+    #             await anyio.to_thread.run_sync(session.commit)
+    #             await anyio.to_thread.run_sync(session.refresh, obj)
+    #         return obj
+    #     except Exception as e:
+    #         self.handle_exception(e)
+
+    async def edit(self, request: Request, pk: Any, data: Dict[str, Any]) -> Any:
+        try:
+            data = await self._arrange_data(request, data, True)
+            await self.validate(request, data)
+            session: Union[Session, AsyncSession] = request.state.session
+            obj = await self.find_by_pk(request, pk)
+
+            session.add(await self._populate_obj(request, obj, data, True))
+            obj = await self._populate_obj(request, obj, data, True)
+            edit_account_platform(await self._populate_obj(request, obj, data, True))
+            if isinstance(session, AsyncSession):
+                await session.commit()
+                await session.refresh(obj)
+            else:
+                await anyio.to_thread.run_sync(session.commit)
+                await anyio.to_thread.run_sync(session.refresh, obj)
+            return obj
+        except Exception as e:
+            self.handle_exception(e)
 
     @action(
         name="change_responsible",
@@ -664,8 +794,56 @@ class TradersView(MyModelView):
         #         if desk_result.department_id != request.state.user["department_id"]:
         #             raise ActionFailed("ID not from your department")
         session: Session = request.state.session
+        for trader in await self.find_by_pks(request, pks):
+            responsible_id = request.query_params["id"]
+            trader.responsible_id = responsible_id
+            with Session(engine) as sqltable_session:
+                statement = select(Client).where(Client.trader_id == trader.id)
+                resp_client = sqltable_session.exec(statement).first()
+            if resp_client:
+                resp_client.responsible_id = responsible_id
+                session.add(trader)
+                session.commit()
+                print('test')
+                with Session(engine) as sqltable_session:
+                    sqltable_session.add(resp_client)
+                    sqltable_session.commit()
+        return "{} clients were successfully changed to responsible with id: {}".format(
+            len(pks), request.query_params["id"]
+        )
+
+    @action(
+        name="change_password",
+        text="Change password",
+        confirmation="Enter the password you want to set",
+        submit_btn_text="Yes, proceed",
+        submit_btn_class="btn-success",
+        #         <input name="id" class="form-control" id="floating-input" value="">
+        form="""<div class="input-group input-group-sm mb-3">,
+            <div class="input-group-prepend">
+            <span class="input-group-text" id="inputGroup-sizing-sm">id:</span>
+            </div>
+            <input  name="id" type="text" class="form-control" aria-label="Small" aria-describedby="inputGroup-sizing-sm">
+            </div>""",
+    )
+    async def change_password(self, request: Request, pks: List[Any]) -> str:
+        # with Session(engine) as session:
+        #     statement = select(Employee).where(Employee.id == request.query_params["id"])
+        #     desk_result = session.exec(statement).first()
+        #     if self.desk_leader:
+        #         if desk_result.desk_id != request.state.user["desk_id"] or desk_result.department_id != request.state.user["department_id"]:
+        #             raise ActionFailed("ID not from your desk or department")
+        #     if self.department_leader:
+        #         if desk_result.department_id != request.state.user["department_id"]:
+        #             raise ActionFailed("ID not from your department")
+        session: Session = request.state.session
         for Trader in await self.find_by_pks(request, pks):
             Trader.responsible_id = request.query_params["id"]
+            with Session(engine) as session:
+                statement = select(Client).where(Client.trader_id == Trader.id)
+                client = session.exec(statement).first()
+            client.responsible_id = request.query_params["id"]
+            session.add(Client)
             session.add(Trader)
         session.commit()
         return "{} clients were successfully changed to responsible with id: {}".format(
@@ -735,6 +913,22 @@ class OrdersView(MyModelView):
         if request.state.user["sys_admin"] is True:
             return True
 
+    fields = [
+        Order.trader,
+        Order.asset_name,
+        Order.amount,
+        Order.opening_price,
+        Order.closed_price,
+        Order.type,
+        Order.pledge,
+        Order.take_profit,
+        Order.stop_loss,
+        Order.created_at,
+        Order.closed_at,
+        Order.is_closed,
+        Order.auto_close,
+    ]
+
     exclude_fields_from_list = [
         Order.id,
         Order.wid,
@@ -796,7 +990,7 @@ class ClientsView(MyModelView):
     def custom_render_js(self, request: Request) -> Optional[str]:
         return request.url_for("statics", path="js/custom_render.js")
 
-    responsive_table = True
+    # responsive_table = True
     column_visibility = True
     search_builder = True
 
@@ -811,6 +1005,7 @@ class ClientsView(MyModelView):
         self.department_leader = request.state.user["department_leader"]
         self.head = request.state.user["head"]
         self.sys_admin = request.state.user["sys_admin"]
+        self.retain = request.state.user["retain"]
         self.query_test = request.query_params
 
         with Session(engine) as session:
@@ -822,6 +1017,9 @@ class ClientsView(MyModelView):
 
         if "clients_can_access" in request.state.user:
             if request.state.user["clients_can_access"] is True:
+                return True
+        if "reatin" in request.state.user:
+            if request.state.user["reatin"] is True:
                 return True
         return False
 
@@ -900,7 +1098,7 @@ class ClientsView(MyModelView):
             return super().get_count_query().where(Client.department_id == self.department_leader)
         if self.desk_leader:
             return super().get_count_query().where(Client.desk_id == self.desk_id)
-        return super().get_count_query().where(Client.responsible_id == self.id).where(Client.desk_id == self.desk_id)
+        return super().get_count_query().where(Client.department_id != 0).where(Client.desk_id != 0).where(Client.department_id == self.department_id).where(Client.responsible_id == self.id).where(Client.desk_id == self.desk_id)
         # return select(func.count(self._pk_column))
 
     fields = [
@@ -931,6 +1129,7 @@ class ClientsView(MyModelView):
         Client.responsible,
         Client.actions,
         Client.affiliate,
+        Client.trader,
         Client.notes,
         Client.responsible_id,
     ]
@@ -1085,6 +1284,8 @@ class ClientsView(MyModelView):
     )
     async def add_note(self, request: Request, pks: List[Any]) -> str:
         session: Session = request.state.session
+        if request.query_params["note"] == "":
+            return "Note is too short"
         for Client in await self.find_by_pks(request, pks):
             new_note = Note(content=request.query_params["note"], client_id=Client.id,
                             employee_id=request.state.user["id"], employee_name=request.state.user["name"])
@@ -1223,6 +1424,44 @@ class StatusesView(MyModelView):
         if request.state.user["sys_admin"]:
             return True
         if request.state.user["head"]:
+            return True
+
+
+class RetainStatusesView(MyModelView):
+    responsive_table = True
+    column_visibility = True
+    search_builder = True
+
+    def is_accessible(self, request: Request) -> bool:
+        referer_url = urlparse(request.headers.get("referer"))
+        query_dict = parse_qs(referer_url.query)
+        self.query = query_dict
+        self.id = request.state.user["id"]
+        self.desk_id = request.state.user["desk_id"]
+        self.department_id = request.state.user["department_id"]
+        self.desk_leader = request.state.user["desk_leader"]
+        self.department_leader = request.state.user["department_leader"]
+        self.head = request.state.user["head"]
+        self.sys_admin = request.state.user["sys_admin"]
+        self.retain = request.state.user["retain"]
+
+        # with Session(engine) as session:
+        #     statement = select(Desk).where(Desk.department_id == request.state.user["department_id"])
+        #     desks = session.exec(statement).all()
+        #     # self.department_desks = desks
+        #     self.department_desks = [desk.id for desk in desks]
+        # self.role_name = request.state.user["id"]
+
+        if request.state.user["sys_admin"] is True:
+            return True
+        if request.state.user["retain"] is True:
+            return True
+        return False
+
+    def can_delete(self, request: Request) -> bool:
+        if request.state.user["sys_admin"]:
+            return True
+        if request.state.user["retain"]:
             return True
 
 

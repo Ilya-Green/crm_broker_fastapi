@@ -21,9 +21,10 @@ import sentry_sdk
 from sqlmodel import SQLModel
 
 from .config import APP_SECRET, APP_DOMAIN, APP_TYPE, ADMIN_PSWD, TG_TOKEN, TG_CHAT_ID, SENTRY_TOKEN, SENTRY_RATE
-from .models import Employee, Role, Client, Note, Desk, Action, Department, Status, Affiliate, Type, Trader, Order
+from .models import Employee, Role, Client, Note, Desk, Action, Department, Status, Affiliate, Type, Trader, Order, \
+    RetainStatus
 from .views import MyModelView, EmployeeView, ClientsView, RolesView, DepartmentsView, DesksView, AffiliatesView, \
-    StatusesView, TypesView, TradersView, OrdersView
+    StatusesView, TypesView, TradersView, OrdersView, RetainStatusesView
 from . import engine
 from .api import apiRouter
 
@@ -137,6 +138,7 @@ admin.add_view(OrdersView(Order, label="Order"))
 admin.add_view(MyModelView(Note))
 admin.add_view(MyModelView(Action))
 admin.add_view(StatusesView(Status, label="Statuses"))
+admin.add_view(RetainStatusesView(RetainStatus, label="Retain Statuses"))
 admin.add_view(TypesView(Type, label="Types"))
 
 # Mount to admin to app

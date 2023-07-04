@@ -48,6 +48,36 @@
                                         </button>
                                     </a>
                                 {% endif %}
+<!--                                <button id="sendcomments" type="button" class="btn btn-primary btn-block me-2" href="#" data-bs-toggle="modal" data-bs-target="#modal-action" data-confirmation="Enter status id"-->
+<!--                                data-form="<div class=&quot;input-group input-group-sm mb-3&quot;>,-->
+<!--                            <div class=&quot;input-group-prepend&quot;>-->
+<!--                            <span class=&quot;input-group-text&quot; id=&quot;inputGroup-sizing-sm&quot;>id:</span>-->
+<!--                            </div>-->
+<!--                            <input  name=&quot;id&quot; type=&quot;text&quot; class=&quot;form-control&quot; aria-label=&quot;Small&quot; aria-describedby=&quot;inputGroup-sizing-sm&quot;>-->
+<!--                            </div>" data-name="change_status" data-submit-btn-text="Yes, proceed" data-submit-btn-class="btn-success">-->
+<!--                                   <i class="fa-solid fa-edit me-2"></i>-->
+<!--                                   Change Status-->
+<!--                                </button>-->
+
+<!--                                <button id="sendnote" type="button" class="btn btn-primary btn-block me-2" href="#" data-bs-toggle="modal" data-bs-target="#modal-action" data-confirmation="Enter status id"-->
+<!--                                data-form="<div class=&quot;input-group input-group-sm mb-3&quot;>,-->
+<!--                            <div class=&quot;input-group-prepend&quot;>-->
+<!--                            <span class=&quot;input-group-text&quot; id=&quot;inputGroup-sizing-sm&quot;>id:</span>-->
+<!--                            </div>-->
+<!--                            <input  name=&quot;id&quot; type=&quot;text&quot; class=&quot;form-control&quot; aria-label=&quot;Small&quot; aria-describedby=&quot;inputGroup-sizing-sm&quot;>-->
+<!--                            </div>" data-name="change_status" data-submit-btn-text="Yes, proceed" data-submit-btn-class="btn-success">-->
+<!--                                   <i class="fa-solid fa-edit me-2"></i>-->
+<!--                                   Add Note-->
+<!--                                </button>-->
+
+                                <button class="btn btn-primary btn-block me-2" type="button" href="#" data-bs-toggle="modal" data-bs-target="#modal-action" data-confirmation="Enter status id" data-form="<div class=&quot;input-group input-group-sm mb-3&quot;>,
+                                    <div class=&quot;input-group-prepend&quot;>
+                                    <span class=&quot;input-group-text&quot; id=&quot;inputGroup-sizing-sm&quot;>id:</span>
+                                    </div>
+                                    <input  name=&quot;id&quot; type=&quot;text&quot; class=&quot;form-control&quot; aria-label=&quot;Small&quot; aria-describedby=&quot;inputGroup-sizing-sm&quot;>
+                                    </div>" data-name="change_status" data-submit-btn-text="Yes, proceed" data-submit-btn-class="btn-success">
+                                                Change Status
+                                </button>
 <!--                                <button id="action-btn"-->
 <!--                                            type="button"-->
 <!--                                            class="btn btn-danger btn-block"-->
@@ -79,14 +109,6 @@
         </div>
     </div>
 </div>
-                                <a class="dropdown-item action-item" type="button" href="#" data-bs-toggle="modal" data-bs-target="#modal-action" data-confirmation="Enter status id" data-form="<div class=&quot;input-group input-group-sm mb-3&quot;>,
-        <div class=&quot;input-group-prepend&quot;>
-        <span class=&quot;input-group-text&quot; id=&quot;inputGroup-sizing-sm&quot;>id:</span>
-        </div>
-        <input  name=&quot;id&quot; type=&quot;text&quot; class=&quot;form-control&quot; aria-label=&quot;Small&quot; aria-describedby=&quot;inputGroup-sizing-sm&quot;>
-        </div>" data-name="change_status" data-submit-btn-text="Yes, proceed" data-submit-btn-class="btn-success">
-                                                Change Status
-                                            </a>
                             </div>
                         </div>
                     </div>
@@ -268,6 +290,7 @@
             body: formData,
         })
       .then(async (response) => {
+          location.reload();
         await new Promise((r) => setTimeout(r, 500));
         $("#modal-loading").modal("hide");
         if (response.ok) {
