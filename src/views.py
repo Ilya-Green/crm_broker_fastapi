@@ -585,6 +585,7 @@ def edit_order_platform(obj: Any,):
         logger.info(f'Неудачная попытка обновить данные ордера: {obj}')
         print("Ошибка при выполнении запроса")
 
+
 def edit_account_platform(obj: Any,):
     url = "https://general-investment.com/api/admin/user/edit"
     query_params = {
@@ -602,7 +603,7 @@ def edit_account_platform(obj: Any,):
         # "dirName": obj.dirName,
         "blocked": obj.blocked,
         "accountStatus": obj.accountStatus,
-        "password": obj.password,
+        # "password": obj.password,
         "isActive": obj.isActive,
         "isVipStatus": obj.isVipStatus,
         # "docs": {
@@ -619,6 +620,43 @@ def edit_account_platform(obj: Any,):
         print(response.status_code)
         print(response.content)
         logger.info(f'Неудачная попытка обновить данные ордера: {obj}')
+        print("Ошибка при выполнении запроса")
+
+
+def change_account_password_platform(trader: Trader, password: str):
+    url = "https://general-investment.com/api/admin/user/edit"
+    query_params = {
+        "token": "value1",
+    }
+    body = {
+        "name": trader.name,
+        "surname": trader.surname,
+        "accountNumber": trader.accountNumber,
+        "email": trader.email,
+        "phone": trader.phone_number,
+        "country": trader.country,
+        # "city": obj.city,
+        # "address": obj.address,
+        # "dirName": obj.dirName,
+        "blocked": trader.blocked,
+        "accountStatus": trader.accountStatus,
+        "password": password,
+        "isActive": trader.isActive,
+        "isVipStatus": trader.isVipStatus,
+        # "docs": {
+        #     "others": []
+        # },
+        "id": trader.id
+    }
+    response = requests.put(url, params=query_params, json=body)
+    if response.status_code == 200:
+        print("Запрос успешно выполнен")
+        print(response.content)
+        logger.info(f'Обновлены данные ордера: {trader}')
+    else:
+        print(response.status_code)
+        print(response.content)
+        logger.info(f'Неудачная попытка обновить данные ордера: {trader}')
         print("Ошибка при выполнении запроса")
 
 
@@ -726,10 +764,11 @@ class TradersView(MyModelView):
         Trader.accountNumber,
     ]
     exclude_fields_from_edit = [
-        Trader.email,
+        # Trader.email,
         Trader.phone_number,
         Trader.created_at_tp,
         Trader.orders,
+        Trader.password,
     ]
     # exclude_fields_from_create = [
     #     Client.notes,
@@ -826,9 +865,9 @@ class TradersView(MyModelView):
         #         <input name="id" class="form-control" id="floating-input" value="">
         form="""<div class="input-group input-group-sm mb-3">,
             <div class="input-group-prepend">
-            <span class="input-group-text" id="inputGroup-sizing-sm">id:</span>
+            <span class="input-group-text" id="inputGroup-sizing-sm">password:</span>
             </div>
-            <input  name="id" type="text" class="form-control" aria-label="Small" aria-describedby="inputGroup-sizing-sm">
+            <input  name="password" type="text" class="form-control" aria-label="Small" aria-describedby="inputGroup-sizing-sm">
             </div>""",
     )
     async def change_password(self, request: Request, pks: List[Any]) -> str:
@@ -843,16 +882,9 @@ class TradersView(MyModelView):
         #             raise ActionFailed("ID not from your department")
         session: Session = request.state.session
         for Trader in await self.find_by_pks(request, pks):
-            Trader.responsible_id = request.query_params["id"]
-            with Session(engine) as session:
-                statement = select(Client).where(Client.trader_id == Trader.id)
-                client = session.exec(statement).first()
-            client.responsible_id = request.query_params["id"]
-            session.add(Client)
-            session.add(Trader)
-        session.commit()
-        return "{} clients were successfully changed to responsible with id: {}".format(
-            len(pks), request.query_params["id"]
+            change_account_password_platform(Trader, request.query_params["password"])
+        return "{} passwords were successfully set".format(
+            len(pks)
         )
 
     async def is_action_allowed(self, request: Request, name: str) -> bool:
