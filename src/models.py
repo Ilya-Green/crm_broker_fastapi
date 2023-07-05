@@ -178,7 +178,7 @@ class Order(SQLModel, table=True):
     stop_loss: Optional[float] = Field()
     auto_close: bool = Field()
     v: Optional[int] = Field()
-    closed_at: Optional[date] = Field()
+    closed_at: Optional[datetime] = Field()
     closed_price: Optional[int] = Field()
 
     user_id: Optional[str] = Field(foreign_key="trader.id")

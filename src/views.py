@@ -478,7 +478,7 @@ def update_platform_data():
         with Session(engine) as session:
             statement = select(Trader).where(Trader.id == user_data["id"])
             current_trader = session.exec(statement).first()
-        autologin=user_data.get("autologin")
+        autologin = user_data.get("autologin")
         new_trader = Trader(
             # id=user_data["id"],
             # name=user_data["name"],
@@ -495,7 +495,8 @@ def update_platform_data():
             password=user_data["password"],
             country=user_data["country"],
             accountNumber=user_data["accountNumber"],
-            created_at_tp=datetime.fromtimestamp(user_data["createdAt"]/1000),
+            created_at_tp=user_data["createdAt"],
+            # created_at_tp=datetime.fromtimestamp(user_data["createdAt"]/1000),
             balance=user_data["balance"],
             mainBalance=user_data["mainBalance"],
             bonuses=user_data["bonuses"],
@@ -567,12 +568,12 @@ def edit_order_platform(obj: Any,):
         "type": obj.type,
         "id": obj.id,
         "isClosed": obj.is_closed,
-        "createdAt": obj.created_at,
+        "createdAt": int(obj.created_at.timestamp() * 1000),
         "takeProfit": obj.take_profit,
         "stopLoss": obj.stop_loss,
         "autoClose": obj.auto_close,
         "__v": obj.v,
-        "closedAt": obj.closed_at,
+        "closedAt": int(obj.closed_at.timestamp() * 1000) if obj.closed_at else None,
         "closedPrice": obj.closed_price
     }
     response = requests.put(url, params=query_params, json=body)
@@ -668,6 +669,10 @@ class TradersView(MyModelView):
     def can_delete(self, request: Request) -> bool:
         if request.state.user["sys_admin"] is True:
             return True
+
+    def can_view_details(self, request: Request) -> bool:
+        update_platform_data()
+        return True
 
     def get_list_query(self):
         update_platform_data()
@@ -912,6 +917,10 @@ class OrdersView(MyModelView):
     def can_delete(self, request: Request) -> bool:
         if request.state.user["sys_admin"] is True:
             return True
+
+    def can_view_details(self, request: Request) -> bool:
+        update_platform_data()
+        return True
 
     fields = [
         Order.trader,
