@@ -1286,6 +1286,7 @@ class ClientsView(MyModelView):
         Client.notes,
         Client.creation_date,
         Client.actions,
+        Client.status
     ]
 
     @action(

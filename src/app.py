@@ -25,7 +25,7 @@ from starlette.types import Message
 
 from sqlmodel import SQLModel
 
-from .config import APP_SECRET, APP_DOMAIN, APP_TYPE, ADMIN_PSWD, TG_TOKEN, TG_CHAT_ID, SENTRY_TOKEN, SENTRY_RATE
+from .config import APP_SECRET, APP_DOMAIN, APP_TYPE, ADMIN_PSWD, TG_TOKEN, TG_CHAT_ID, SENTRY_TOKEN, SENTRY_RATE, CRM_NAME
 from .models import Employee, Role, Client, Note, Desk, Action, Department, Status, Affiliate, Type, Trader, Order, \
     RetainStatus, Transaction
 from .views import MyModelView, EmployeeView, ClientsView, RolesView, DepartmentsView, DesksView, AffiliatesView, \
@@ -154,7 +154,7 @@ class CustomAdmin(Admin):
 
 
 admin = CustomAdmin(engine,
-              title="CRM Broker",
+              title=CRM_NAME,
               auth_provider=MyAuthProvider(),
               middlewares=[Middleware(SessionMiddleware, secret_key=APP_SECRET, max_age=60*60)],
               base_url="/admin",

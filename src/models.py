@@ -98,6 +98,7 @@ class Client(SQLModel, table=True):
     creation_date: Optional[datetime] = Field(sa_column=Column(DateTime(timezone=True), default=datetime.utcnow))
 
     country_code: Optional[str] = Field()
+    # country: Optional[str] = Field()
 
     type_id: Optional[int] = Field(foreign_key="type.id")
     type: "Type" = Relationship(back_populates="client")
