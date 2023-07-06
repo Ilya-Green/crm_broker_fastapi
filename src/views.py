@@ -795,6 +795,7 @@ class TradersView(MyModelView):
         Trader.date,
         Trader.mainBalance,
         Trader.balance,
+        Trader.transactions,
     ]
     # exclude_fields_from_create = [
     #     Client.notes,
