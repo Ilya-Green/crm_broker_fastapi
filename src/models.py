@@ -163,6 +163,21 @@ class Trader(SQLModel, table=True):
 
     orders: "Order" = Relationship(back_populates="trader")
 
+    transactions: "Transaction" = Relationship(back_populates="trader")
+
+
+class Transaction(SQLModel, table=True):
+    id: Optional[str] = Field(primary_key=True)
+    content: Optional[str] = Field()
+    createdAt: int = Field()
+    dirName: Optional[str] = Field()
+    type: str = Field()
+    value: float = Field()
+    v: Optional[int] = Field()
+
+    trader_id: str = Field(foreign_key="trader.id")
+    trader: "Trader" = Relationship(back_populates="transactions")
+
 
 class Order(SQLModel, table=True):
     wid: Optional[str] = Field()

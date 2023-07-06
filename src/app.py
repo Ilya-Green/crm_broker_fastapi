@@ -27,9 +27,9 @@ from sqlmodel import SQLModel
 
 from .config import APP_SECRET, APP_DOMAIN, APP_TYPE, ADMIN_PSWD, TG_TOKEN, TG_CHAT_ID, SENTRY_TOKEN, SENTRY_RATE
 from .models import Employee, Role, Client, Note, Desk, Action, Department, Status, Affiliate, Type, Trader, Order, \
-    RetainStatus
+    RetainStatus, Transaction
 from .views import MyModelView, EmployeeView, ClientsView, RolesView, DepartmentsView, DesksView, AffiliatesView, \
-    StatusesView, TypesView, TradersView, OrdersView, RetainStatusesView
+    StatusesView, TypesView, TradersView, OrdersView, RetainStatusesView, TransactionsView
 from . import engine
 from .api import apiRouter
 
@@ -171,6 +171,7 @@ admin.add_view(AffiliatesView(Affiliate, label="Affiliates"))
 
 admin.add_view(ClientsView(Client, label="Clients"))
 admin.add_view(TradersView(Trader, label="Traders"))
+admin.add_view(TransactionsView(Transaction, label="Transactions"))
 admin.add_view(OrdersView(Order, label="Order"))
 
 admin.add_view(MyModelView(Note))

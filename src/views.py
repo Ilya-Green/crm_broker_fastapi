@@ -52,7 +52,7 @@ import asyncio
 import logging
 
 from starlette_admin.helpers import html_params
-from .models import Employee, Role, Client, Desk, Affiliate, Department, Note, Trader, Order
+from .models import Employee, Role, Client, Desk, Affiliate, Department, Note, Trader, Order, Transaction
 from . import engine
 
 
@@ -552,6 +552,24 @@ def update_platform_data():
             session.merge(new_order)
             session.commit()
 
+    params = {'token': 'value1'}
+    response = requests.get(url='https://general-investment.com/api/admin/transaction/all', params=params)
+    data = json.loads(response.content)
+    for transaction_data in data:
+        new_transaction = Transaction(
+            id=transaction_data["id"],
+            content=transaction_data.get("content"),
+            createdAt=transaction_data["createdAt"],
+            dirName=transaction_data.get("dirName"),
+            type=transaction_data["type"],
+            value=transaction_data["value"],
+            v=transaction_data.get("__v"),
+            trader_id=transaction_data["userId"],
+        )
+        with Session(engine) as session:
+            session.merge(new_transaction)
+            session.commit()
+
 
 def edit_order_platform(obj: Any,):
     url = "https://general-investment.com/api/admin/order/edit"
@@ -696,7 +714,7 @@ class TradersView(MyModelView):
             return True
 
     def can_edit(self, request: Request) -> bool:
-        # update_platform_data()
+        update_platform_data()
         if request.state.user["sys_admin"] is True:
             return True
         if request.state.user["head"] is True:
@@ -722,7 +740,7 @@ class TradersView(MyModelView):
             return super().get_list_query().where(Trader.responsible_id == self.id)
 
     def get_count_query(self):
-        update_platform_data()
+        # update_platform_data()
         if self.sys_admin:
             return super().get_count_query()
         if self.head:
@@ -757,6 +775,7 @@ class TradersView(MyModelView):
         URLField("autologin_link"),
         # Trader.autologin_link,
         Trader.autologin,
+        Trader.transactions,
     ]
 
     exclude_fields_from_list = [
@@ -765,10 +784,17 @@ class TradersView(MyModelView):
     ]
     exclude_fields_from_edit = [
         # Trader.email,
-        Trader.phone_number,
+        # Trader.phone_number,
         Trader.created_at_tp,
         Trader.orders,
         Trader.password,
+        Trader.bonuses,
+        Trader.credFacilities,
+        Trader.autologin,
+        Trader.autologin_link,
+        Trader.date,
+        Trader.mainBalance,
+        Trader.balance,
     ]
     # exclude_fields_from_create = [
     #     Client.notes,
@@ -899,6 +925,79 @@ class TradersView(MyModelView):
         return True
 
 
+class TransactionsView(MyModelView):
+    # responsive_table = True
+    column_visibility = True
+    search_builder = True
+
+    def is_accessible(self, request: Request) -> bool:
+        referer_url = urlparse(request.headers.get("referer"))
+        query_dict = parse_qs(referer_url.query)
+        self.query = query_dict
+        self.id = request.state.user["id"]
+        self.desk_id = request.state.user["desk_id"]
+        self.department_id = request.state.user["department_id"]
+        self.desk_leader = request.state.user["desk_leader"]
+        self.department_leader = request.state.user["department_leader"]
+        self.head = request.state.user["head"]
+        self.sys_admin = request.state.user["sys_admin"]
+        self.retain = request.state.user["retain"]
+
+        with Session(engine) as session:
+            statement = select(Desk).where(Desk.department_id == request.state.user["department_id"])
+            desks = session.exec(statement).all()
+            # self.department_desks = desks
+            self.department_desks = [desk.id for desk in desks]
+        # self.role_name = request.state.user["id"]
+
+        if request.state.user["sys_admin"] is True:
+            return True
+        if request.state.user["retain"] is True:
+            return True
+        return False
+
+    def can_create(self, request: Request) -> bool:
+        if request.state.user["sys_admin"] is True:
+            return True
+
+    def can_edit(self, request: Request) -> bool:
+        # update_platform_data()
+        if request.state.user["sys_admin"] is True:
+            return True
+        if request.state.user["head"] is True:
+            return True
+        if request.state.user["retain"] is True:
+            return True
+
+    def can_delete(self, request: Request) -> bool:
+        if request.state.user["sys_admin"] is True:
+            return True
+
+    def can_view_details(self, request: Request) -> bool:
+        update_platform_data()
+        return True
+
+    # def get_list_query(self):
+    #     # update_platform_data()
+    #     return super().get_list_query()
+    #     if self.sys_admin:
+    #         return super().get_list_query()
+    #     if self.head:
+    #         return super().get_list_query()
+    #     if self.retain:
+    #         return super().get_list_query().where(Trader.responsible_id == self.id)
+    #
+    # def get_count_query(self):
+    #     # update_platform_data()
+    #     return super().get_list_query()
+    #     if self.sys_admin:
+    #         return super().get_count_query()
+    #     if self.head:
+    #         return super().get_count_query()
+    #     if self.retain:
+    #         return super().get_count_query().where(Trader.responsible_id == self.id)
+
+
 class OrdersView(MyModelView):
     responsive_table = True
     column_visibility = True
@@ -992,7 +1091,7 @@ class OrdersView(MyModelView):
             return super().get_list_query().where(Order.user_id.in_(self.responsible_user_ids))
 
     def get_count_query(self):
-        update_platform_data()
+        # update_platform_data()
         if self.sys_admin:
             return super().get_count_query()
         if self.head:
