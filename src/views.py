@@ -26,7 +26,7 @@ from starlette_admin import (
     TimeZoneField,
 )
 from starlette_admin.fields import FileField, RelationField
-from .fields import PasswordField, CopyField, NotesField, EmailCopyField, StatusField
+from .fields import PasswordField, CopyField, NotesField, EmailCopyField, StatusField, TraderField
 from starlette_admin.contrib.sqlmodel import ModelView
 from starlette.requests import Request
 from sqlalchemy.orm import Session
@@ -678,6 +678,43 @@ def change_account_password_platform(trader: Trader, password: str):
         print("Ошибка при выполнении запроса")
 
 
+def create_transaction(trader: Trader, password: str):
+    url = "https://general-investment.com/api/admin/user/edit"
+    query_params = {
+        "token": "value1",
+    }
+    body = {
+        "name": trader.name,
+        "surname": trader.surname,
+        "accountNumber": trader.accountNumber,
+        "email": trader.email,
+        "phone": trader.phone_number,
+        "country": trader.country,
+        # "city": obj.city,
+        # "address": obj.address,
+        # "dirName": obj.dirName,
+        "blocked": trader.blocked,
+        "accountStatus": trader.accountStatus,
+        "password": password,
+        "isActive": trader.isActive,
+        "isVipStatus": trader.isVipStatus,
+        # "docs": {
+        #     "others": []
+        # },
+        "id": trader.id
+    }
+    response = requests.put(url, params=query_params, json=body)
+    if response.status_code == 200:
+        print("Запрос успешно выполнен")
+        print(response.content)
+        logger.info(f'Обновлены данные ордера: {trader}')
+    else:
+        print(response.status_code)
+        print(response.content)
+        logger.info(f'Неудачная попытка обновить данные ордера: {trader}')
+        print("Ошибка при выполнении запроса")
+
+
 class TradersView(MyModelView):
     # responsive_table = True
     column_visibility = True
@@ -978,9 +1015,9 @@ class TransactionsView(MyModelView):
         update_platform_data()
         return True
 
-    # def get_list_query(self):
-    #     # update_platform_data()
-    #     return super().get_list_query()
+    def get_list_query(self):
+        update_platform_data()
+        return super().get_list_query()
     #     if self.sys_admin:
     #         return super().get_list_query()
     #     if self.head:
@@ -998,9 +1035,35 @@ class TransactionsView(MyModelView):
     #     if self.retain:
     #         return super().get_count_query().where(Trader.responsible_id == self.id)
 
+    fields = [
+        TraderField("trader"),
+        Transaction.createdAt,
+        Transaction.type,
+        Transaction.value,
+        Transaction.id,
+        Transaction.trader,
+    ]
+
+    async def create(self, request: Request, data: Dict[str, Any]) -> Any:
+        try:
+            data = await self._arrange_data(request, data)
+            await self.validate(request, data)
+            session: Union[Session, AsyncSession] = request.state.session
+            obj = await self._populate_obj(request, self.model(), data)
+            session.add(obj)
+            if isinstance(session, AsyncSession):
+                await session.commit()
+                await session.refresh(obj)
+            else:
+                await anyio.to_thread.run_sync(session.commit)
+                await anyio.to_thread.run_sync(session.refresh, obj)
+            return obj
+        except Exception as e:
+            return self.handle_exception(e)
+
 
 class OrdersView(MyModelView):
-    responsive_table = True
+    # responsive_table = True
     column_visibility = True
     search_builder = True
 
@@ -1055,19 +1118,21 @@ class OrdersView(MyModelView):
         return True
 
     fields = [
-        Order.trader,
+        TraderField("trader"),
+
         Order.asset_name,
         Order.amount,
         Order.opening_price,
         Order.closed_price,
         Order.type,
         Order.pledge,
-        Order.take_profit,
-        Order.stop_loss,
+        Order.is_closed,
         Order.created_at,
         Order.closed_at,
-        Order.is_closed,
         Order.auto_close,
+        Order.take_profit,
+        Order.stop_loss,
+        Order.trader,
     ]
 
     exclude_fields_from_list = [
@@ -1244,6 +1309,7 @@ class ClientsView(MyModelView):
 
     fields = [
 
+        Client.status_id,
         Client.id,
         Client.first_name,
         EmailCopyField("email"),

@@ -170,7 +170,7 @@ class Trader(SQLModel, table=True):
 class Transaction(SQLModel, table=True):
     id: Optional[str] = Field(primary_key=True)
     content: Optional[str] = Field()
-    createdAt: int = Field()
+    createdAt: datetime = Field()
     dirName: Optional[str] = Field()
     type: str = Field()
     value: float = Field()
@@ -196,6 +196,7 @@ class Order(SQLModel, table=True):
     v: Optional[int] = Field()
     closed_at: Optional[datetime] = Field()
     closed_price: Optional[int] = Field()
+    profit: Optional[float] = Field()
 
     user_id: Optional[str] = Field(foreign_key="trader.id")
     trader: "Trader" = Relationship(back_populates="orders")
