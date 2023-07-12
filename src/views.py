@@ -1293,16 +1293,54 @@ class ClientsView(MyModelView):
         return query
 
     def get_count_query(self) -> Select:
-        if self.sys_admin:
-            return super().get_count_query()
-        if self.head:
-            return super().get_count_query()
-        if self.department_leader:
-            return super().get_count_query().where(Client.department_id == self.department_leader)
-        if self.desk_leader:
-            return super().get_count_query().where(Client.desk_id == self.desk_id)
-        return super().get_count_query().where(Client.department_id != 0).where(Client.desk_id != 0).where(Client.department_id == self.department_id).where(Client.responsible_id == self.id).where(Client.desk_id == self.desk_id)
+        # if self.sys_admin:
+        #     return super().get_count_query()
+        # if self.head:
+        #     return super().get_count_query()
+        # if self.department_leader:
+        #     return super().get_count_query().where(Client.department_id == self.department_leader)
+        # if self.desk_leader:
+        #     return super().get_count_query().where(Client.desk_id == self.desk_id)
+        # return super().get_count_query().where(Client.department_id != 0).where(Client.desk_id != 0).where(Client.department_id == self.department_id).where(Client.responsible_id == self.id).where(Client.desk_id == self.desk_id)
         # return select(func.count(self._pk_column))
+        if "hide" not in self.query:
+            with Session(engine) as session:
+                statement = select(Status).where(Status.hide == 0)
+                statuses = session.exec(statement).all()
+                exc_statuses = [status.id for status in statuses]
+            query = super().get_count_query().where(or_(Client.status_id.in_(exc_statuses), Client.status_id.is_(None)))
+        else:
+            query = super().get_count_query()
+        if "responsible_id" in self.query:
+            query = query.where(Client.responsible_id == self.query["responsible_id"][0])
+        if self.sys_admin:
+        #     if self.query:
+        #         query = super().get_list_query()
+        #         for key, value in self.query.items():
+        #             # query = query.where(Client.key == 'HOT')
+        #             query = query.where(getattr(Client, key).in_(value))
+        #         return query
+        #     else:
+        #         return super().get_list_query()
+            return query
+        # if self.head:
+        #     with Session(engine) as session:
+        #         statement = select(Desk).where(Desk.department_id == self.department_id)
+        #         desks = session.exec(statement).all()
+        #         desk_ids = [desk.id for desk in desks]
+        #         clients = super().get_list_query().where(Client.desk_id.in_(desk_ids))
+        #         return clients
+        if self.head:
+            # test = super().get_list_query().where(Desk.department_id == self.department_id)
+            return query
+        if self.department_leader:
+            query = query.where(Client.department_id != 0).where(Client.department_id == self.department_id)
+            return query
+        if self.desk_leader:
+            query = query.where(Client.desk_id != 0).where(Client.department_id == self.department_id).where(Client.desk_id == self.desk_id)
+            return query
+        query = query.where(Client.department_id != 0).where(Client.desk_id != 0).where(Client.department_id == self.department_id).where(Client.desk_id == self.desk_id).where(Client.responsible_id == self.id)
+        return query
 
     fields = [
 
