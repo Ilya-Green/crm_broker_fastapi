@@ -212,6 +212,7 @@ class Type(SQLModel, table=True):
 class Status(SQLModel, table=True):
     id: Optional[int] = Field(primary_key=True)
     name: str = Field()
+    hide: Optional[bool] = Field()
 
     client: Client = Relationship(back_populates="status")
 

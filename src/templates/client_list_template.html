@@ -71,18 +71,64 @@ block content %}
         <div class="card-body border-bottom p-0">
           <div class="d-flex m-3">
             <div id="pageLength_container">
-                <button class="btn btn-light" onclick="addParams()">Responsible</button>
-                <script>
-                function addParams() {
-                  // Получаем текущий URL-адрес
-                  var url = new URL(window.location.href);
-                  // Добавляем параметры
-                  url.searchParams.set('role', 'HOT');
-                  // Перенаправляем на обновленный URL-адрес
-                  window.location.href = url.toString();
-                }
-                </script>
-            </div>
+                  <input type="text" id="responsibleInput" class="form-control" placeholder="id" style="width: 40px; display: inline-block;">
+                  <button class="btn btn-light" onclick="responsibleFunc()">Responsible</button>
+                  <script>
+                  function responsibleFunc() {
+                    // Получаем текущий URL-адрес
+                    var url = new URL(window.location.href);
+                     // Получаем значение из поля ввода
+                    var id = document.getElementById('responsibleInput').value;
+                    // Добавляем параметры
+                    url.searchParams.set('responsible_id', id);
+                    // Перенаправляем на обновленный URL-адрес
+                    window.location.href = url.toString();
+                  }
+                  </script>
+                  <button id="showButton" class="btn btn-light" onclick="showFunc()">Show All</button>
+                  <button id="hideButton" class="btn btn-light" onclick="hideFunc()">Hide</button>
+                  <script>
+                  function showFunc() {
+                    // Получаем текущий URL-адрес
+                    var url = new URL(window.location.href);
+                    // Добавляем параметры
+                    url.searchParams.set('hide', 'false');
+                    // Перенаправляем на обновленный URL-адрес
+                    window.location.href = url.toString();
+                  }
+                  function hideFunc() {
+                    // Получаем текущий URL-адрес
+                    var url = new URL(window.location.href);
+                    // Добавляем параметры
+                    url.searchParams.delete('hide');
+                    // Перенаправляем на обновленный URL-адрес
+                    window.location.href = url.toString();
+                  }
+                  </script>
+                  <script>
+                    var urlParams = new URLSearchParams(window.location.search);
+
+                    if (urlParams.get('hide') === 'false') {
+                        document.getElementById('hideButton').style.display = 'inline-block';
+                        document.getElementById('showButton').style.display = 'none';
+                    } else {
+                        document.getElementById('hideButton').style.display = 'none';
+                        document.getElementById('showButton').style.display = 'inline-block';
+                    }
+                  </script>
+                  <button class="btn btn-light" onclick="clearFunc()">Clear</button>
+                  <script>
+                  function clearFunc() {
+                    // Получаем текущий URL-адрес
+                    var url = new URL(window.location.href);
+                    url.searchParams.forEach(function(value, paramName) {
+                        url.searchParams.delete(paramName);
+                    });
+                    // Перенаправляем на обновленный URL-адрес
+                    window.location.href = url.toString();
+                  }
+                  </script>
+              </div>
             <div class="ms-auto text-muted">
               <div class="ms-2 d-inline-block">
                 <div class="input-icon">

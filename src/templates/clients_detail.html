@@ -78,6 +78,15 @@
                                     </div>" data-name="change_status" data-submit-btn-text="Yes, proceed" data-submit-btn-class="btn-success">
                                                 Change Status
                                 </button>
+
+                                <button class="btn btn-primary btn-block me-2" type="button" href="#" data-bs-toggle="modal" data-bs-target="#modal-action-comment" data-confirmation="Enter comment" data-form="<div class=&quot;input-group input-group-sm mb-3&quot;>,
+                                    <div class=&quot;input-group-prepend&quot;>
+                                    <span class=&quot;input-group-text&quot; id=&quot;inputGroup-sizing-sm&quot;>id:</span>
+                                    </div>
+                                    <input  name=&quot;id&quot; type=&quot;text&quot; class=&quot;form-control&quot; aria-label=&quot;Small&quot; aria-describedby=&quot;inputGroup-sizing-sm&quot;>
+                                    </div>" data-name="change_status" data-submit-btn-text="Yes, proceed" data-submit-btn-class="btn-success">
+                                                Add comment
+                                </button>
 <!--                                <button id="action-btn"-->
 <!--                                            type="button"-->
 <!--                                            class="btn btn-danger btn-block"-->
@@ -92,7 +101,7 @@
             <div class="modal-body">
                 <div id="actionConfirmation"></div></br>
                 <div id="modal-form"></div>
-                <select name="id" id="status-select">
+                <select class="form-select" name="id" id="status-select">
 <!--                                <option value="1">HOT</option>-->
 <!--                                <option value="2">START</option>-->
 <!--                                <option value="3">F</option>-->
@@ -109,6 +118,24 @@
         </div>
     </div>
 </div>
+
+<!--<div class="modal modal-blur fade" id="modal-action" tabindex="-1" role="dialog" aria-hidden="true">-->
+<!--    <div class="modal-dialog modal-sm modal-dialog-centered" role="document">-->
+<!--        <div class="modal-content">-->
+<!--            <div class="modal-body">-->
+<!--                <div id="actionConfirmation"></div></br>-->
+<!--                <div id="modal-form"></div>-->
+<!--        </select>-->
+<!--            </div>-->
+<!--            <div class="modal-footer">-->
+<!--                <button type="button" class="btn btn-link link-secondary me-auto"-->
+<!--                        data-bs-dismiss="modal">{{ _("Cancel") }}</button>-->
+<!--                <button id="actionSubmit" type="button" class="btn btn-primary"-->
+<!--                        data-bs-dismiss="modal">{{ _("Yes, Proceed") }}</button>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--</div>-->
                             </div>
                         </div>
                     </div>
@@ -348,6 +375,65 @@
   })
   .catch(error => {
     console.error('Error:', error);
+  });
+      function submitActionComment(name, formData) {
+    $("#modal-loading").modal("show");
+    query = new URLSearchParams();
+      query.append("pks", {{ obj[pk] }});
+    query.append("name", name);
+
+    $('#modal-action-comment :input').each(function() {
+        query.append(this.name, $(this).val());
+    });
+
+        const url = window.location.origin + "/admin/api/client/action?" + query.toString();
+        fetch(url, {
+            method: "POST",
+            body: formData,
+        })
+      .then(async (response) => {
+          location.reload();
+        await new Promise((r) => setTimeout(r, 500));
+        $("#modal-loading").modal("hide");
+        if (response.ok) {
+          table.rows().deselect();
+          table.ajax.reload();
+          successAlert((await response.json())["msg"]);
+        } else {
+          if (response.status == 400) {
+            return Promise.reject((await response.json())["msg"]);
+          }
+          return Promise.reject("Something went wrong!");
+        }
+      })
+      .catch(async (error) => {
+        await new Promise((r) => setTimeout(r, 500));
+        dangerAlert(error);
+      });
+  }
+     $("#modal-action-comment").on("show.bs.modal", function (event) {
+    var button = $(event.relatedTarget); // Button that triggered the modal
+    var confirmation = button.data("confirmation");
+    var form = button.data("form");
+    var name = button.data("name");
+    var submit_btn_text = button.data("submit-btn-text");
+    var submit_btn_class = button.data("submit-btn-class");
+
+    var modal = $(this);
+    modal.find("#actionConfirmation").text(confirmation);
+    var modalForm = modal.find("#modal-form");
+    $('#modal-form').html(form);
+    var actionSubmit = modal.find("#actionSubmit");
+    actionSubmit.text(submit_btn_text);
+    actionSubmit.removeClass().addClass(`btn ${submit_btn_class}`);
+    actionSubmit.unbind();
+    actionSubmit.on("click", function (event) {
+      const formElement = modalForm.find("form");
+      const formData = formElement.length
+        ? new FormData(formElement.get(0))
+        : new FormData();
+      submitActionComment(name, formData);
+    });
   });
     </script>
 {% endblock %}

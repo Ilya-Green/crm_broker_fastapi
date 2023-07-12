@@ -52,7 +52,7 @@ import asyncio
 import logging
 
 from starlette_admin.helpers import html_params
-from .models import Employee, Role, Client, Desk, Affiliate, Department, Note, Trader, Order, Transaction
+from .models import Employee, Role, Client, Desk, Affiliate, Department, Note, Trader, Order, Transaction, Status
 from . import engine
 
 
@@ -1190,7 +1190,7 @@ class OrdersView(MyModelView):
 class ClientsView(MyModelView):
     page_size_options = [5, 10, 25, 50, 100, 500, 1000]
 
-    # list_template = "client_list_template.html"
+    list_template = "client_list_template.html"
     detail_template: str = "clients_detail.html"
 
     def custom_render_js(self, request: Request) -> Optional[str]:
@@ -1253,6 +1253,16 @@ class ClientsView(MyModelView):
     #     return False
 
     def get_list_query(self):
+        if "hide" not in self.query:
+            with Session(engine) as session:
+                statement = select(Status).where(Status.hide == 0)
+                statuses = session.exec(statement).all()
+                exc_statuses = [status.id for status in statuses]
+            query = super().get_list_query().where(or_(Client.status_id.in_(exc_statuses), Client.status_id.is_(None)))
+        else:
+            query = super().get_list_query()
+        if "responsible_id" in self.query:
+            query = query.where(Client.responsible_id == self.query["responsible_id"][0])
         if self.sys_admin:
         #     if self.query:
         #         query = super().get_list_query()
@@ -1262,9 +1272,6 @@ class ClientsView(MyModelView):
         #         return query
         #     else:
         #         return super().get_list_query()
-            query = super().get_list_query().where()
-            if "responsible_id" in self.query:
-                query = query.where(Client.responsible_id == self.query["responsible_id"][0])
             return query
         # if self.head:
         #     with Session(engine) as session:
@@ -1275,24 +1282,14 @@ class ClientsView(MyModelView):
         #         return clients
         if self.head:
             # test = super().get_list_query().where(Desk.department_id == self.department_id)
-
-            query = super().get_list_query()
-            if "responsible_id" in self.query:
-                query = query.where(Client.responsible_id == self.query["responsible_id"][0])
             return query
         if self.department_leader:
-            query = super().get_list_query().where(Client.department_id != 0).where(Client.department_id == self.department_id)
-            if "responsible_id" in self.query:
-                query = query.where(Client.responsible_id == self.query["responsible_id"][0])
+            query = query.where(Client.department_id != 0).where(Client.department_id == self.department_id)
             return query
         if self.desk_leader:
-            query = super().get_list_query().where(Client.desk_id != 0).where(Client.department_id == self.department_id).where(Client.desk_id == self.desk_id)
-            if "responsible_id" in self.query:
-                query = query.where(Client.responsible_id == self.query["responsible_id"][0])
+            query = query.where(Client.desk_id != 0).where(Client.department_id == self.department_id).where(Client.desk_id == self.desk_id)
             return query
-        query = super().get_list_query().where(Client.department_id != 0).where(Client.desk_id != 0).where(Client.department_id == self.department_id).where(Client.desk_id == self.desk_id).where(Client.responsible_id == self.id)
-        if "responsible_id" in self.query:
-            query = query.where(Client.responsible_id == self.query["responsible_id"][0])
+        query = query.where(Client.department_id != 0).where(Client.desk_id != 0).where(Client.department_id == self.department_id).where(Client.desk_id == self.desk_id).where(Client.responsible_id == self.id)
         return query
 
     def get_count_query(self) -> Select:
