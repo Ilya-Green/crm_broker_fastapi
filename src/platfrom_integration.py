@@ -112,17 +112,14 @@ def update_platform_data():
         with Session(engine) as session:
             session.merge(new_transaction)
             session.commit()
-    print("updated")
 
 
 def update_platform_data_by_id(ids: list):
-    start_time = time.time()
     params = {'token': 'value1'}
     response = requests.get(url='https://general-investment.com/api/admin/user/all', params=params)
     data = json.loads(response.content)
     for user_data in data:
         if user_data["id"] in ids:
-            print(user_data["id"])
             with Session(engine) as session:
                 statement = select(Trader).where(Trader.id == user_data["id"])
                 current_trader = session.exec(statement).first()
@@ -180,7 +177,6 @@ def update_platform_data_by_id(ids: list):
     data = json.loads(response.content)
     for user_data in data:
         if user_data["userId"] in ids:
-            print(user_data["userId"])
             new_order = Order(
                 wid=user_data["_id"],
                 id=user_data["id"],
@@ -208,7 +204,6 @@ def update_platform_data_by_id(ids: list):
     data = json.loads(response.content)
     for transaction_data in data:
         if user_data["userId"] in ids:
-            print(user_data["userId"])
             new_transaction = Transaction(
                 id=transaction_data["id"],
                 content=transaction_data.get("content"),
@@ -222,7 +217,6 @@ def update_platform_data_by_id(ids: list):
             with Session(engine) as session:
                 session.merge(new_transaction)
                 session.commit()
-    print("updated: ", time.time() - start_time)
 
 
 def update_orders():
@@ -254,7 +248,6 @@ def update_orders():
 
 
 def update_order(id: int):
-    start_time = time.time()
     params = {'token': 'value1'}
     response = requests.get(url='https://general-investment.com/api/admin/order/all', params=params)
     data = json.loads(response.content)
@@ -283,7 +276,6 @@ def update_order(id: int):
         with Session(engine) as session:
             session.merge(order_to_update)
             session.commit()
-    print(f'{id}: ', time.time() - start_time)
 
 
 def edit_order_platform(obj: Any,):
