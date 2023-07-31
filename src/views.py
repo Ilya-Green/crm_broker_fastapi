@@ -1,5 +1,6 @@
 import json
 from datetime import datetime
+import time
 
 import anyio
 import requests
@@ -25,15 +26,16 @@ from starlette_admin import (
     TimeField,
     TimeZoneField,
 )
+from starlette_admin.contrib.sqla.helpers import build_query, build_order_clauses
 from starlette_admin.fields import FileField, RelationField
 from .fields import PasswordField, CopyField, NotesField, EmailCopyField, StatusField, TraderField
 from starlette_admin.contrib.sqlmodel import ModelView
 from starlette.requests import Request
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from sqlmodel import Session, select
 from starlette.requests import Request
 from sqlalchemy import or_, and_
-from typing import Optional, Dict, Union
+from typing import Optional, Dict, Union, Sequence
 from starlette_admin import action
 from typing import Any, List
 from urllib.parse import urlparse, parse_qs
@@ -50,11 +52,13 @@ from starlette_admin.exceptions import ActionFailed, FormValidationError
 import aiohttp
 import asyncio
 import logging
+from sqlalchemy import select as sqlalchemy_select
 
 from starlette_admin.helpers import html_params
 from .models import Employee, Role, Client, Desk, Affiliate, Department, Note, Trader, Order, Transaction, Status
 from . import engine
-
+from .platfrom_integration import update_platform_data, edit_account_platform, change_account_password_platform, \
+    update_order, edit_order_platform, update_orders, update_platform_data_by_id
 
 logger = logging.getLogger("api")
 
@@ -282,9 +286,9 @@ class EmployeeView(MyModelView):
         PasswordField("password"),
         Employee.role,
         Employee.desk,
-        Employee.clients_responsible,
+        # Employee.clients_responsible,
         Employee.department,
-        Employee.notes,
+        # Employee.notes,
         Employee.actions,
     ]
 
@@ -470,252 +474,6 @@ class AffiliatesView(MyModelView):
         return False
 
 
-def update_platform_data():
-    params = {'token': 'value1'}
-    response = requests.get(url='https://general-investment.com/api/admin/user/all', params=params)
-    data = json.loads(response.content)
-    for user_data in data:
-        with Session(engine) as session:
-            statement = select(Trader).where(Trader.id == user_data["id"])
-            current_trader = session.exec(statement).first()
-        autologin = user_data.get("autologin")
-        new_trader = Trader(
-            # id=user_data["id"],
-            # name=user_data["name"],
-            # email=user_data["email"],
-            # phone_number=user_data["phone"],
-            # balance=user_data["mainBalance"],
-            # created_at_tp=datetime.fromtimestamp(user_data["createdAt"]/1000),
-            id=user_data["id"],
-            name=user_data["name"],
-            surname=user_data["surname"],
-            email=user_data["email"],
-            phone_number=user_data["phone"],
-            date=user_data["date"],
-            # date=datetime.fromtimestamp(user_data["date"]/1000),
-            password=user_data["password"],
-            country=user_data["country"],
-            accountNumber=user_data["accountNumber"],
-            created_at_tp=user_data["createdAt"],
-            # created_at_tp=datetime.fromtimestamp(user_data["createdAt"]/1000),
-            balance=user_data["balance"],
-            mainBalance=user_data["mainBalance"],
-            bonuses=user_data["bonuses"],
-            credFacilities=user_data["credFacilities"],
-            accountStatus=user_data["accountStatus"],
-            blocked=user_data["blocked"],
-            isActive=user_data["isActive"],
-            isVipStatus=user_data["isVipStatus"],
-            autologin=user_data.get("autologin"),
-            autologin_link="https://general-investment.com/autoologin?token=" + autologin if autologin else ""
-        )
-        if current_trader is not None:
-            new_trader.responsible_id = current_trader.responsible_id
-            new_trader.status_id = current_trader.status_id
-            if user_data["balance"] > 0:
-                with Session(engine) as session:
-                    statement = select(Client).where(Client.trader_id == new_trader.id)
-                    current_client = session.exec(statement).first()
-                if current_client:
-                    current_client.type_id = 3
-                    session.merge(current_client)
-                    session.commit()
-            # if (user_data["balance"] == 0) and ((user_data["credFacilities"] > 0) or (user_data["bonuses"] > 0)):
-            #     new_trader.type_id = 2
-
-        with Session(engine) as session:
-            session.merge(new_trader)
-            session.commit()
-
-    params = {'token': 'value1'}
-    response = requests.get(url='https://general-investment.com/api/admin/order/all', params=params)
-    data = json.loads(response.content)
-    for user_data in data:
-        new_order = Order(
-            wid=user_data["_id"],
-            id=user_data["id"],
-            asset_name=user_data["assetName"],
-            amount=user_data["amount"],
-            opening_price=user_data["openingPrice"],
-            pledge=user_data["pledge"],
-            user_id=user_data["userId"],
-            type=user_data["type"],
-            is_closed=user_data["isClosed"],
-            created_at=user_data["createdAt"],
-            take_profit=user_data["takeProfit"],
-            stop_loss=user_data["stopLoss"],
-            auto_close=user_data["autoClose"],
-            v=user_data["__v"],
-            closed_at=user_data.get("closedAt"),
-            closed_price=user_data.get("closedPrice")
-        )
-        with Session(engine) as session:
-            session.merge(new_order)
-            session.commit()
-
-    params = {'token': 'value1'}
-    response = requests.get(url='https://general-investment.com/api/admin/transaction/all', params=params)
-    data = json.loads(response.content)
-    for transaction_data in data:
-        new_transaction = Transaction(
-            id=transaction_data["id"],
-            content=transaction_data.get("content"),
-            createdAt=transaction_data["createdAt"],
-            dirName=transaction_data.get("dirName"),
-            type=transaction_data["type"],
-            value=transaction_data["value"],
-            v=transaction_data.get("__v"),
-            trader_id=transaction_data["userId"],
-        )
-        with Session(engine) as session:
-            session.merge(new_transaction)
-            session.commit()
-
-
-def edit_order_platform(obj: Any,):
-    url = "https://general-investment.com/api/admin/order/edit"
-    query_params = {
-        "token": "value1",
-    }
-    body = {
-        "_id": obj.wid,
-        "assetName": obj.asset_name,
-        "amount": obj.amount,
-        "openingPrice": obj.opening_price,
-        "pledge": obj.pledge,
-        "userId": obj.user_id,
-        "type": obj.type,
-        "id": obj.id,
-        "isClosed": obj.is_closed,
-        "createdAt": int(obj.created_at.timestamp() * 1000),
-        "takeProfit": obj.take_profit,
-        "stopLoss": obj.stop_loss,
-        "autoClose": obj.auto_close,
-        "__v": obj.v,
-        "closedAt": int(obj.closed_at.timestamp() * 1000) if obj.closed_at else None,
-        "closedPrice": obj.closed_price
-    }
-    response = requests.put(url, params=query_params, json=body)
-    if response.status_code == 200:
-        print("Запрос успешно выполнен")
-        logger.info(f'Обновлены данные ордера: {obj}')
-    else:
-        print(response.status_code)
-        logger.info(f'Неудачная попытка обновить данные ордера: {obj}')
-        print("Ошибка при выполнении запроса")
-
-
-def edit_account_platform(obj: Any,):
-    url = "https://general-investment.com/api/admin/user/edit"
-    query_params = {
-        "token": "value1",
-    }
-    body = {
-        "name": obj.name,
-        "surname": obj.surname,
-        "accountNumber": obj.accountNumber,
-        "email": obj.email,
-        "phone": obj.phone_number,
-        "country": obj.country,
-        # "city": obj.city,
-        # "address": obj.address,
-        # "dirName": obj.dirName,
-        "blocked": obj.blocked,
-        "accountStatus": obj.accountStatus,
-        # "password": obj.password,
-        "isActive": obj.isActive,
-        "isVipStatus": obj.isVipStatus,
-        # "docs": {
-        #     "others": []
-        # },
-        "id": obj.id
-    }
-    response = requests.put(url, params=query_params, json=body)
-    if response.status_code == 200:
-        print("Запрос успешно выполнен")
-        print(response.content)
-        logger.info(f'Обновлены данные ордера: {obj}')
-    else:
-        print(response.status_code)
-        print(response.content)
-        logger.info(f'Неудачная попытка обновить данные ордера: {obj}')
-        print("Ошибка при выполнении запроса")
-
-
-def change_account_password_platform(trader: Trader, password: str):
-    url = "https://general-investment.com/api/admin/user/edit"
-    query_params = {
-        "token": "value1",
-    }
-    body = {
-        "name": trader.name,
-        "surname": trader.surname,
-        "accountNumber": trader.accountNumber,
-        "email": trader.email,
-        "phone": trader.phone_number,
-        "country": trader.country,
-        # "city": obj.city,
-        # "address": obj.address,
-        # "dirName": obj.dirName,
-        "blocked": trader.blocked,
-        "accountStatus": trader.accountStatus,
-        "password": password,
-        "isActive": trader.isActive,
-        "isVipStatus": trader.isVipStatus,
-        # "docs": {
-        #     "others": []
-        # },
-        "id": trader.id
-    }
-    response = requests.put(url, params=query_params, json=body)
-    if response.status_code == 200:
-        print("Запрос успешно выполнен")
-        print(response.content)
-        logger.info(f'Обновлены данные ордера: {trader}')
-    else:
-        print(response.status_code)
-        print(response.content)
-        logger.info(f'Неудачная попытка обновить данные ордера: {trader}')
-        print("Ошибка при выполнении запроса")
-
-
-def create_transaction(trader: Trader, password: str):
-    url = "https://general-investment.com/api/admin/user/edit"
-    query_params = {
-        "token": "value1",
-    }
-    body = {
-        "name": trader.name,
-        "surname": trader.surname,
-        "accountNumber": trader.accountNumber,
-        "email": trader.email,
-        "phone": trader.phone_number,
-        "country": trader.country,
-        # "city": obj.city,
-        # "address": obj.address,
-        # "dirName": obj.dirName,
-        "blocked": trader.blocked,
-        "accountStatus": trader.accountStatus,
-        "password": password,
-        "isActive": trader.isActive,
-        "isVipStatus": trader.isVipStatus,
-        # "docs": {
-        #     "others": []
-        # },
-        "id": trader.id
-    }
-    response = requests.put(url, params=query_params, json=body)
-    if response.status_code == 200:
-        print("Запрос успешно выполнен")
-        print(response.content)
-        logger.info(f'Обновлены данные ордера: {trader}')
-    else:
-        print(response.status_code)
-        print(response.content)
-        logger.info(f'Неудачная попытка обновить данные ордера: {trader}')
-        print("Ошибка при выполнении запроса")
-
-
 class TradersView(MyModelView):
     # responsive_table = True
     column_visibility = True
@@ -752,7 +510,8 @@ class TradersView(MyModelView):
             return True
 
     def can_edit(self, request: Request) -> bool:
-        update_platform_data()
+        ids = [request.path_params.get("pk")]
+        update_platform_data_by_id(ids)
         if request.state.user["sys_admin"] is True:
             return True
         if request.state.user["head"] is True:
@@ -765,11 +524,10 @@ class TradersView(MyModelView):
             return True
 
     def can_view_details(self, request: Request) -> bool:
-        update_platform_data()
         return True
 
     def get_list_query(self):
-        update_platform_data()
+        # update_platform_data()
         if self.sys_admin:
             return super().get_list_query()
         if self.head:
@@ -857,6 +615,45 @@ class TradersView(MyModelView):
     #         return obj
     #     except Exception as e:
     #         self.handle_exception(e)
+
+    async def find_all(
+        self,
+        request: Request,
+        skip: int = 0,
+        limit: int = 100,
+        where: Union[Dict[str, Any], str, None] = None,
+        order_by: Optional[List[str]] = None,
+    ) -> Sequence[Any]:
+        session: Union[Session, AsyncSession] = request.state.session
+        stmt = self.get_list_query().offset(skip)
+        if limit > 0:
+            stmt = stmt.limit(limit)
+        if where is not None:
+            if isinstance(where, dict):
+                where = build_query(where, self.model)
+            else:
+                where = await self.build_full_text_search_query(
+                    request, where, self.model
+                )
+            stmt = stmt.where(where)  # type: ignore
+        stmt = stmt.order_by(*build_order_clauses(order_by or [], self.model))
+        # for field in self.fields:
+        #     if isinstance(field, RelationField) and not field.exclude_from_edit:
+        #         stmt = stmt.options(joinedload(getattr(self.model, field.name)))
+
+        if isinstance(session, AsyncSession):
+            item = (await session.execute(stmt)).scalars().unique().all()
+        items = (
+            (await anyio.to_thread.run_sync(session.execute, stmt))
+            .scalars()
+            .unique()
+            .all()
+        )
+        ids = []
+        for trader in items:
+            ids.append(trader.id)
+        update_platform_data_by_id(ids)
+        return items
 
     async def edit(self, request: Request, pk: Any, data: Dict[str, Any]) -> Any:
         try:
@@ -1000,7 +797,7 @@ class TransactionsView(MyModelView):
             return True
 
     def can_edit(self, request: Request) -> bool:
-        # update_platform_data()
+        update_platform_data()
         if request.state.user["sys_admin"] is True:
             return True
         if request.state.user["head"] is True:
@@ -1013,7 +810,6 @@ class TransactionsView(MyModelView):
             return True
 
     def can_view_details(self, request: Request) -> bool:
-        update_platform_data()
         return True
 
     def get_list_query(self):
@@ -1104,7 +900,11 @@ class OrdersView(MyModelView):
             return True
 
     def can_edit(self, request: Request) -> bool:
-        update_platform_data()
+        url = str(request.url)
+        parsed_url = urlparse(url)
+        path_segments = parsed_url.path.split("/")
+        id_value = path_segments[-1]
+        update_order(id_value)
         if request.state.user["sys_admin"] is True:
             return True
         if request.state.user["retain"] is True:
@@ -1115,7 +915,6 @@ class OrdersView(MyModelView):
             return True
 
     def can_view_details(self, request: Request) -> bool:
-        update_platform_data()
         return True
 
     fields = [
@@ -1149,7 +948,7 @@ class OrdersView(MyModelView):
     # ]
 
     def get_list_query(self):
-        update_platform_data()
+        update_orders()
         if self.sys_admin:
             return super().get_list_query()
         if self.head:
@@ -1660,6 +1459,12 @@ class ClientsView(MyModelView):
 
 
 class StatusesView(MyModelView):
+    fields = [
+        Status.id,
+        Status.name,
+        Status.hide,
+    ]
+
     responsive_table = True
     column_visibility = True
     search_builder = True
