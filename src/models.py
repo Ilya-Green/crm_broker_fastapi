@@ -133,7 +133,7 @@ class Trader(SQLModel, table=True):
     # phone_number: str = Field()
     # balance: int = Field(default=0)
     # created_at_tp: Optional[datetime] = Field()
-    id: Optional[str] = Field(primary_key=True)
+    id: Optional[str] = Field(primary_key=True, index=True)
     name: Optional[str] = Field()
     surname: Optional[str] = Field()
     email: Optional[EmailStr] = Field()
