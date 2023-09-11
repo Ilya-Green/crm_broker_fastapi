@@ -107,6 +107,7 @@ class Client(SQLModel, table=True):
     status: "Status" = Relationship(back_populates="client")
 
     notes: "Note" = Relationship(back_populates="client")
+    last_note: Optional[datetime] = Field(sa_column=Column(DateTime(timezone=True)))
 
     desk_id: Optional[int] = Field(foreign_key="desk.id")
     desk: "Desk" = Relationship(back_populates="client")

@@ -27,7 +27,7 @@ from starlette_admin import (
     TimeZoneField,
 )
 from starlette_admin.contrib.sqla.helpers import build_query, build_order_clauses
-from starlette_admin.fields import FileField, RelationField
+from starlette_admin.fields import FileField, RelationField, BooleanField
 from .fields import PasswordField, CopyField, NotesField, EmailCopyField, StatusField, TraderField
 from starlette_admin.contrib.sqlmodel import ModelView
 from starlette.requests import Request
@@ -993,6 +993,8 @@ class ClientsView(MyModelView):
     list_template = "client_list_template.html"
     detail_template: str = "clients_detail.html"
 
+    fields_default_sort = ["title", ("id", True)]
+
     def custom_render_js(self, request: Request) -> Optional[str]:
         return request.url_for("statics", path="js/custom_render.js")
 
@@ -1063,6 +1065,8 @@ class ClientsView(MyModelView):
             query = super().get_list_query()
         if "responsible_id" in self.query:
             query = query.where(Client.responsible_id == self.query["responsible_id"][0])
+        if "status_id" in self.query:
+            query = query.where(Client.status_id == self.query["status_id"][0])
         if self.sys_admin:
         #     if self.query:
         #         query = super().get_list_query()
@@ -1113,6 +1117,8 @@ class ClientsView(MyModelView):
             query = super().get_count_query()
         if "responsible_id" in self.query:
             query = query.where(Client.responsible_id == self.query["responsible_id"][0])
+        if "status_id" in self.query:
+            query = query.where(Client.status_id == self.query["status_id"][0])
         if self.sys_admin:
         #     if self.query:
         #         query = super().get_list_query()
@@ -1174,11 +1180,12 @@ class ClientsView(MyModelView):
         Client.trader,
         Client.notes,
         Client.responsible_id,
+        Client.last_note,
     ]
 
-    # exclude_fields_from_list = [
-    #     Client.notes,
-    # ]
+    exclude_fields_from_list = [
+        # Client.first_name,
+    ]
     exclude_fields_from_edit = [
         Client.notes,
         Client.creation_date,
@@ -1333,6 +1340,8 @@ class ClientsView(MyModelView):
             new_note = Note(content=request.query_params["note"], client_id=Client.id,
                             employee_id=request.state.user["id"], employee_name=request.state.user["name"])
             session.add(new_note)
+            Client.last_note = datetime.utcnow()
+            session.add(Client)
         session.commit()
         return "{} Note was successfully added".format(
             len(pks)
@@ -1340,6 +1349,7 @@ class ClientsView(MyModelView):
 
     @action(
         name="change_status",
+        id="changestatus",
         text="Change status",
         confirmation="Enter status id",
         submit_btn_text="Yes, proceed",
@@ -1351,6 +1361,7 @@ class ClientsView(MyModelView):
         </div>
         <input  name="id" type="text" class="form-control" aria-label="Small" aria-describedby="inputGroup-sizing-sm">
         </div>""",
+        data_bs_target="#modal-action-comment"
     )
     async def change_status(self, request: Request, pks: List[Any]) -> str:
         session: Session = request.state.session
@@ -1462,7 +1473,8 @@ class StatusesView(MyModelView):
     fields = [
         Status.id,
         Status.name,
-        Status.hide,
+        BooleanField("hide", label="Hide clients with this status from standard client list table"),
+        # Status.hide,
     ]
 
     responsive_table = True

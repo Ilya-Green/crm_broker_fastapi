@@ -39,9 +39,10 @@ block content %}
                     class="dropdown-item action-item"
                     type="button"
                     href="#"
+                    id="{{action.id}}"
                     {% if action.confirmation %}
                     data-bs-toggle="modal"
-                    data-bs-target="#modal-action"
+                    data-bs-target="{{action.data_bs_target}}"
                     data-confirmation="{{action.confirmation}}"
                     {% else %}
                     data-no-confirmation-action="true"
@@ -71,6 +72,20 @@ block content %}
         <div class="card-body border-bottom p-0">
           <div class="d-flex m-3">
             <div id="pageLength_container">
+                  <input type="text" id="statusInput" class="form-control" placeholder="id" style="width: 40px; display: inline-block;">
+                  <button class="btn btn-light" onclick="statusFunc()">Status</button>
+                  <script>
+                  function statusFunc() {
+                    // Получаем текущий URL-адрес
+                    var url = new URL(window.location.href);
+                     // Получаем значение из поля ввода
+                    var id = document.getElementById('statusInput').value;
+                    // Добавляем параметры
+                    url.searchParams.set('status_id', id);
+                    // Перенаправляем на обновленный URL-адрес
+                    window.location.href = url.toString();
+                  }
+                  </script>
                   <input type="text" id="responsibleInput" class="form-control" placeholder="id" style="width: 40px; display: inline-block;">
                   <button class="btn btn-light" onclick="responsibleFunc()">Responsible</button>
                   <script>
@@ -116,7 +131,7 @@ block content %}
                         document.getElementById('showButton').style.display = 'inline-block';
                     }
                   </script>
-                  <button class="btn btn-light" onclick="clearFunc()">Clear</button>
+                  <button class="btn btn-light" onclick="clearFunc()">Clear filters</button>
                   <script>
                   function clearFunc() {
                     // Получаем текущий URL-адрес
