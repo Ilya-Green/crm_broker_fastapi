@@ -993,7 +993,7 @@ class ClientsView(MyModelView):
     list_template = "client_list_template.html"
     detail_template: str = "clients_detail.html"
 
-    fields_default_sort = ["title", ("id", True)]
+    fields_default_sort = ["id", ("id", True)]
 
     def custom_render_js(self, request: Request) -> Optional[str]:
         return request.url_for("statics", path="js/custom_render.js")
@@ -1361,7 +1361,7 @@ class ClientsView(MyModelView):
         </div>
         <input  name="id" type="text" class="form-control" aria-label="Small" aria-describedby="inputGroup-sizing-sm">
         </div>""",
-        data_bs_target="#modal-action-comment"
+        data_bs_target="#modal-action-status"
     )
     async def change_status(self, request: Request, pks: List[Any]) -> str:
         session: Session = request.state.session

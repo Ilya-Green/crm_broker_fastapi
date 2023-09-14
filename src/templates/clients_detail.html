@@ -376,7 +376,7 @@
   .catch(error => {
     console.error('Error:', error);
   });
-      function submitActionComment(name, formData) {
+    function submitActionComment(name, formData) {
     $("#modal-loading").modal("show");
     query = new URLSearchParams();
       query.append("pks", {{ obj[pk] }});
