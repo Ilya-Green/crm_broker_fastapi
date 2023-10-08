@@ -1,2 +1,18 @@
 # crm_broker_fastapi
  
+CRM_NAME="dev"
+APP_DOMAIN="local"
+APP_TYPE="DEV"
+APP_SECRET="1234567890"
+ADMIN_PSWD="12345678"
+
+DB_FILE="sample_db.sqlite"
+DB_URI="sqlite:///"
+
+TG_TOKEN=""
+TG_CHAT_ID=""
+
+SENTRY_TOKEN=""
+SENTRY_RATE="0.0"
+
+PLATFORM_INTEGRATION_IS="0"
