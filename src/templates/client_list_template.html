@@ -42,7 +42,7 @@ block content %}
                     id="{{action.id}}"
                     {% if action.confirmation %}
                     data-bs-toggle="modal"
-                    data-bs-target="#modal-action"
+                    data-bs-target="{{action.data_bs_target}}"
                     data-confirmation="{{action.confirmation}}"
                     {% else %}
                     data-no-confirmation-action="true"
@@ -57,14 +57,29 @@ block content %}
                   {% endfor %}
                 </div>
 
-                <div class="modal modal-blur fade" id="modal-action-status" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal modal-blur fade" id="modal-admin" tabindex="-1" role="dialog" aria-hidden="true">
                   <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
                       <div class="modal-content">
                           <div class="modal-body">
+
                               <div id="actionConfirmation"></div></br>
-                              <div id="modal-form"></div>
-                              <select class="form-select" name="id" id="status-select">
-                      </select>
+<!--                              <div id="modal-form"></div>-->
+                              Department
+                              <select class="form-select" name="department" id="status-department">
+                                  <option value="none">no change</option>
+                              </select>
+                              Desk
+                              <select class="form-select" name="desk" id="status-desk">
+                                  <option value="none">no changes</option>
+                              </select>
+                              Responsible
+                              <select class="form-select" name="responsible" id="status-responsible">
+                                  <option value="none">no change</option>
+                              </select>
+                              Status
+                              <select class="form-select" name="status" id="status-status">
+                                  <option value="none">no change</option>
+                              </select>
                           </div>
                           <div class="modal-footer">
                               <button type="button" class="btn btn-link link-secondary me-auto"
@@ -75,127 +90,159 @@ block content %}
                       </div>
                   </div>
               </div>
+
+
+                  <div class="modal modal-blur fade" id="modal-department" tabindex="-1" role="dialog" aria-hidden="true">
+                  <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+                      <div class="modal-content">
+                          <div class="modal-body">
+                              <div id="actionConfirmationDepartment"></div></br>
+                              Desk
+                              <select class="form-select" name="desk" id="status-desk-department">
+                                  <option value="none">no changes</option>
+                              </select>
+                              Responsible
+                              <select class="form-select" name="responsible" id="status-responsible-department">
+                                  <option value="none">no change</option>
+                              </select>
+                              Status
+                              <select class="form-select" name="status" id="status-status-department">
+                                  <option value="none">no change</option>
+                              </select>
+                          </div>
+                          <div class="modal-footer">
+                              <button type="button" class="btn btn-link link-secondary me-auto"
+                                      data-bs-dismiss="modal">{{ _("Cancel") }}</button>
+                              <button id="actionSubmitDepartment" type="button" class="btn btn-primary"
+                                      data-bs-dismiss="modal">{{ _("Yes, Proceed") }}</button>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+
+                <div class="modal modal-blur fade" id="modal-desk" tabindex="-1" role="dialog" aria-hidden="true">
+                  <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+                      <div class="modal-content">
+                          <div class="modal-body">
+                              <div id="actionConfirmationDesk"></div></br>
+                              Responsible
+                              <select class="form-select" name="responsible" id="status-responsible-desk">
+                                  <option value="none">no change</option>
+                              </select>
+                              Status
+                              <select class="form-select" name="status" id="status-status-desk">
+                                  <option value="none">no change</option>
+                              </select>
+                          </div>
+                          <div class="modal-footer">
+                              <button type="button" class="btn btn-link link-secondary me-auto"
+                                      data-bs-dismiss="modal">{{ _("Cancel") }}</button>
+                              <button id="actionSubmitDesk" type="button" class="btn btn-primary"
+                                      data-bs-dismiss="modal">{{ _("Yes, Proceed") }}</button>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+
                   <script>
-                      fetch('/api/v1/client/statuses')
+                      fetch('/admin/api/department')
                           .then(response => response.json())
                           .then(data => {
-                            const selectElement = document.getElementById('status-select');
-                            data.forEach(status => {
+                            const selectElement = document.getElementById('status-department');
+                            data.items.forEach(status => {
                               const optionElement = document.createElement('option');
                               optionElement.value = status.id;
                               optionElement.textContent = status.name.toUpperCase();
                               selectElement.appendChild(optionElement);
-                              console.log("88 str");
                             });
                           })
                           .catch(error => {
                             console.error('Error:', error);
                           });
+                      fetch('/admin/api/desk')
+                          .then(response => response.json())
+                          .then(data => {
+                            const selectElement = document.getElementById('status-desk');
+                            data.items.forEach(status => {
+                              const optionElement = document.createElement('option');
+                              optionElement.value = status.id;
+                              optionElement.textContent = status.name.toUpperCase();
+                              selectElement.appendChild(optionElement);
+                            })
+                            const selectElementDepartment = document.getElementById('status-desk-department');
+                            data.items.forEach(status => {
+                              const optionElement = document.createElement('option');
+                              optionElement.value = status.id;
+                              optionElement.textContent = status.name.toUpperCase();
+                              selectElementDepartment.appendChild(optionElement);
+                            });
+                          })
+                          .catch(error => {
+                            console.error('Error:', error);
+                          });
+                      fetch('/admin/api/employee')
+                          .then(response => response.json())
+                          .then(data => {
+                              console.log(data);
+                            const selectElement = document.getElementById('status-responsible');
+                            const items = data.items;
+                            items.forEach(item => {
+                              const optionElement = document.createElement('option');
+                              optionElement.value = item.id;
+                              optionElement.textContent = item.login.toUpperCase();
+                              selectElement.appendChild(optionElement);
+                            })
+                            const selectElementDepartment = document.getElementById('status-responsible-department');
+                            const itemsDepartment = data.items;
+                            itemsDepartment.forEach(item => {
+                              const optionElement = document.createElement('option');
+                              optionElement.value = item.id;
+                              optionElement.textContent = item.login.toUpperCase();
+                              selectElementDepartment.appendChild(optionElement);
+                            })
+                            const selectElementDesk = document.getElementById('status-responsible-desk');
+                            const itemsDesk = data.items;
+                            itemsDesk.forEach(item => {
+                              const optionElement = document.createElement('option');
+                              optionElement.value = item.id;
+                              optionElement.textContent = item.login.toUpperCase();
+                              selectElementDesk.appendChild(optionElement);
+                            })
+                            ;
+                          })
+                          .catch(error => {
+                            console.error('Error:', error);
+                          });
+                      fetch('/admin/api/status')
+                          .then(response => response.json())
+                          .then(data => {
+                            const selectElement = document.getElementById('status-status');
+                            data.items.forEach(status => {
+                              const optionElement = document.createElement('option');
+                              optionElement.value = status.id;
+                              optionElement.textContent = status.name.toUpperCase();
+                              selectElement.appendChild(optionElement);
+                            })
+                            const selectElementDepartment = document.getElementById('status-status-department');
+                            data.items.forEach(status => {
+                              const optionElement = document.createElement('option');
+                              optionElement.value = status.id;
+                              optionElement.textContent = status.name.toUpperCase();
+                              selectElementDepartment.appendChild(optionElement);
+                            })
+                            const selectElementDesk = document.getElementById('status-status-desk');
+                            data.items.forEach(status => {
+                              const optionElement = document.createElement('option');
+                              optionElement.value = status.id;
+                              optionElement.textContent = status.name.toUpperCase();
+                              selectElementDesk.appendChild(optionElement);
+                            })
+                            ;
+                          })
+                          .catch(error => {
+                            console.error('Error:', error);
+                          });
                   </script>
-                  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.js"></script>
-<!--                  <script>-->
-
-
-
-
-
-
-<!--                          // WORKING CODE-->
-<!--                            function submitAction(name, formData) {-->
-<!--                                $("#modal-loading").modal("show");-->
-<!--                                query = new URLSearchParams();-->
-<!--                                selectedRows = table.rows({ selected: true }).ids().toArray();-->
-<!--                                 selectedRows.forEach((s) => {-->
-<!--                                  query.append("pks", s);-->
-<!--                                });-->
-<!--                                query.append("name", name);-->
-
-<!--                                $('#modal-action :input').each(function() {-->
-<!--                                    query.append(this.name, $(this).val());-->
-<!--                                });-->
-
-<!--                                    const url = window.location.origin + "/admin/api/client/action?" + query.toString();-->
-<!--                                    fetch(url, {-->
-<!--                                        method: "POST",-->
-<!--                                        body: formData,-->
-<!--                                    })-->
-<!--                                  .then(async (response) => {-->
-<!--                                      location.reload();-->
-<!--                                    await new Promise((r) => setTimeout(r, 500));-->
-<!--                                    $("#modal-loading").modal("hide");-->
-<!--                                    if (response.ok) {-->
-<!--                                      table.rows().deselect();-->
-<!--                                      table.ajax.reload();-->
-<!--                                      successAlert((await response.json())["msg"]);-->
-<!--                                    } else {-->
-<!--                                      if (response.status == 400) {-->
-<!--                                        return Promise.reject((await response.json())["msg"]);-->
-<!--                                      }-->
-<!--                                      return Promise.reject("Something went wrong!");-->
-<!--                                    }-->
-<!--                                  })-->
-<!--                                  .catch(async (error) => {-->
-<!--                                    await new Promise((r) => setTimeout(r, 500));-->
-<!--                                    dangerAlert(error);-->
-<!--                                  });-->
-<!--                              }-->
-<!--                            console.log("142");-->
-
-<!--                          $("#modal-action-status").on("show.bs.modal", function (event) {-->
-<!--                              console.log('test');-->
-<!--                              var button = $(event.relatedTarget); // Button that triggered the modal-->
-<!--                              var confirmation = button.data("confirmation");-->
-<!--                              var form = button.data("form");-->
-<!--                              var name = button.data("name");-->
-<!--                              var submit_btn_text = button.data("submit-btn-text");-->
-<!--                              var submit_btn_class = button.data("submit-btn-class");-->
-
-<!--                              var modal = $(this);-->
-<!--                              modal.find("#actionConfirmation").text(confirmation);-->
-<!--                              var modalForm = modal.find("#modal-form");-->
-<!--                              $('#modal-form').html(form);-->
-<!--                              var actionSubmit = modal.find("#actionSubmit");-->
-<!--                              actionSubmit.text(submit_btn_text);-->
-<!--                              actionSubmit.removeClass().addClass(`btn ${submit_btn_class}`);-->
-<!--                              actionSubmit.unbind();-->
-<!--                              actionSubmit.on("click", function (event) {-->
-<!--                                  const formElement = modalForm.find("form");-->
-<!--                                  const formData = formElement.length-->
-<!--                                      ? new FormData(formElement.get(0))-->
-<!--                                      : new FormData();-->
-<!--                                  submitAction(name, formData);-->
-<!--                              });-->
-<!--                          });-->
-
-
-
-<!--                          //END WORKING CODE-->
-
-<!--                  </script>-->
-<!--                    <script>-->
-<!--                        function pushupdate(){-->
-<!--                            console.log("HUETA")-->
-<!--                        }-->
-<!--                        function update(){-->
-<!--                                                   // Получаем элемент с заданным id-->
-<!--                        var elementsstatus = document.getElementById('modal-action-status');-->
-<!--                       console.log(elementsstatus, "FOUNDED");-->
-<!--                        // Проверяем, есть ли такой элемент и его значение свойства display-->
-<!--                        if (elementsstatus) {-->
-<!--                          var displayValue = window.getComputedStyle(elementsstatus).getPropertyValue('display');-->
-
-<!--                          // Проверяем значение свойства display-->
-<!--                          if (displayValue === 'block') {-->
-<!--                            console.log('Свойство display у элемента с id "modal-action-status" равно "block"');-->
-<!--                          }-->
-<!--                          if (displayValue === 'none') {-->
-<!--                            console.log('Свойство display у элемента с id "modal-action-status" равно "none"');-->
-<!--                          }-->
-<!--                        }-->
-<!--                        }-->
-
-
-<!--                    </script>-->
               </div>
               {%if model.can_create(request)%}
               <a
@@ -421,4 +468,3 @@ block content %}
   src="{{ url_for(__name__ ~ ':statics', path='js/list.js') }}"
 ></script>
 {% endblock %}
-

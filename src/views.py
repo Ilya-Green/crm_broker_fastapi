@@ -1055,6 +1055,7 @@ class ClientsView(MyModelView):
     #     return False
 
     def get_list_query(self):
+
         if "hide" not in self.query:
             with Session(engine) as session:
                 statement = select(Status).where(Status.hide == 0)
@@ -1063,27 +1064,12 @@ class ClientsView(MyModelView):
             query = super().get_list_query().where(or_(Client.status_id.in_(exc_statuses), Client.status_id.is_(None)))
         else:
             query = super().get_list_query()
+        if self.sys_admin:
+            return query
         if "responsible_id" in self.query:
             query = query.where(Client.responsible_id == self.query["responsible_id"][0])
         if "status_id" in self.query:
             query = query.where(Client.status_id == self.query["status_id"][0])
-        if self.sys_admin:
-        #     if self.query:
-        #         query = super().get_list_query()
-        #         for key, value in self.query.items():
-        #             # query = query.where(Client.key == 'HOT')
-        #             query = query.where(getattr(Client, key).in_(value))
-        #         return query
-        #     else:
-        #         return super().get_list_query()
-            return query
-        # if self.head:
-        #     with Session(engine) as session:
-        #         statement = select(Desk).where(Desk.department_id == self.department_id)
-        #         desks = session.exec(statement).all()
-        #         desk_ids = [desk.id for desk in desks]
-        #         clients = super().get_list_query().where(Client.desk_id.in_(desk_ids))
-        #         return clients
         if self.head:
             # test = super().get_list_query().where(Desk.department_id == self.department_id)
             return query
@@ -1097,16 +1083,6 @@ class ClientsView(MyModelView):
         return query
 
     def get_count_query(self) -> Select:
-        # if self.sys_admin:
-        #     return super().get_count_query()
-        # if self.head:
-        #     return super().get_count_query()
-        # if self.department_leader:
-        #     return super().get_count_query().where(Client.department_id == self.department_leader)
-        # if self.desk_leader:
-        #     return super().get_count_query().where(Client.desk_id == self.desk_id)
-        # return super().get_count_query().where(Client.department_id != 0).where(Client.desk_id != 0).where(Client.department_id == self.department_id).where(Client.responsible_id == self.id).where(Client.desk_id == self.desk_id)
-        # return select(func.count(self._pk_column))
         if "hide" not in self.query:
             with Session(engine) as session:
                 statement = select(Status).where(Status.hide == 0)
@@ -1196,6 +1172,94 @@ class ClientsView(MyModelView):
         Client.actions,
         Client.status
     ]
+
+    @action(
+        name="set_admin",
+        text="Set",
+        confirmation="Enter the department id",
+        submit_btn_text="Yes, proceed",
+        submit_btn_class="btn-success",
+        #         <input name="id" class="form-control" id="floating-input" value="">
+        form=""" """,
+        data_bs_target="#modal-admin",
+    )
+    async def set_admin(self, request: Request, pks: List[Any]) -> str:
+        session: Session = request.state.session
+        if request.query_params["department"] != "none":
+            for Client in await self.find_by_pks(request, pks):
+                Client.department_id = request.query_params["department"]
+                session.add(Client)
+        if request.query_params["desk"] != "none":
+            for Client in await self.find_by_pks(request, pks):
+                Client.desk_id = request.query_params["desk"]
+                session.add(Client)
+        if request.query_params["responsible"] != "none":
+            for Client in await self.find_by_pks(request, pks):
+                Client.responsible_id = request.query_params["responsible"]
+                session.add(Client)
+        if request.query_params["status"] != "none":
+            for Client in await self.find_by_pks(request, pks):
+                Client.status_id = request.query_params["status"]
+                session.add(Client)
+        session.commit()
+        return "{} clients were successfully changed".format(
+            len(pks)
+        )
+
+    @action(
+        name="set_department_leader",
+        text="Set",
+        confirmation="Enter the department id",
+        submit_btn_text="Yes, proceed",
+        submit_btn_class="btn-success",
+        #         <input name="id" class="form-control" id="floating-input" value="">
+        form=""" """,
+        data_bs_target="#modal-department",
+    )
+    async def set_department_leader(self, request: Request, pks: List[Any]) -> str:
+        session: Session = request.state.session
+        if request.query_params["desk"] != "none":
+            for Client in await self.find_by_pks(request, pks):
+                Client.desk_id = request.query_params["desk"]
+                session.add(Client)
+        if request.query_params["responsible"] != "none":
+            for Client in await self.find_by_pks(request, pks):
+                Client.responsible_id = request.query_params["responsible"]
+                session.add(Client)
+        if request.query_params["status"] != "none":
+            for Client in await self.find_by_pks(request, pks):
+                Client.status_id = request.query_params["status"]
+                session.add(Client)
+        session.commit()
+        return "{} clients were successfully changed".format(
+            len(pks)
+        )
+
+    @action(
+        name="set_desk_leader",
+        text="Set",
+        confirmation="Enter the department id",
+        submit_btn_text="Yes, proceed",
+        submit_btn_class="btn-success",
+        #         <input name="id" class="form-control" id="floating-input" value="">
+        form=""" """,
+        data_bs_target="#modal-desk",
+    )
+    async def set_desk_leader(self, request: Request, pks: List[Any]) -> str:
+        session: Session = request.state.session
+        if request.query_params["responsible"] != "none":
+            for Client in await self.find_by_pks(request, pks):
+                Client.responsible_id = request.query_params["responsible"]
+                session.add(Client)
+        if request.query_params["status"] != "none":
+            for Client in await self.find_by_pks(request, pks):
+                Client.status_id = request.query_params["status"]
+                session.add(Client)
+        session.commit()
+        return "{} clients were successfully changed".format(
+            len(pks)
+        )
+
 
     @action(
         name="set_department",
@@ -1375,6 +1439,20 @@ class ClientsView(MyModelView):
 
 
     async def is_action_allowed(self, request: Request, name: str) -> bool:
+        if name == "set_admin":
+            if request.state.user["sys_admin"]:
+                return True
+            if request.state.user["head"]:
+                return True
+            return False
+        if name == "set_department_leader":
+            if request.state.user["department_leader"]:
+                return True
+            return False
+        if name == "set_desk_leader":
+            if request.state.user["desk_leader"]:
+                return True
+            return False
         if name == "set_department":
             if request.state.user["sys_admin"]:
                 return True
