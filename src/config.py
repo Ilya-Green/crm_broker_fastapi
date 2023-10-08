@@ -17,3 +17,5 @@ TG_CHAT_ID = os.environ.get("TG_CHAT_ID")
 
 SENTRY_TOKEN = os.environ.get("SENTRY_TOKEN")
 SENTRY_RATE = os.environ.get("SENTRY_RATE")
+
+PLATFORM_INTEGRATION_IS_ON = os.environ.get("PLATFORM_INTEGRATION_IS_ON")

@@ -21,6 +21,7 @@ apiRouter = APIRouter(
 async def get_statuses():
     return api_get_statuses()
 
+
 @apiRouter.get("/types")
 async def get_statuses():
     return api_get_types()
