@@ -148,13 +148,14 @@ block content %}
                       fetch('/admin/api/department')
                           .then(response => response.json())
                           .then(data => {
-                            const selectElement = document.getElementById('status-department');
+                            const selectElementModal = document.getElementById('status-department');
                             data.items.forEach(status => {
                               const optionElement = document.createElement('option');
                               optionElement.value = status.id;
                               optionElement.textContent = status.name.toUpperCase();
-                              selectElement.appendChild(optionElement);
+                              selectElementModal.appendChild(optionElement);
                             });
+
                           })
                           .catch(error => {
                             console.error('Error:', error);
@@ -184,13 +185,31 @@ block content %}
                           .then(response => response.json())
                           .then(data => {
                               console.log(data);
+
+                              const responsibleSelect = document.getElementById('responsible-filter');
+                              const itemsFilter = data.items;
+                            itemsFilter.forEach(item => {
+                              const optionElement = document.createElement('option');
+                              optionElement.value = item.id;
+                              optionElement.textContent = item.login.toUpperCase();
+                                responsibleSelect.appendChild(optionElement)
+                            })
+                              function getQueryParam(param) {
+                                    const urlParams = new URLSearchParams(window.location.search);
+                                    return urlParams.get(param);
+                                }
+                                const selectedOption = getQueryParam('responsible_id');
+                                if (selectedOption){
+                                    const selectElement = document.getElementById('responsible-filter');
+                                    selectElement.value = selectedOption;
+                                }
                             const selectElement = document.getElementById('status-responsible');
                             const items = data.items;
                             items.forEach(item => {
                               const optionElement = document.createElement('option');
                               optionElement.value = item.id;
                               optionElement.textContent = item.login.toUpperCase();
-                              selectElement.appendChild(optionElement);
+                              selectElement.appendChild(optionElement)
                             })
                             const selectElementDepartment = document.getElementById('status-responsible-department');
                             const itemsDepartment = data.items;
@@ -216,6 +235,26 @@ block content %}
                       fetch('/admin/api/status')
                           .then(response => response.json())
                           .then(data => {
+                              const selectElementFilter = document.getElementById('status-filter');
+                              data.items.forEach(status => {
+                                  const optionElement = document.createElement('option');
+                                  optionElement.value = status.id;
+                                  optionElement.textContent = status.name.toUpperCase();
+                                  selectElementFilter.appendChild(optionElement);
+                                })
+
+
+                              function getQueryParam(param) {
+                                    const urlParams = new URLSearchParams(window.location.search);
+                                    return urlParams.get(param);
+                                }
+                                const selectedOption = getQueryParam('status_id');
+                                if (selectedOption){
+                                    const selectElement = document.getElementById('status-filter');
+                                    selectElement.value = selectedOption;
+                                }
+
+
                             const selectElement = document.getElementById('status-status');
                             data.items.forEach(status => {
                               const optionElement = document.createElement('option');
@@ -259,35 +298,57 @@ block content %}
         <div class="card-body border-bottom p-0">
           <div class="d-flex m-3">
             <div id="pageLength_container">
-                  <input type="text" id="statusInput" class="form-control" placeholder="id" style="width: 40px; display: inline-block;">
-                  <button class="btn btn-light" onclick="statusFunc()">Status</button>
+<!--                  <input type="text" id="statusInput" class="form-control" placeholder="id" style="width: 40px; display: inline-block;">-->
+                    <select class="form-select" name="department" id="status-filter" style="width: 80px; display: inline-block;">
+                        <option value="none"> all </option>
+                  </select>
+<!--                  <button class="btn btn-light" onclick="statusFunc()">Status</button>-->
                   <script>
                   function statusFunc() {
-                    // Получаем текущий URL-адрес
                     var url = new URL(window.location.href);
-                     // Получаем значение из поля ввода
-                    var id = document.getElementById('statusInput').value;
-                    // Добавляем параметры
-                    url.searchParams.set('status_id', id);
-                    // Перенаправляем на обновленный URL-адрес
+
+                    var id = document.getElementById('status-filter').value;
+
+                    if (id === 'none') {
+                        url.searchParams.delete('status_id');
+                    } else {
+                        url.searchParams.set('status_id', id);
+                    }
+
                     window.location.href = url.toString();
                   }
+
+                  var selectElement = document.getElementById("status-filter");
+
+                  selectElement.addEventListener("change", function() {
+                      console.log('changed');
+                    statusFunc();
+                    // statusFunc();
+                });
                   </script>
-                  <input type="text" id="responsibleInput" class="form-control" placeholder="id" style="width: 40px; display: inline-block;">
-                  <button class="btn btn-light" onclick="responsibleFunc()">Responsible</button>
+                   <select class="form-select" name="department" id="responsible-filter" style="width: 80px; display: inline-block;">
+                        <option value="none"> all </option>
+                  </select>
                   <script>
                   function responsibleFunc() {
-                    // Получаем текущий URL-адрес
                     var url = new URL(window.location.href);
-                     // Получаем значение из поля ввода
-                    var id = document.getElementById('responsibleInput').value;
-                    // Добавляем параметры
-                    url.searchParams.set('responsible_id', id);
-                    // Перенаправляем на обновленный URL-адрес
+                    var id = document.getElementById('responsible-filter').value;
+                        if (id === 'none') {
+                        url.searchParams.delete('responsible_id');
+                    } else {
+                        url.searchParams.set('responsible_id', id);
+                    }
+
                     window.location.href = url.toString();
                   }
+
+                  var selectElement = document.getElementById("responsible-filter");
+                  selectElement.addEventListener("change", function() {
+                      console.log('changed');
+                    responsibleFunc();
+                });
                   </script>
-                  <button id="showButton" class="btn btn-light" onclick="showFunc()">Show All</button>
+                  <button id="showButton" class="btn btn-light" onclick="showFunc()">Show hidden</button>
                   <button id="hideButton" class="btn btn-light" onclick="hideFunc()">Hide</button>
                   <script>
                   function showFunc() {
@@ -321,13 +382,9 @@ block content %}
                   <button class="btn btn-light" onclick="clearFunc()">Clear filters</button>
                   <script>
                   function clearFunc() {
-                    // Получаем текущий URL-адрес
-                    var url = new URL(window.location.href);
-                    url.searchParams.forEach(function(value, paramName) {
-                        url.searchParams.delete(paramName);
-                    });
-                    // Перенаправляем на обновленный URL-адрес
-                    window.location.href = url.toString();
+                    const currentURL = new URL(window.location.href);
+                    currentURL.search = '';
+                    window.location.href = currentURL.toString();
                   }
                   </script>
               </div>

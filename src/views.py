@@ -1064,12 +1064,14 @@ class ClientsView(MyModelView):
             query = super().get_list_query().where(or_(Client.status_id.in_(exc_statuses), Client.status_id.is_(None)))
         else:
             query = super().get_list_query()
-        if self.sys_admin:
-            return query
+
         if "responsible_id" in self.query:
             query = query.where(Client.responsible_id == self.query["responsible_id"][0])
         if "status_id" in self.query:
             query = query.where(Client.status_id == self.query["status_id"][0])
+        if self.sys_admin:
+            print(query)
+            return query
         if self.head:
             # test = super().get_list_query().where(Desk.department_id == self.department_id)
             return query
