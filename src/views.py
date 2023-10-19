@@ -28,7 +28,7 @@ from starlette_admin import (
 )
 from starlette_admin.contrib.sqla.helpers import build_query, build_order_clauses
 from starlette_admin.fields import FileField, RelationField, BooleanField
-from .fields import PasswordField, CopyField, NotesField, EmailCopyField, StatusField, TraderField
+from .fields import PasswordField, CopyField, NotesField, EmailCopyField, StatusField, TraderField, ResponsibleField
 from starlette_admin.contrib.sqlmodel import ModelView
 from starlette.requests import Request
 from sqlalchemy.orm import Session, joinedload
@@ -1070,7 +1070,6 @@ class ClientsView(MyModelView):
         if "status_id" in self.query:
             query = query.where(Client.status_id == self.query["status_id"][0])
         if self.sys_admin:
-            print(query)
             return query
         if self.head:
             # test = super().get_list_query().where(Desk.department_id == self.department_id)
@@ -1135,6 +1134,7 @@ class ClientsView(MyModelView):
         CopyField("phone_number"),
         NotesField("notes"),
         StatusField("status"),
+        ResponsibleField("responsible"),
         CountryField("country_code"),
         Client.creation_date,
 

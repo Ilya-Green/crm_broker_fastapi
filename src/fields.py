@@ -87,6 +87,21 @@ class StatusField(StringField):
 
 
 @dataclass
+class ResponsibleField(StringField):
+    """This field is used to represent any kind of long text content.
+    For short text contents, use [StringField][starlette_admin.fields.StringField]"""
+
+    rows: int = 6
+    render_function_key: str = "responsible"
+    class_: str = "field-textarea form-control"
+    form_template: str = "forms/textarea.html"
+    display_template: str = "displays/responsible.html"
+    exclude_from_create = True
+    exclude_from_edit = True
+    exclude_from_list = True
+
+
+@dataclass
 class TraderField(StringField):
     """This field is used to represent any kind of long text content.
     For short text contents, use [StringField][starlette_admin.fields.StringField]"""
