@@ -8,10 +8,10 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.9"
-starlette-admin = {git = "https://github.com/Ilya-Green/starlette-admin.git"}
+starlette-admin = { git = "https://github.com/Ilya-Green/starlette-admin.git", rev = "19e303616944096b184ab3e927380e8aa00c5981" }
 sentry-sdk = {extras = ["fastapi"], version = "^1.38.0"}
 gunicorn = "^21.2.0"
-sqlmodel = "0.0.8"
+sqlmodel = "0.0.14"
 python-dotenv = "^1.0.0"
 itsdangerous = "^2.1.2"
 email-validator = "1.3.1"
