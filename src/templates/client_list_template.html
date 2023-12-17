@@ -145,7 +145,7 @@ block content %}
               </div>
 
                   <script>
-                      fetch('/admin/api/department')
+                      fetch('/admin/api/department?include_relationships=0')
                           .then(response => response.json())
                           .then(data => {
                             const selectElementModal = document.getElementById('status-department');
@@ -160,7 +160,7 @@ block content %}
                           .catch(error => {
                             console.error('Error:', error);
                           });
-                      fetch('/admin/api/desk')
+                      fetch('/admin/api/desk?include_relationships=0')
                           .then(response => response.json())
                           .then(data => {
                             const selectElement = document.getElementById('status-desk');
@@ -181,7 +181,7 @@ block content %}
                           .catch(error => {
                             console.error('Error:', error);
                           });
-                      fetch('/admin/api/employee')
+                      fetch('/admin/api/employee?include_relationships=0')
                           .then(response => response.json())
                           .then(data => {
                               console.log(data);
@@ -232,7 +232,7 @@ block content %}
                           .catch(error => {
                             console.error('Error:', error);
                           });
-                      fetch('/admin/api/status')
+                      fetch('/admin/api/status?include_relationships=0')
                           .then(response => response.json())
                           .then(data => {
                               const selectElementFilter = document.getElementById('status-filter');
