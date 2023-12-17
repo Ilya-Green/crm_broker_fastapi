@@ -1,4 +1,6 @@
 from dataclasses import dataclass
+
+from starlette.requests import Request
 from starlette_admin import (
     CollectionField,
     ColorField,
@@ -17,7 +19,7 @@ from starlette_admin import (
     PasswordField,
     RelationField,
 )
-from typing import Optional
+from typing import Optional, Any
 
 
 @dataclass
@@ -38,6 +40,14 @@ class PasswordField(StringField):
     searchable: Optional[bool] = False
     orderable: Optional[bool] = False
     render_function_key: str = "file"
+
+    async def serialize_value(
+            self, request: Request, value: Any, action: RequestAction
+    ) -> Any:
+        if request.state.user["sys_admin"] is False:
+            return "********"
+        # return "********"
+        return value
 
 
 @dataclass
