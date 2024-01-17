@@ -31,7 +31,7 @@ from starlette_admin.fields import FileField, RelationField, BooleanField
 from .fields import PasswordField, CopyField, NotesField, EmailCopyField, StatusField, TraderField, ResponsibleField
 from starlette_admin.contrib.sqlmodel import ModelView
 from starlette.requests import Request
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session, joinedload, sessionmaker
 from sqlmodel import Session, select
 from starlette.requests import Request
 from sqlalchemy import or_, and_
@@ -1058,7 +1058,7 @@ class ClientsView(MyModelView):
 
         if "hide" not in self.query:
             with Session(engine) as session:
-                statement = select(Status).where(Status.hide == 0)
+                statement = select(Status).where(Status.hide == False)
                 statuses = session.exec(statement).all()
                 exc_statuses = [status.id for status in statuses]
             query = super().get_list_query().where(or_(Client.status_id.in_(exc_statuses), Client.status_id.is_(None)))
@@ -1086,7 +1086,7 @@ class ClientsView(MyModelView):
     def get_count_query(self) -> Select:
         if "hide" not in self.query:
             with Session(engine) as session:
-                statement = select(Status).where(Status.hide == 0)
+                statement = select(Status).where(Status.hide == False)
                 statuses = session.exec(statement).all()
                 exc_statuses = [status.id for status in statuses]
             query = super().get_count_query().where(or_(Client.status_id.in_(exc_statuses), Client.status_id.is_(None)))
@@ -1172,7 +1172,9 @@ class ClientsView(MyModelView):
         Client.notes,
         Client.creation_date,
         Client.actions,
-        Client.status
+        Client.status,
+        Client.responsible,
+        Client.trader,
     ]
 
     @action(
@@ -1187,23 +1189,25 @@ class ClientsView(MyModelView):
     )
     async def set_admin(self, request: Request, pks: List[Any]) -> str:
         session: Session = request.state.session
-        if request.query_params["department"] != "none":
-            for Client in await self.find_by_pks(request, pks):
-                Client.department_id = request.query_params["department"]
-                session.add(Client)
-        if request.query_params["desk"] != "none":
-            for Client in await self.find_by_pks(request, pks):
-                Client.desk_id = request.query_params["desk"]
-                session.add(Client)
-        if request.query_params["responsible"] != "none":
-            for Client in await self.find_by_pks(request, pks):
-                Client.responsible_id = request.query_params["responsible"]
-                session.add(Client)
-        if request.query_params["status"] != "none":
-            for Client in await self.find_by_pks(request, pks):
-                Client.status_id = request.query_params["status"]
-                session.add(Client)
-        session.commit()
+        Clients = await self.find_by_pks(request, pks)
+
+        updates = []
+        for client in Clients:
+            update_data = {'id': client.id}
+            if request.query_params["department"] != "none":
+                update_data['department_id'] = request.query_params["department"]
+            if request.query_params["desk"] != "none":
+                update_data['desk_id'] = request.query_params["desk"]
+            if request.query_params["responsible"] != "none":
+                update_data['responsible_id'] = request.query_params["responsible"]
+            if request.query_params["status"] != "none":
+                update_data['status_id'] = request.query_params["status"]
+            updates.append(update_data)
+
+        if updates:
+            session.bulk_update_mappings(Client, updates)
+            session.commit()
+
         return "{} clients were successfully changed".format(
             len(pks)
         )
