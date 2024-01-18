@@ -1,0 +1,31 @@
+{% if data | is_iter %}
+    <ul>
+        {% for value in data %}
+            <li>
+
+                <div class="input-group">
+                  <div id="myText" class="form-control border-0" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                    <a href="mailto:{{ value }}">{{ value }}</a>
+                  </div>
+                  <div class="input-group-append">
+                    <button class="btn btn-outline-secondary" type="button" data-clipboard-target="#myText">
+                      Copy
+                    </button>
+                  </div>
+                </div>
+
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <div class="input-group">
+      <div id="myText" class="form-control border-0" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+        <a href="mailto:{{ data }}">{{ data }}</a>
+      </div>
+      <div class="input-group-append">
+        <button class="btn btn-outline-secondary" type="button" data-clipboard-target="#myText">
+          Copy
+        </button>
+      </div>
+    </div>
+{% endif %}

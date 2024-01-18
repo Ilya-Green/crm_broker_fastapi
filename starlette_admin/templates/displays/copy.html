@@ -1,0 +1,16 @@
+<div class="input-group">
+  <div id="myText" class="form-control border-0" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+    {{ data }}
+  </div>
+  <div class="input-group-append">
+    <button class="btn btn-outline-secondary" type="button" data-clipboard-target="#myText">
+      Copy
+    </button>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js"></script>
+
+<script>
+  var clipboard = new ClipboardJS('.btn');
+</script>

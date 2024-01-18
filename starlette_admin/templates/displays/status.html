@@ -1,0 +1,27 @@
+<!--<div class="list-group">-->
+<!--    {%if data | is_iter %}-->
+<!--        <ul>-->
+<!--    {% for value in data %}-->
+
+<!--  <a href={{ value._detail_url }} class="list-group-item list-group-item-action flex-column align-items-start active">-->
+<!--    <div class="d-flex w-100 justify-content-between">-->
+<!--      <h5 class="mb-1">{{ value.employee_name }}</h5>-->
+<!--      <small>{{ value.id }}</small>-->
+<!--    </div>-->
+<!--    <p class="mb-1">{{ value.name }}</p>-->
+<!--    <small>{{ value.created_at }} UTC</small>-->
+<!--  </a>-->
+<!--    {% endfor %}-->
+<!--    </ul>-->
+<!--    {%else%}-->
+<!--      <a href={{ data._detail_url }} class="list-group-item list-group-item-action flex-column align-items-start active">-->
+<!--          <p class="mb-1">{{ data.name }}</p>-->
+<!--      </a>-->
+<!--    {%endif%}-->
+<!--</div>-->
+
+<div class="list-group">
+  <a href={{ data._detail_url }} class="list-group-item list-group-item-action flex-column align-items-start active">
+      <p class="mb-1">{{ data.name }}</p>
+  </a>
+</div>

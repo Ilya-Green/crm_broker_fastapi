@@ -1,0 +1,53 @@
+
+<div class="list-group">
+    <ul>
+    <div class="list-group">
+        <!--        <textarea name="comments" id="comments" cols="30" rows="10"></textarea>-->
+        <textarea name="comments" class="form-control" id="comments" rows="3"></textarea>
+            <button id="sendcomments" type="button" class="btn btn-primary btn-block me-2">
+               <i class="fa-solid fa-edit me-2"></i>
+               Send
+            </button>
+    </div>
+    {%if data | is_iter %}
+    {% for value in data|reverse %}
+  <a href={{ value._detail_url }} class="list-group-item list-group-item-action flex-column align-items-start active">
+    <div class="d-flex w-100 justify-content-between">
+      <h5 class="mb-1">{{ value.employee_name }}</h5>
+      <small>{{ value.id }}</small>
+    </div>
+    <p class="mb-1">{{ value.content }}</p>
+    <small>{{ value.created_at }} UTC</small>
+  </a>
+    {% endfor %}
+    </ul>
+    {%else%}
+{#    {{ data }}#}
+    {%endif%}
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(function() {
+  $("#sendcomments").click(function() {
+    const note = $("#comments").val(); // Получить значение из текстового поля "comments"
+    const url = window.location.origin + "/admin/api/client/action?pks=" + {{ obj[pk] }} + "&name=add_note&note=" + encodeURIComponent(note);
+
+    fetch(url, {
+      method: "POST"
+    })
+    .then(response => {
+      if (response.ok) {
+          location.reload();
+        console.log("LOL");
+        // location.reload();
+      } else {
+        console.log("LOL");
+      }
+    })
+    .catch(error => {
+      console.log("LOL");
+    });
+  });
+});
+
+</script>
