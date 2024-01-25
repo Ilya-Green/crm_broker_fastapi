@@ -7,7 +7,7 @@ import requests
 from sqlmodel import Session, select
 
 from src import engine
-from src.config import PLATFORM_INTEGRATION_IS_ON
+from src.config import PLATFORM_INTEGRATION_IS_ON, PLATFORM_INTEGRATION_URL
 from src.models import Trader, Client, Order, Transaction
 
 logger = logging.getLogger("api")
@@ -16,7 +16,7 @@ logger = logging.getLogger("api")
 def update_platform_data():
     if PLATFORM_INTEGRATION_IS_ON:
         params = {'token': 'value1'}
-        response = requests.get(url='https://general-investment.com/api/admin/user/all', params=params)
+        response = requests.get(url=f'{PLATFORM_INTEGRATION_URL}/api/admin/user/all', params=params)
         data = json.loads(response.content)
         for user_data in data:
             with Session(engine) as session:
@@ -51,7 +51,7 @@ def update_platform_data():
                 isActive=user_data["isActive"],
                 isVipStatus=user_data["isVipStatus"],
                 autologin=user_data.get("autologin"),
-                autologin_link="https://general-investment.com/autoologin?token=" + autologin if autologin else ""
+                autologin_link=f"{PLATFORM_INTEGRATION_URL}/autoologin?token=" + autologin if autologin else ""
             )
             if current_trader is not None:
                 new_trader.responsible_id = current_trader.responsible_id
@@ -72,7 +72,7 @@ def update_platform_data():
                 session.commit()
 
         params = {'token': 'value1'}
-        response = requests.get(url='https://general-investment.com/api/admin/order/all', params=params)
+        response = requests.get(url=f'{PLATFORM_INTEGRATION_URL}/api/admin/order/all', params=params)
         data = json.loads(response.content)
         for user_data in data:
             new_order = Order(
@@ -98,7 +98,7 @@ def update_platform_data():
                 session.commit()
 
         params = {'token': 'value1'}
-        response = requests.get(url='https://general-investment.com/api/admin/transaction/all', params=params)
+        response = requests.get(url=f'{PLATFORM_INTEGRATION_URL}/api/admin/transaction/all', params=params)
         data = json.loads(response.content)
         for transaction_data in data:
             new_transaction = Transaction(
@@ -119,7 +119,7 @@ def update_platform_data():
 def update_platform_data_by_id(ids: list):
     if PLATFORM_INTEGRATION_IS_ON:
         params = {'token': 'value1'}
-        response = requests.get(url='https://general-investment.com/api/admin/user/all', params=params)
+        response = requests.get(url=f'{PLATFORM_INTEGRATION_URL}/api/admin/user/all', params=params)
         data = json.loads(response.content)
         for user_data in data:
             if user_data["id"] in ids:
@@ -155,7 +155,7 @@ def update_platform_data_by_id(ids: list):
                     isActive=user_data["isActive"],
                     isVipStatus=user_data["isVipStatus"],
                     autologin=user_data.get("autologin"),
-                    autologin_link="https://general-investment.com/autoologin?token=" + autologin if autologin else ""
+                    autologin_link=f"{PLATFORM_INTEGRATION_URL}/autoologin?token=" + autologin if autologin else ""
                 )
                 if current_trader is not None:
                     new_trader.responsible_id = current_trader.responsible_id
@@ -176,7 +176,7 @@ def update_platform_data_by_id(ids: list):
                     session.commit()
 
         params = {'token': 'value1'}
-        response = requests.get(url='https://general-investment.com/api/admin/order/all', params=params)
+        response = requests.get(url=f'{PLATFORM_INTEGRATION_URL}/api/admin/order/all', params=params)
         data = json.loads(response.content)
         for user_data in data:
             if user_data["userId"] in ids:
@@ -203,7 +203,7 @@ def update_platform_data_by_id(ids: list):
                     session.commit()
 
         params = {'token': 'value1'}
-        response = requests.get(url='https://general-investment.com/api/admin/transaction/all', params=params)
+        response = requests.get(url=f'{PLATFORM_INTEGRATION_URL}/api/admin/transaction/all', params=params)
         data = json.loads(response.content)
         for transaction_data in data:
             if user_data["userId"] in ids:
@@ -225,7 +225,7 @@ def update_platform_data_by_id(ids: list):
 def update_orders():
     if PLATFORM_INTEGRATION_IS_ON:
         params = {'token': 'value1'}
-        response = requests.get(url='https://general-investment.com/api/admin/order/all', params=params)
+        response = requests.get(url=f'{PLATFORM_INTEGRATION_URL}/api/admin/order/all', params=params)
         data = json.loads(response.content)
         for user_data in data:
             new_order = Order(
@@ -254,7 +254,7 @@ def update_orders():
 def update_order(id: int):
     if PLATFORM_INTEGRATION_IS_ON:
         params = {'token': 'value1'}
-        response = requests.get(url='https://general-investment.com/api/admin/order/all', params=params)
+        response = requests.get(url=f'{PLATFORM_INTEGRATION_URL}/api/admin/order/all', params=params)
         data = json.loads(response.content)
         for user_data in data:
             if user_data["id"] == id:
@@ -285,7 +285,7 @@ def update_order(id: int):
 
 def edit_order_platform(obj: Any,):
     if PLATFORM_INTEGRATION_IS_ON:
-        url = "https://general-investment.com/api/admin/order/edit"
+        url = f"{PLATFORM_INTEGRATION_URL}/api/admin/order/edit"
         query_params = {
             "token": "value1",
         }
@@ -319,7 +319,7 @@ def edit_order_platform(obj: Any,):
 
 def edit_account_platform(obj: Any,):
     if PLATFORM_INTEGRATION_IS_ON:
-        url = "https://general-investment.com/api/admin/user/edit"
+        url = f"{PLATFORM_INTEGRATION_URL}/api/admin/user/edit"
         query_params = {
             "token": "value1",
         }
@@ -357,7 +357,7 @@ def edit_account_platform(obj: Any,):
 
 def change_account_password_platform(trader: Trader, password: str):
     if PLATFORM_INTEGRATION_IS_ON:
-        url = "https://general-investment.com/api/admin/user/edit"
+        url = f"{PLATFORM_INTEGRATION_URL}/api/admin/user/edit"
         query_params = {
             "token": "value1",
         }
@@ -395,7 +395,7 @@ def change_account_password_platform(trader: Trader, password: str):
 
 def create_transaction(trader: Trader, password: str):
     if PLATFORM_INTEGRATION_IS_ON:
-        url = "https://general-investment.com/api/admin/user/edit"
+        url = f"{PLATFORM_INTEGRATION_URL}/api/admin/user/edit"
         query_params = {
             "token": "value1",
         }
