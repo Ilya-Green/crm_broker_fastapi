@@ -1558,7 +1558,7 @@ class StatusesView(MyModelView):
     fields = [
         Status.id,
         Status.name,
-        BooleanField("hide", label="Hide clients with this status from standard client list table"),
+        BooleanField("hide", label="Hide from clients"),
         # Status.hide,
     ]
 
