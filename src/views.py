@@ -28,7 +28,8 @@ from starlette_admin import (
 )
 from starlette_admin.contrib.sqla.helpers import build_query, build_order_clauses
 from starlette_admin.fields import FileField, RelationField, BooleanField
-from .fields import PasswordField, CopyField, NotesField, EmailCopyField, StatusField, TraderField, ResponsibleField
+from .fields import PasswordField, CopyField, NotesField, EmailCopyField, StatusField, TraderField, ResponsibleField, \
+    CustomPhoneField
 from starlette_admin.contrib.sqlmodel import ModelView
 from starlette.requests import Request
 from sqlalchemy.orm import Session, joinedload, sessionmaker
@@ -1131,7 +1132,7 @@ class ClientsView(MyModelView):
         Client.id,
         Client.first_name,
         EmailCopyField("email"),
-        CopyField("phone_number"),
+        CustomPhoneField("phone_number"),
         NotesField("notes"),
         StatusField("status"),
         ResponsibleField("responsible"),
