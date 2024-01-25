@@ -67,7 +67,7 @@ class MyModelView(ModelView):
     include_relationships: bool = True
     page_size = 20
     page_size_options = [5, 10, 25, 50, 100, 500, 1000]
-    export_types = [ExportType.EXCEL, ExportType.CSV, ExportType.PDF, ExportType.PRINT]
+    export_types = []
 
 
 class EmployeeView(MyModelView):
