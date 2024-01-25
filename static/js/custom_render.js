@@ -39,6 +39,13 @@ const render = {
     if (type != "display") return data;
     return `<span class="align-middle d-inline-block text-truncate" data-toggle="tooltip" data-placement="bottom" title='${data}' style="max-width: 30em;">${data}</span>`;
   },
+  phone: function render(data, type, full, meta, fieldOptions) {
+    if (data == null) return null_column();
+    if (Array.isArray(data) && data.length == 0) return empty_column();
+    data = Array.isArray(data) ? data : [data].map((d) => escape(d)).join(",");
+    if (type != "display") return data;
+    return `<span class="censor-container"><span class="censor-overlay"></span><span class="align-middle d-inline-block text-truncate censored-text" data-toggle="tooltip" data-placement="bottom" title='${data}' style="max-width: 30em;">${data}</span></span>`;
+  },
   boolean: function render(data, type, full, meta, fieldOptions) {
     if (data == null) return null_column();
     if (Array.isArray(data) && data.length == 0) return empty_column();

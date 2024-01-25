@@ -56,6 +56,16 @@ class CopyField(StringField):
 
 
 @dataclass
+class CustomPhoneField(StringField):
+    display_template: str = "displays/phone.html"
+
+    input_type: str = "phone"
+    class_: str = "field-phone form-control"
+
+    render_function_key: str = "phone"
+
+
+@dataclass
 class NotesField(StringField):
     """This field is used to represent any kind of long text content.
     For short text contents, use [StringField][starlette_admin.fields.StringField]"""

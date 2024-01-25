@@ -1,4 +1,40 @@
 {% extends "layout.html" %} {% block header %}
+<style>
+.censor-container {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.censor-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: repeating-linear-gradient(
+      45deg,
+      #606dbc,
+      #606dbc 10px,
+      #465298 10px,
+      #465298 20px
+    );
+    transition: opacity 0.3s;
+    pointer-events: all; /* Убедитесь, что на начальном этапе мозаика реагирует на события мыши */
+}
+
+.censored-text {
+    user-select: text; /* Убедитесь, что текст можно выделить */
+    visibility: visible; /* Убедитесь, что текст всегда видим */
+}
+
+.censor-container:hover .censor-overlay {
+    opacity: 0; /* Сделайте мозаику прозрачной при наведении */
+    pointer-events: none; /* События мыши должны проходить сквозь мозаику */
+}
+
+
+</style>
 <div class="d-flex justify-content-between align-items-center">
   <h1>{{ model.label }}</h1>
   <ol class="breadcrumb">
