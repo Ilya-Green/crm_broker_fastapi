@@ -530,7 +530,7 @@ class TradersView(MyModelView):
         return True
 
     def get_list_query(self):
-        # update_platform_data()
+        update_platform_data()
         if self.sys_admin:
             return super().get_list_query()
         if self.head:
@@ -652,10 +652,10 @@ class TradersView(MyModelView):
             .unique()
             .all()
         )
-        ids = []
-        for trader in items:
-            ids.append(trader.id)
-        update_platform_data_by_id(ids)
+        # ids = []
+        # for trader in items:
+        #     ids.append(trader.id)
+        # update_platform_data_by_id(ids)
         return items
 
     async def edit(self, request: Request, pk: Any, data: Dict[str, Any]) -> Any:
