@@ -476,6 +476,8 @@ class AffiliatesView(MyModelView):
 
 
 class TradersView(MyModelView):
+    detail_template: str = "trader_detail.html"
+
     # responsive_table = True
     column_visibility = True
     search_builder = True
