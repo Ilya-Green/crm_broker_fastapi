@@ -1,20 +1,19 @@
 import json
 from fastapi import HTTPException
 import requests
+from sqlalchemy.orm import aliased, joinedload, load_only
 from sqlmodel import Session, select, asc, desc
-from typing import Any, Dict, List, Optional, Set, Union
 import logging
-from fastapi.responses import ORJSONResponse
-from starlette.responses import JSONResponse
 from src.views import update_platform_data
-from .config import PLATFORM_INTEGRATION_IS_ON
+from src.config import PLATFORM_INTEGRATION_IS_ON, PLATFORM_INTEGRATION_URL
 
-from .models import Employee, Role, Client, Status, Affiliate, Type
-from . import engine
+from src.models import Client, Affiliate, Status, Type
+from src import engine
 
-from .schemas import ClientCreate, ClientList
+from src.api.v1.schemas import ClientCreateIn, ClientListIn, ClientListOut, ClientCreateOut
 import string
 import random
+
 
 def generate_password(length=8):
     characters = string.ascii_letters + string.digits + string.punctuation
@@ -24,20 +23,8 @@ def generate_password(length=8):
 
 logger_api = logging.getLogger("api")
 
-def api_get_statuses():
-    with Session(engine) as session:
-        statement = select(Status)
-        statuses = session.exec(statement).all()
-    return statuses
 
-def api_get_types():
-    with Session(engine) as session:
-        statement = select(Type)
-        types = session.exec(statement).all()
-    return types
-
-
-def api_client_create(data: ClientCreate):
+def api_client_create(data: ClientCreateIn) -> ClientCreateOut:
     with Session(engine) as session:
         statement = select(Affiliate).where(Affiliate.auth_key == data.auth_key)
         auth = session.exec(statement).first()
@@ -52,9 +39,8 @@ def api_client_create(data: ClientCreate):
             unique_phone = session.exec(statement).first()
         if unique_phone:
             raise HTTPException(status_code=403, detail="Phone Duplicate")
-
         if PLATFORM_INTEGRATION_IS_ON:
-            url = "https://general-investment.com/api/client/user/autologin"
+            url = f"{PLATFORM_INTEGRATION_URL}/api/client/user/autologin"
             payload = {
                 "name": data.first_name,
                 "surname": data.second_name,
@@ -77,6 +63,8 @@ def api_client_create(data: ClientCreate):
             with Session(engine) as session:
                 new_client = Client(**data.dict(),
                                     affiliate_id=auth.id,
+                                    status_id=1,
+                                    type_id=1,
                                     trader_id=response_json["userId"],
                                     )
                 session.add(new_client)
@@ -87,37 +75,48 @@ def api_client_create(data: ClientCreate):
             #                        {new_client},
             #                        "https://general-investment.com/autologin?token="])
             autologin = response_json["autologin"]
-            return 'success', new_client, f"https://general-investment.com/autoologin?token={autologin}"
+            return ClientCreateOut(detail='success', autologin=f"{PLATFORM_INTEGRATION_URL}/autoologin?token={autologin}")
         else:
             with Session(engine) as session:
                 new_client = Client(**data.dict(),
                                     affiliate_id=auth.id,
+                                    status_id=1,
+                                    type_id=1
                                     )
                 session.add(new_client)
                 session.commit()
                 session.refresh(new_client)
             logger_api.warning(f"created {new_client}")
-            return 'success', new_client
+            return ClientCreateOut(detail='success', autologin='disabled')
     else:
         logger_api.warning(f"incorrect auth_key {auth}")
-        return 'incorrect auth_key'
+        raise HTTPException(status_code=401, detail="there is no such auth_key")
 
 
-def api_client_list(data: ClientList) -> Union[List[Dict[str, str]], int]:
+def filter_sqlalchemy_attributes(data):
+    return {key: value for key, value in data.items() if not key.startswith('_sa_')}
+
+
+def api_client_list(data: ClientListIn) -> ClientListOut:
     with Session(engine) as session:
         statement = select(Affiliate).where(Affiliate.auth_key == data.auth_key)
         auth = session.exec(statement).first()
     if auth:
         with Session(engine) as session:
             sorting_order = desc if data.sorting_order == 'desc' else asc
-            statement = select(Client).where(Client.affiliate_id == auth.id).where(Client.id.notin_(data.ignoreClientIds)).order_by(sorting_order(data.sorting_field)).offset(data.offset).limit(data.limit)
-            if data.count == 0:
+            status_alias = aliased(Status)
+            statement = select(Client, Status.name, Type.name).join(Status, Client.status_id == Status.id).join(Type, Client.type_id == Type.id).where(Client.affiliate_id == auth.id).where(Client.id.notin_(data.ignoreClientIds)).order_by(sorting_order(data.sorting_field)).offset(data.offset)
+            if data.limit > 0:
+                statement.limit(data.limit)
+            if data.return_count == 0:
                 result = session.exec(statement).all()
-                return result
+                response_data = [
+                    {**filter_sqlalchemy_attributes(item[0].__dict__), "status": item[1], "type": item[2]} for item in result
+                ]
+                return ClientListOut(detail='success', data=response_data)
             else:
                 result = session.exec(statement).all()
                 count = len(result)
-                return count
-        return result
+                return ClientListOut(detail='success', data=count)
     else:
-        return 'incorrect auth_key'
+        raise HTTPException(status_code=401, detail="there is no such  auth_key")

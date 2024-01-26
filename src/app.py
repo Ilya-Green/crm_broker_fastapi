@@ -1,4 +1,3 @@
-import json
 from typing import Optional
 
 from fastapi import FastAPI, Request
@@ -7,32 +6,34 @@ from starlette.applications import Starlette
 from starlette.responses import HTMLResponse, PlainTextResponse
 from starlette.routing import Route
 from starlette.staticfiles import StaticFiles
-from starlette_admin.contrib.sqlmodel import ModelView, Admin
+from starlette.templating import Jinja2Templates
+from starlette_admin.contrib.sqlmodel import Admin
 # from starlette_admin import Admin
-from starlette.requests import Request
 from starlette.middleware import Middleware
 from starlette.middleware.sessions import SessionMiddleware
+
+from .api.services.api import statusesRouter
 from .provider import MyAuthProvider
 from sqlmodel import Session, select
 import requests
 import traceback
 import logging
 import sentry_sdk
-from fastapi import APIRouter, Response, Request
+from fastapi import Response, Request
 from starlette.background import BackgroundTask
 from fastapi.routing import APIRoute
 from starlette.types import Message
 
 from sqlmodel import SQLModel
 
-from .config import APP_SECRET, APP_DOMAIN, APP_TYPE, ADMIN_PSWD, TG_TOKEN, TG_CHAT_ID, SENTRY_TOKEN, SENTRY_RATE, CRM_NAME
+from .config import APP_SECRET, APP_DOMAIN, APP_TYPE, TG_TOKEN, TG_CHAT_ID, SENTRY_TOKEN, SENTRY_RATE, CRM_NAME
 from .models import Employee, Role, Client, Note, Desk, Action, Department, Status, Affiliate, Type, Trader, Order, \
     RetainStatus, Transaction
 from .seed_database import seed_database
 from .views import MyModelView, EmployeeView, ClientsView, RolesView, DepartmentsView, DesksView, AffiliatesView, \
     StatusesView, TypesView, TradersView, OrdersView, RetainStatusesView, TransactionsView
 from . import engine
-from .api import apiRouter
+from src.api.v1.api import affApiV1
 
 
 def init_database() -> None:
@@ -157,9 +158,9 @@ admin.add_view(TypesView(Type, label="Types"))
 # Mount to admin to app
 admin.mount_to(app)
 
-app.include_router(apiRouter, prefix="/api/v1",)
-
 app.mount("/static", StaticFiles(directory="static"), name="static")
+app.include_router(affApiV1, prefix="/api",)
+app.include_router(statusesRouter, prefix="/api",)
 
 
 if APP_TYPE != "DEV":
