@@ -83,17 +83,17 @@ class Client(SQLModel, table=True):
     email: EmailStr = Field()
     phone_number: str = Field(min_length=4)
 
+    ip: Optional[str] = Field()
+    funnel_name: Optional[str] = Field()
+    funnel_link: Optional[str] = Field()
     title: Optional[str] = Field()
     second_name: Optional[str] = Field()
     patronymic: Optional[str] = Field()
     city: Optional[str] = Field()
-    # status_name: Optional[str] = Field()
     description: Optional[str] = Field()
     address: Optional[str] = Field()
-    region: Optional[str] = Field()
-    postcode: Optional[int] = Field()
     additional_contact: Optional[str] = Field()
-    utm: Optional[str] = Field()
+    is_archived: Optional[bool] = Field(default=False)
 
     creation_date: Optional[datetime] = Field(sa_column=Column(DateTime(timezone=True), default=datetime.utcnow))
 
