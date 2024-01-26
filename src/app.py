@@ -137,21 +137,21 @@ admin = CustomAdmin(engine,
               )
 
 # Add views
-admin.add_view(EmployeeView(Employee, label="Employees"))
-admin.add_view(RolesView(Role, label="Roles"))
+admin.add_view(EmployeeView(Employee, label="Employees", icon="fas fa-address-card"))
+admin.add_view(RolesView(Role, label="Roles", icon="fa-solid fa-sitemap"))
 admin.add_view(DepartmentsView(Department))
 admin.add_view(DesksView(Desk))
 
 admin.add_view(AffiliatesView(Affiliate, label="Affiliates"))
 
-admin.add_view(ClientsView(Client, label="Clients"))
-admin.add_view(TradersView(Trader, label="Traders"))
+admin.add_view(ClientsView(Client, label="Leads", icon="fa fa-bullhorn"))
+admin.add_view(TradersView(Trader, label="Retention"))
 admin.add_view(TransactionsView(Transaction, label="Transactions"))
-admin.add_view(OrdersView(Order, label="Order"))
+admin.add_view(OrdersView(Order, label="Orders", icon="fa-solid fa-wallet"))
 
 admin.add_view(MyModelView(Note))
 admin.add_view(MyModelView(Action))
-admin.add_view(StatusesView(Status, label="Statuses"))
+admin.add_view(StatusesView(Status, label="Statuses", icon="fa-solid fa-tags"))
 admin.add_view(RetainStatusesView(RetainStatus, label="Retain Statuses"))
 admin.add_view(TypesView(Type, label="Types"))
 
