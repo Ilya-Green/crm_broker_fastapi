@@ -76,6 +76,7 @@ class Affiliate(SQLModel, table=True):
     id: Optional[int] = Field(primary_key=True)
     name: Optional[str] = Field()
     auth_key: Optional[str] = Field(default=secrets.token_hex(32))
+    email: Optional[EmailStr] = Field()
 
     clients: "Client" = Relationship(back_populates="affiliate")
 
