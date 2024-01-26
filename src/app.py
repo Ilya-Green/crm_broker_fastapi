@@ -28,6 +28,7 @@ from sqlmodel import SQLModel
 from .config import APP_SECRET, APP_DOMAIN, APP_TYPE, ADMIN_PSWD, TG_TOKEN, TG_CHAT_ID, SENTRY_TOKEN, SENTRY_RATE, CRM_NAME
 from .models import Employee, Role, Client, Note, Desk, Action, Department, Status, Affiliate, Type, Trader, Order, \
     RetainStatus, Transaction
+from .seed_database import seed_database
 from .views import MyModelView, EmployeeView, ClientsView, RolesView, DepartmentsView, DesksView, AffiliatesView, \
     StatusesView, TypesView, TradersView, OrdersView, RetainStatusesView, TransactionsView
 from . import engine
@@ -36,34 +37,7 @@ from .api import apiRouter
 
 def init_database() -> None:
     SQLModel.metadata.create_all(engine)
-    with Session(engine) as session:
-        statement = select(Role).where(Role.id == 1)
-        result = session.exec(statement).first()
-        if result is None:
-            session.add(
-                Role(
-                    id=1,
-                    name="sys_admin",
-                    sys_admin=1,
-                    head=1,
-                    desk_leader=1,
-                    accounts_can_access=1,
-                    role_can_access=1,
-                    clients_can_access=1,
-                    roles_can_access=1,
-                )
-            )
-            session.commit()
-            with Session(engine) as session:
-                session.add(
-                    Employee(
-                        id=1,
-                        login="admin",
-                        password=ADMIN_PSWD,
-                        role_id=1,
-                    )
-                )
-                session.commit()
+    seed_database()
 
 
 app = FastAPI(
