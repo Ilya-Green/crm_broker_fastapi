@@ -12,7 +12,6 @@ def seed_database():
         if result is None:
             session.add(
                 Role(
-                    id=1,
                     name="sys_admin",
                     sys_admin=1,
                     head=1,
@@ -190,7 +189,6 @@ def seed_database():
 
             session.add(
                 Employee(
-                    id=1,
                     login="admin",
                     password=ADMIN_PSWD,
                     role_id=1,
