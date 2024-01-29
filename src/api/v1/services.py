@@ -65,7 +65,7 @@ def api_client_create(data: ClientCreateIn) -> ClientCreateOut:
                                     affiliate_id=auth.id,
                                     status_id=1,
                                     type_id=1,
-                                    trader_id=response_json["userId"],
+                                    trader_id=response_json["id"],
                                     )
                 session.add(new_client)
                 session.commit()
