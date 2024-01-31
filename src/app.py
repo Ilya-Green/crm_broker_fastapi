@@ -133,7 +133,7 @@ admin = CustomAdmin(engine,
               auth_provider=MyAuthProvider(),
               middlewares=[Middleware(SessionMiddleware, secret_key=APP_SECRET, max_age=60*60)],
               base_url="/admin",
-              templates_dir='src/templates',
+              templates_dir='starlette_admin/templates',
               )
 
 # Add views
