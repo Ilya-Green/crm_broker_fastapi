@@ -59,7 +59,7 @@ from starlette_admin.helpers import html_params
 from .models import Employee, Role, Client, Desk, Affiliate, Department, Note, Trader, Order, Transaction, Status
 from . import engine
 from .platfrom_integration import update_platform_data, edit_account_platform, change_account_password_platform, \
-    update_order, edit_order_platform, update_orders, update_platform_data_by_id
+    update_order, edit_order_platform, update_orders, update_platform_data_by_id, create_transaction
 
 logger = logging.getLogger("api")
 
@@ -748,6 +748,44 @@ class TradersView(MyModelView):
         session: Session = request.state.session
         for Trader in await self.find_by_pks(request, pks):
             change_account_password_platform(Trader, request.query_params["password"])
+        return "{} passwords were successfully set".format(
+            len(pks)
+        )
+
+    @action(
+        name="create_deposit",
+        text="Create deposit",
+        confirmation="Enter the password you want to set",
+        submit_btn_text="Yes, proceed",
+        submit_btn_class="btn-success",
+        #         <input name="id" class="form-control" id="floating-input" value="">
+        form="""
+            <div class="input-group input-group-sm mb-3">,
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="inputGroup-sizing-sm">Value($):</span>
+                </div>
+            <input  name="value" type="text" class="form-control" aria-label="Small" aria-describedby="inputGroup-sizing-sm">
+            </div>
+            
+            <div class="form-group">
+                <label for="selectOption">Select Option:</label>
+                <select class="form-control" id="selectOption" name="selectOption">
+                    <option value="deposit">Deposit</option>
+                    <option value="credFacilities">Credit Facilities</option>
+                    <option value="bonuses">Bonuses</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="description">Description:</label>
+                <input type="text" class="form-control" id="description" name="description">
+            </div>
+            """,
+    )
+    async def create_deposit(self, request: Request, pks: List[Any]) -> str:
+        session: Session = request.state.session
+        for Trader in await self.find_by_pks(request, pks):
+            create_transaction(Trader, request.query_params["value"], request.query_params["selectOption"], request.query_params["description"])
         return "{} passwords were successfully set".format(
             len(pks)
         )

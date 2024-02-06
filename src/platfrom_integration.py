@@ -393,39 +393,26 @@ def change_account_password_platform(trader: Trader, password: str):
             print("Ошибка при выполнении запроса")
 
 
-def create_transaction(trader: Trader, password: str):
+def create_transaction(trader: Trader, value: int, type: str, description: str):
     if PLATFORM_INTEGRATION_IS_ON:
-        url = f"{PLATFORM_INTEGRATION_URL}/api/admin/user/edit"
-        query_params = {
-            "token": "value1",
+        url = f"{PLATFORM_INTEGRATION_URL}/api/admin/transaction/save?token=token"
+        payload = json.dumps({
+            "dirName": "1lsalz1zn",
+            "value": str(value),
+            "content": description,
+            "userId": trader.id,
+            "type": type,
+        })
+        headers = {
+            'Content-Type': 'application/json'
         }
-        body = {
-            "name": trader.name,
-            "surname": trader.surname,
-            "accountNumber": trader.accountNumber,
-            "email": trader.email,
-            "phone": trader.phone_number,
-            "country": trader.country,
-            # "city": obj.city,
-            # "address": obj.address,
-            # "dirName": obj.dirName,
-            "blocked": trader.blocked,
-            "accountStatus": trader.accountStatus,
-            "password": password,
-            "isActive": trader.isActive,
-            "isVipStatus": trader.isVipStatus,
-            # "docs": {
-            #     "others": []
-            # },
-            "id": trader.id
-        }
-        response = requests.put(url, params=query_params, json=body)
+        response = requests.request("POST", url, headers=headers, data=payload)
         if response.status_code == 200:
             print("Запрос успешно выполнен")
             print(response.content)
-            logger.info(f'Обновлены данные ордера: {trader}')
+            logger.info(f'Добавлена транзакция: {trader} : {value}$ {type} {description}')
         else:
             print(response.status_code)
             print(response.content)
-            logger.info(f'Неудачная попытка обновить данные ордера: {trader}')
+            logger.info(f'Неудачная попытка обновить данные ордера: {trader} : {value}$ {type} {description}')
             print("Ошибка при выполнении запроса")
