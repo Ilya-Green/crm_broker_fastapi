@@ -1084,6 +1084,28 @@ class ClientsView(MyModelView):
         if request.state.user["head"] is True:
             return True
 
+    def can_view_details(self, request: Request) -> bool:
+        if request.state.user["sys_admin"] is True:
+            return True
+        if request.state.user["head"] is True:
+            return True
+
+        url_path = request.url.path
+        path_parts = url_path.split('/')
+        client_id = path_parts[-1]
+        user_id = request.state.user["id"]
+        with Session(engine) as session:
+            statement = select(Client).where(Client.id == client_id)
+            this_client = session.exec(statement).first()
+
+        if request.state.user["department_leader"] is True and this_client.department_id == request.state.user["department_id"]:
+            return True
+        if request.state.user["desk_leader"] is True and this_client.department_id == request.state.user["department_id"] and this_client.desk_id == request.state.user["desk_id"]:
+            return True
+        if request.state.user["clients_can_access"] is True and this_client and this_client.responsible_id == user_id:
+            return True
+        return False
+
     # def can_change_responsible(self, request: Request) -> bool:
     #     if request.state.user["sys_admin"] is True:
     #         return True
