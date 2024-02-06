@@ -1485,6 +1485,30 @@ class ClientsView(MyModelView):
             len(pks), request.query_params["id"]
         )
 
+    @action(
+        name="change_type",
+        text="Change type",
+        confirmation="Enter type id",
+        submit_btn_text="Yes, proceed",
+        submit_btn_class="btn-success",
+        #         <input name="id" class="form-control" id="floating-input" value="">
+        form="""<div class="input-group input-group-sm mb-3">,
+        <div class="input-group-prepend">
+        <span class="input-group-text" id="inputGroup-sizing-sm">id:</span>
+        </div>
+        <input  name="id" type="text" class="form-control" aria-label="Small" aria-describedby="inputGroup-sizing-sm">
+        </div>""",
+    )
+    async def change_type(self, request: Request, pks: List[Any]) -> str:
+        session: Session = request.state.session
+        for Client in await self.find_by_pks(request, pks):
+            Client.type_id = request.query_params["id"]
+            session.add(Client)
+        session.commit()
+        return "{} clients were successfully changed status to id: {}".format(
+            len(pks), request.query_params["id"]
+        )
+
 
     async def is_action_allowed(self, request: Request, name: str) -> bool:
         if name == "set_admin":
