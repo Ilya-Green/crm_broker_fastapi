@@ -786,7 +786,7 @@ class TradersView(MyModelView):
         session: Session = request.state.session
         for Trader in await self.find_by_pks(request, pks):
             create_transaction(Trader, request.query_params["value"], request.query_params["selectOption"], request.query_params["description"])
-        return "{} passwords were successfully set".format(
+        return "{} deposits were successfully created".format(
             len(pks)
         )
 
