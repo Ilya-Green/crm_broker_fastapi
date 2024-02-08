@@ -75,7 +75,7 @@ def api_client_create(data: ClientCreateIn) -> ClientCreateOut:
             #                        {new_client},
             #                        "https://general-investment.com/autologin?token="])
             autologin = response_json["autologin"]
-            return ClientCreateOut(detail='success', autologin=f"{PLATFORM_INTEGRATION_URL}/autoologin?token={autologin}")
+            return ClientCreateOut(detail='success', autologin=f"{PLATFORM_INTEGRATION_URL}/autoologin?token={autologin}", data=new_client)
         else:
             with Session(engine) as session:
                 new_client = Client(**data.dict(),
@@ -87,7 +87,7 @@ def api_client_create(data: ClientCreateIn) -> ClientCreateOut:
                 session.commit()
                 session.refresh(new_client)
             logger_api.warning(f"created {new_client}")
-            return ClientCreateOut(detail='success', autologin='disabled')
+            return ClientCreateOut(detail='success', autologin='disabled', data=new_client)
     else:
         logger_api.warning(f"incorrect auth_key {auth}")
         raise HTTPException(status_code=401, detail="there is no such auth_key")

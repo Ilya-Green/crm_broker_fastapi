@@ -49,9 +49,30 @@ class ClientCreateIn(SQLModel):
         return value
 
 
+class ClientData(SQLModel):
+    id: Optional[int] = Field(primary_key=True)
+
+    first_name: str = Field(min_length=3)
+    email: EmailStr = Field()
+
+    ip: Optional[str] = Field()
+    funnel_name: Optional[str] = Field()
+    funnel_link: Optional[str] = Field()
+    title: Optional[str] = Field()
+    second_name: Optional[str] = Field()
+    patronymic: Optional[str] = Field()
+    city: Optional[str] = Field()
+    description: Optional[str] = Field()
+    address: Optional[str] = Field()
+    additional_contact: Optional[str] = Field()
+    creation_date: Optional[datetime] = Field()
+    country_code: Optional[str] = Field()
+
+
 class ClientCreateOut(SQLModel):
     detail: str = Field(default="success")
     autologin: Optional[str] = Field()
+    data: Optional[ClientData] = Field()
 
 
 class ClientListIn(SQLModel):
