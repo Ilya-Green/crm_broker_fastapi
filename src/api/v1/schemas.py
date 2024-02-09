@@ -77,12 +77,12 @@ class ClientCreateOut(SQLModel):
 
 class ClientListIn(SQLModel):
     auth_key: str = Field()
-    offset: int = Field(default=0)
-    limit: int = Field(default=0)
-    sorting_field: str = Field(default="id")
-    sorting_order: str = Field(default="desc", description="asc or desc. forward or reverse order")
-    ignoreClientIds: List[int] = Field()
-    return_count: bool = Field(default=0)
+    offset: Optional[int] = Field(default=0)
+    limit: Optional[int] = Field(default=0)
+    sorting_field: Optional[str] = Field(default="id")
+    sorting_order: Optional[str] = Field(default="desc", description="asc or desc. forward or reverse order")
+    ignoreClientIds: Optional[List[int]] = Field(default=[0])
+    return_count: Optional[bool] = Field(default=0)
 
 
 class ClientOut(SQLModel):
