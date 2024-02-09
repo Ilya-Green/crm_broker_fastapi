@@ -556,7 +556,7 @@ class TradersView(MyModelView):
         Trader.surname,
         Trader.email,
         Trader.phone_number,
-        Trader.date,
+        # Trader.date,
         Trader.country,
         Trader.created_at_tp,
         Trader.balance,
