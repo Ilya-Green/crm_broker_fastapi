@@ -7,6 +7,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import InstrumentedAttribute, Mapper, Session, joinedload
 from sqlalchemy.sql import Select
 from starlette.requests import Request
+
+from src.fields import EmailCopyField
 from starlette_admin.contrib.sqla.exceptions import InvalidModelError
 from starlette_admin.contrib.sqla.helpers import (
     build_order_clauses,
@@ -160,6 +162,7 @@ class ModelView(BaseModelView):
                 URLField,
                 PhoneField,
                 ColorField,
+                EmailCopyField,
             ]:
                 attr = getattr(self.model, field.name)
                 clauses.append(cast(attr, String).ilike(f"%{term}%"))
