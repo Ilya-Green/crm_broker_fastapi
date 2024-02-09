@@ -114,6 +114,10 @@ def api_client_list(data: ClientListIn) -> ClientListOut:
                 statement = statement.where(Client.creation_date >= data.date_from)
             if data.date_to:
                 statement = statement.where(Client.creation_date <= data.date_to)
+            if data.during_last_minutes:
+                now = datetime.utcnow()
+                time_threshold = now - timedelta(minutes=data.during_last_minutes)
+                statement = statement.where(Client.creation_date >= time_threshold)
             if data.return_count == 0:
                 result = session.exec(statement).all()
                 count = len(result)
