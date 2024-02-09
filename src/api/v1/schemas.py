@@ -113,3 +113,4 @@ class ClientOut(SQLModel):
 class ClientListOut(SQLModel):
     detail: str = Field(default='success')
     data: List[ClientOut] = Field()
+    count: Optional[int] = Field()

@@ -110,13 +110,14 @@ def api_client_list(data: ClientListIn) -> ClientListOut:
                 statement = statement.limit(data.limit)
             if data.return_count == 0:
                 result = session.exec(statement).all()
+                count = len(result)
                 response_data = [
                     {**filter_sqlalchemy_attributes(item[0].__dict__), "status": item[1], "type": item[2]} for item in result
                 ]
-                return ClientListOut(detail='success', data=response_data)
+                return ClientListOut(detail='success', count=count, data=response_data)
             else:
                 result = session.exec(statement).all()
                 count = len(result)
-                return ClientListOut(detail='success', data=count)
+                return ClientListOut(detail='success', count=count)
     else:
         raise HTTPException(status_code=401, detail="there is no such  auth_key")
