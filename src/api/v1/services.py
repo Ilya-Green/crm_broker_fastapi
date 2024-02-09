@@ -107,7 +107,7 @@ def api_client_list(data: ClientListIn) -> ClientListOut:
             status_alias = aliased(Status)
             statement = select(Client, Status.name, Type.name).join(Status, Client.status_id == Status.id).join(Type, Client.type_id == Type.id).where(Client.affiliate_id == auth.id).where(Client.id.notin_(data.ignoreClientIds)).order_by(sorting_order(Client.id)).offset(data.offset)
             if data.limit > 0:
-                statement.limit(data.limit)
+                statement = statement.limit(data.limit)
             if data.return_count == 0:
                 result = session.exec(statement).all()
                 response_data = [
