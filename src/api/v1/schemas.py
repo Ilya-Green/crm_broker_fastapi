@@ -77,6 +77,8 @@ class ClientCreateOut(SQLModel):
 
 class ClientListIn(SQLModel):
     auth_key: str = Field()
+    date_from: Optional[datetime] = Field(default="2024-01-08T18:00:20.385616+03:00")
+    date_to: Optional[datetime] = Field(default="2024-02-08T18:00:20.385616+03:00")
     offset: Optional[int] = Field(default=0)
     limit: Optional[int] = Field(default=0)
     sorting_field: Optional[str] = Field(default="id")

@@ -1,4 +1,6 @@
 import json
+from datetime import datetime, timedelta
+
 from fastapi import HTTPException
 import requests
 from sqlalchemy.orm import aliased, joinedload, load_only
@@ -108,6 +110,10 @@ def api_client_list(data: ClientListIn) -> ClientListOut:
             statement = select(Client, Status.name, Type.name).join(Status, Client.status_id == Status.id).join(Type, Client.type_id == Type.id).where(Client.affiliate_id == auth.id).where(Client.id.notin_(data.ignoreClientIds)).order_by(sorting_order(Client.id)).offset(data.offset)
             if data.limit > 0:
                 statement = statement.limit(data.limit)
+            if data.date_from:
+                statement = statement.where(Client.creation_date >= data.date_from)
+            if data.date_to:
+                statement = statement.where(Client.creation_date <= data.date_to)
             if data.return_count == 0:
                 result = session.exec(statement).all()
                 count = len(result)
