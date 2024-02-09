@@ -103,7 +103,7 @@ def api_client_list(data: ClientListIn) -> ClientListOut:
         auth = session.exec(statement).first()
     if auth:
         with Session(engine) as session:
-            sorting_order = desc if data.sorting_order == 'desc' else asc
+            sorting_order = asc if data.sorting_order == 'asc' else desc
             status_alias = aliased(Status)
             statement = select(Client, Status.name, Type.name).join(Status, Client.status_id == Status.id).join(Type, Client.type_id == Type.id).where(Client.affiliate_id == auth.id).where(Client.id.notin_(data.ignoreClientIds)).order_by(sorting_order(Client.id)).offset(data.offset)
             if data.limit > 0:
