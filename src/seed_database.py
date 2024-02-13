@@ -97,7 +97,7 @@ def seed_database():
                     desk_leader=0,
                     accounts_can_access=0,
                     roles_can_access=0,
-                    clients_can_access=0,
+                    clients_can_access=1,
                     retain=1,
                 )
             )
