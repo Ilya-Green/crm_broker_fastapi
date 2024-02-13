@@ -12,7 +12,7 @@ from src.config import PLATFORM_INTEGRATION_IS_ON, PLATFORM_INTEGRATION_URL
 from src.models import Client, Affiliate, Status, Type
 from src import engine
 
-from src.api.v1.schemas import ClientCreateIn, ClientListIn, ClientListOut, ClientCreateOut
+from src.api.v1.schemas import ClientCreateIn, ClientListIn, ClientListOut, ClientCreateOut, ClientListInPydantic
 import string
 import random
 
@@ -99,7 +99,7 @@ def filter_sqlalchemy_attributes(data):
     return {key: value for key, value in data.items() if not key.startswith('_sa_')}
 
 
-def api_client_list(data: ClientListIn) -> ClientListOut:
+def api_client_list(data: ClientListInPydantic) -> ClientListOut:
     with Session(engine) as session:
         statement = select(Affiliate).where(Affiliate.auth_key == data.auth_key)
         auth = session.exec(statement).first()

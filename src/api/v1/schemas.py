@@ -10,6 +10,7 @@ from sqlalchemy import JSON, Column, DateTime, Enum, String, Text
 
 from sqlmodel import Field, Relationship, SQLModel, MetaData
 from starlette_admin.i18n import get_countries_list
+from pydantic import Field as PydanticField
 
 from src.models import Client, Status
 
@@ -86,6 +87,19 @@ class ClientListIn(SQLModel):
     sorting_order: Optional[str] = Field(default="desc", description="asc or desc. forward or reverse order")
     ignoreClientIds: Optional[List[int]] = Field(default=[0])
     return_count: Optional[bool] = Field(default=0)
+
+
+class ClientListInPydantic(BaseModel):
+    auth_key: str = Field()
+    date_from: Optional[datetime] = PydanticField(default=None, example="2024-01-08T18:00:20.385616+03:00")
+    date_to: Optional[datetime] = PydanticField(default=None, example="2024-02-08T18:00:20.385616+03:00")
+    during_last_minutes: Optional[int] = PydanticField()
+    offset: Optional[int] = PydanticField(default=0)
+    limit: Optional[int] = PydanticField(default=0)
+    sorting_field: Optional[str] = PydanticField(default="id")
+    sorting_order: Optional[str] = PydanticField(default="desc", description="asc or desc. forward or reverse order")
+    ignoreClientIds: Optional[List[int]] = PydanticField(default=[0])
+    return_count: Optional[bool] = PydanticField(default=0)
 
 
 class ClientOut(SQLModel):

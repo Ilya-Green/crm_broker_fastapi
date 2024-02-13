@@ -2,7 +2,7 @@ from fastapi import APIRouter
 import logging
 
 from src.api.v1.services import api_client_create, api_client_list
-from src.api.v1.schemas import ClientListIn, ClientCreateIn, ClientCreateOut, ClientListOut
+from src.api.v1.schemas import ClientListIn, ClientCreateIn, ClientCreateOut, ClientListOut, ClientListInPydantic
 
 logger = logging.getLogger("api")
 
@@ -45,5 +45,5 @@ async def create_client(data: ClientCreateIn):
                     description="Returns list of clients",
                     response_model=ClientListOut,
                     )
-async def get_client_list(data: ClientListIn):
+async def get_client_list(data: ClientListInPydantic):
     return api_client_list(data)
