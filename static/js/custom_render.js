@@ -71,7 +71,18 @@ const render = {
   url: function render(data, type, full, meta, fieldOptions) {
     if (data == null) return null_column();
     if (Array.isArray(data) && data.length == 0) return empty_column();
-    data = Array.isArray(data) ? data : [data].map((d) => new URL(d));
+    function isValidHttpUrl(string) {
+    let url;
+
+    try {
+      url = new URL(string);
+    } catch (_) {
+      return false;
+    }
+
+    return url.protocol === "http:" || url.protocol === "https:";
+  }
+    data = Array.isArray(data) ? data : [data].map(d => isValidHttpUrl(d) ? new URL(d).href : d);
     if (type != "display") return data.join(",");
     return `<span class="align-middle d-inline-block text-truncate" data-toggle="tooltip" data-placement="bottom" title='${data}' style="max-width: 30em;">${data.map(
       (d) => '<a href="' + d + '">' + d + "</a>"
