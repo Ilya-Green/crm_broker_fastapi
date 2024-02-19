@@ -71,6 +71,96 @@ class MyModelView(ModelView):
     export_types = []
 
 
+class NotesView(MyModelView):
+    def is_accessible(self, request: Request) -> bool:
+        self.id = request.state.user["id"]
+        self.desk_id = request.state.user["desk_id"]
+        self.department_id = request.state.user["department_id"]
+        self.desk_leader = request.state.user["desk_leader"]
+        self.department_leader = request.state.user["department_leader"]
+        self.head = request.state.user["head"]
+        self.sys_admin = request.state.user["sys_admin"]
+        self.retain = request.state.user["retain"]
+
+        # with Session(engine) as session:
+        #     statement = select(Desk).where(Desk.department_id == request.state.user["department_id"])
+        #     desks = session.exec(statement).all()
+        #     self.department_desks = [desk.id for desk in desks]
+
+        if "clients_can_access" in request.state.user:
+            if request.state.user["clients_can_access"] is True:
+                return True
+        if "retain" in request.state.user:
+            if request.state.user["retain"] is True:
+                return True
+        return False
+
+
+    def can_view_details(self, request: Request) -> bool:
+        # if request.state.user["sys_admin"] is True:
+        #     return True
+        # if request.state.user["head"] is True:
+        #     return True
+
+        url_path = request.url.path
+        path_parts = url_path.split('/')
+        note_id = path_parts[-1]
+        user_id = request.state.user["id"]
+        with Session(engine) as session:
+            statement = select(Note).where(Note.id == note_id)
+            this_note = session.exec(statement).first()
+        with Session(engine) as session:
+            statement = select(Client).where(Client.id == this_note.client_id)
+            this_client = session.exec(statement).first()
+
+        if request.state.user["department_leader"] is True and this_client.department_id == request.state.user["department_id"]:
+            return True
+        if request.state.user["desk_leader"] is True and this_client.department_id == request.state.user["department_id"] and this_client.desk_id == request.state.user["desk_id"]:
+            return True
+        if request.state.user["clients_can_access"] is True and this_client and this_client.responsible_id == user_id:
+            return True
+        return False
+
+    def get_list_query(self):
+        query = super().get_list_query()
+        if self.sys_admin:
+            return query
+        if self.head:
+            return query
+        if self.department_leader:
+            return query
+        if self.desk_leader:
+            return query
+        # if self.department_leader:
+        #     query = query.where(Client.department_id != 0).where(Client.department_id == self.department_id)
+        #     return query
+        # if self.desk_leader:
+        #     query = query.where(Client.desk_id != 0).where(Client.department_id == self.department_id).where(Client.desk_id == self.desk_id)
+        #     return query
+        query = query.where(Note.employee_id == self.id)
+        return query
+
+    def get_count_query(self) -> Select:
+        query = super().get_count_query()
+        if self.sys_admin:
+            return query
+        if self.head:
+            # test = super().get_list_query().where(Desk.department_id == self.department_id)
+            return query
+        if self.department_leader:
+            return query
+        if self.desk_leader:
+            return query
+        # if self.department_leader:
+        #     query = query.where(Client.department_id != 0).where(Client.department_id == self.department_id)
+        #     return query
+        # if self.desk_leader:
+        #     query = query.where(Client.desk_id != 0).where(Client.department_id == self.department_id).where(Client.desk_id == self.desk_id)
+        #     return query
+        query = query.where(Note.employee_id == self.id)
+        return query
+
+
 class EmployeeView(MyModelView):
     async def select2_result(self, obj: Any, request: Request) -> str:
         """

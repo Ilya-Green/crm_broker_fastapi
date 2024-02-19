@@ -31,7 +31,7 @@ from .models import Employee, Role, Client, Note, Desk, Action, Department, Stat
     RetainStatus, Transaction
 from .seed_database import seed_database
 from .views import MyModelView, EmployeeView, ClientsView, RolesView, DepartmentsView, DesksView, AffiliatesView, \
-    StatusesView, TypesView, TradersView, OrdersView, RetainStatusesView, TransactionsView
+    StatusesView, TypesView, TradersView, OrdersView, RetainStatusesView, TransactionsView, NotesView
 from . import engine
 from src.api.v1.api import affApiV1
 
@@ -149,7 +149,7 @@ admin.add_view(TradersView(Trader, label="Retention"))
 admin.add_view(TransactionsView(Transaction, label="Transactions"))
 admin.add_view(OrdersView(Order, label="Orders", icon="fa-solid fa-wallet"))
 
-admin.add_view(MyModelView(Note))
+admin.add_view(NotesView(Note))
 admin.add_view(MyModelView(Action))
 admin.add_view(StatusesView(Status, label="Statuses", icon="fa-solid fa-tags"))
 admin.add_view(RetainStatusesView(RetainStatus, label="Retain Statuses"))
