@@ -1071,12 +1071,9 @@ class OrdersView(MyModelView):
         Order.wid,
         Order.v,
     ]
-    # exclude_fields_from_edit = [
-    #     Trader.email,
-    #     Trader.phone_number,
-    #     Trader.created_at_tp,
-    #     Trader.orders,
-    # ]
+    exclude_fields_from_edit = [
+        Order.trader
+    ]
 
     def get_list_query(self):
         update_orders()
