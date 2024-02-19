@@ -197,10 +197,10 @@ class Order(SQLModel, table=True):
     wid: Optional[str] = Field()
     id: Optional[str] = Field(primary_key=True)
     asset_name: str = Field()
-    amount: float
-    opening_price: float
-    pledge: float
-    type: str
+    amount: float = Field()
+    opening_price: float = Field()
+    pledge: float = Field()
+    type: str = Field()
     is_closed: bool = Field()
     created_at: Optional[datetime] = Field()
     take_profit: Optional[float] = Field()
