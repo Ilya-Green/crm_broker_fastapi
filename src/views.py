@@ -1369,6 +1369,13 @@ class ClientsView(MyModelView):
                 update_data['desk_id'] = request.query_params["desk"]
             if request.query_params["responsible"] != "none":
                 update_data['responsible_id'] = request.query_params["responsible"]
+                if client.trader_id is not None:
+                    with Session(engine) as session:
+                        statement = select(Trader).where(Trader.id == client.trader_id)
+                        trader = session.exec(statement).first()
+                    if trader:
+                        trader.responsible_id = request.query_params["responsible"]
+                        session.merge(trader)
             if request.query_params["status"] != "none":
                 update_data['status_id'] = request.query_params["status"]
             updates.append(update_data)
@@ -1401,6 +1408,13 @@ class ClientsView(MyModelView):
             for client in await self.find_by_pks(request, pks):
                 client.responsible_id = request.query_params["responsible"]
                 session.add(Client)
+                if client.trader_id is not None:
+                    with Session(engine) as session:
+                        statement = select(Trader).where(Trader.id == client.trader_id)
+                        trader = session.exec(statement).first()
+                    if trader:
+                        trader.responsible_id = request.query_params["responsible"]
+                        session.merge(trader)
         if request.query_params["status"] != "none":
             for client in await self.find_by_pks(request, pks):
                 client.status_id = request.query_params["status"]
@@ -1426,6 +1440,13 @@ class ClientsView(MyModelView):
             for client in await self.find_by_pks(request, pks):
                 client.responsible_id = request.query_params["responsible"]
                 session.add(Client)
+                if client.trader_id is not None:
+                    with Session(engine) as session:
+                        statement = select(Trader).where(Trader.id == client.trader_id)
+                        trader = session.exec(statement).first()
+                    if trader:
+                        trader.responsible_id = request.query_params["responsible"]
+                        session.merge(trader)
         if request.query_params["status"] != "none":
             for client in await self.find_by_pks(request, pks):
                 client.status_id = request.query_params["status"]
@@ -1520,6 +1541,12 @@ class ClientsView(MyModelView):
             responsible_id = request.query_params["id"]
             client.responsible_id = responsible_id
             session.add(Client)
+            if client.trader_id is not None:
+                with Session(engine) as session:
+                    statement = select(Trader).where(Trader.id == client.trader_id)
+                    trader = session.exec(statement).first()
+                if trader:
+                    trader.responsible_id = responsible_id
         session.commit()
         return "{} clients were successfully changed to responsible with id: {}".format(
             len(pks), request.query_params["id"]
