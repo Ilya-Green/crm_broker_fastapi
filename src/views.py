@@ -1337,6 +1337,7 @@ class ClientsView(MyModelView):
         Client.last_note,
     ]
     exclude_fields_from_create = [
+        Client.last_note,
         Client.notes,
         Client.creation_date,
         Client.actions,
