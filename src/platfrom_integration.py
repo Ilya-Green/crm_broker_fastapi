@@ -17,7 +17,7 @@ def update_platform_data():
     if PLATFORM_INTEGRATION_IS_ON:
         params = {'token': 'value1'}
         response = requests.get(url=f'{PLATFORM_INTEGRATION_URL}/api/admin/user/all', params=params)
-        data = json.loads(response.content)
+        data = response.json()
         for user_data in data:
             with Session(engine) as session:
                 statement = select(Trader).where(Trader.id == user_data["id"])
@@ -73,7 +73,7 @@ def update_platform_data():
 
         params = {'token': 'value1'}
         response = requests.get(url=f'{PLATFORM_INTEGRATION_URL}/api/admin/order/all', params=params)
-        data = json.loads(response.content)
+        data = response.json()
         for user_data in data:
             new_order = Order(
                 wid=user_data["_id"],
@@ -99,7 +99,7 @@ def update_platform_data():
 
         params = {'token': 'value1'}
         response = requests.get(url=f'{PLATFORM_INTEGRATION_URL}/api/admin/transaction/all', params=params)
-        data = json.loads(response.content)
+        data = response.json()
         for transaction_data in data:
             new_transaction = Transaction(
                 id=transaction_data["id"],
@@ -120,7 +120,7 @@ def update_platform_data_by_id(ids: list):
     if PLATFORM_INTEGRATION_IS_ON:
         params = {'token': 'value1'}
         response = requests.get(url=f'{PLATFORM_INTEGRATION_URL}/api/admin/user/all', params=params)
-        data = json.loads(response.content)
+        data = response.json()
         for user_data in data:
             if user_data["id"] in ids:
                 with Session(engine) as session:
@@ -177,7 +177,7 @@ def update_platform_data_by_id(ids: list):
 
         params = {'token': 'value1'}
         response = requests.get(url=f'{PLATFORM_INTEGRATION_URL}/api/admin/order/all', params=params)
-        data = json.loads(response.content)
+        data = response.json()
         for user_data in data:
             if user_data["userId"] in ids:
                 new_order = Order(
@@ -204,7 +204,7 @@ def update_platform_data_by_id(ids: list):
 
         params = {'token': 'value1'}
         response = requests.get(url=f'{PLATFORM_INTEGRATION_URL}/api/admin/transaction/all', params=params)
-        data = json.loads(response.content)
+        data = response.json()
         for transaction_data in data:
             if user_data["userId"] in ids:
                 new_transaction = Transaction(
@@ -226,7 +226,7 @@ def update_orders():
     if PLATFORM_INTEGRATION_IS_ON:
         params = {'token': 'value1'}
         response = requests.get(url=f'{PLATFORM_INTEGRATION_URL}/api/admin/order/all', params=params)
-        data = json.loads(response.content)
+        data = response.json()
         for user_data in data:
             new_order = Order(
                 wid=user_data["_id"],
@@ -255,7 +255,7 @@ def update_order(id: int):
     if PLATFORM_INTEGRATION_IS_ON:
         params = {'token': 'value1'}
         response = requests.get(url=f'{PLATFORM_INTEGRATION_URL}/api/admin/order/all', params=params)
-        data = json.loads(response.content)
+        data = response.json()
         for user_data in data:
             if user_data["id"] == id:
                 order_to_update = Order(
