@@ -1100,10 +1100,23 @@ class OrdersView(MyModelView):
             await self.validate(request, data)
             session: Union[Session, AsyncSession] = request.state.session
             obj = await self.find_by_pk(request, pk)
-
+            old_is_closed = obj.is_closed
             session.add(await self._populate_obj(request, obj, data, True))
             obj = await self._populate_obj(request, obj, data, True)
-            edit_order_platform(await self._populate_obj(request, obj, data, True))
+            new_is_closed = obj.is_closed
+            if (old_is_closed is True) and (new_is_closed is False):
+                raise FormValidationError({'is_closed': 'Order already closed. Cannot be opened'})
+            if obj.asset_name is None:
+                raise FormValidationError({'asset_name': 'must be defined'})
+            if (old_is_closed is True) and (obj.closed_price is None):
+                raise FormValidationError({'closed_price': 'must be defined'})
+            if (old_is_closed is True) and (obj.closed_price == 0):
+                raise FormValidationError({'closed_price': 'must be more than 0'})
+            if (old_is_closed is True) and (obj.closed_at is None):
+                raise FormValidationError({'closed_at': 'must be defined'})
+            if (obj.type != 'buy') and (obj.type != 'sell'):
+                raise FormValidationError({'type': 'Only options are available: buy or sell'})
+            edit_order_platform(obj)
             if isinstance(session, AsyncSession):
                 await session.commit()
                 await session.refresh(obj)
