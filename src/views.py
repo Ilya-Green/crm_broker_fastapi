@@ -1108,11 +1108,11 @@ class OrdersView(MyModelView):
                 raise FormValidationError({'is_closed': 'Order already closed. Cannot be opened'})
             if obj.asset_name is None:
                 raise FormValidationError({'asset_name': 'must be defined'})
-            if (old_is_closed is True) and (obj.closed_price is None):
+            if (new_is_closed is True) and (obj.closed_price is None):
                 raise FormValidationError({'closed_price': 'must be defined'})
-            if (old_is_closed is True) and (obj.closed_price == 0):
+            if (new_is_closed is True) and (obj.closed_price == 0):
                 raise FormValidationError({'closed_price': 'must be more than 0'})
-            if (old_is_closed is True) and (obj.closed_at is None):
+            if (new_is_closed is True) and (obj.closed_at is None):
                 raise FormValidationError({'closed_at': 'must be defined'})
             if (obj.type != 'buy') and (obj.type != 'sell'):
                 raise FormValidationError({'type': 'Only options are available: buy or sell'})
