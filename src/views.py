@@ -1330,8 +1330,11 @@ class ClientsView(MyModelView):
         # Client.first_name,
     ]
     exclude_fields_from_edit = [
+        Client.status,
+        Client.responsible,
         Client.notes,
         Client.creation_date,
+        Client.last_note,
     ]
     exclude_fields_from_create = [
         Client.notes,
