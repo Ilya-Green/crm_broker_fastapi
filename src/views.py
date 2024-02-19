@@ -1394,16 +1394,16 @@ class ClientsView(MyModelView):
     async def set_department_leader(self, request: Request, pks: List[Any]) -> str:
         session: Session = request.state.session
         if request.query_params["desk"] != "none":
-            for Client in await self.find_by_pks(request, pks):
-                Client.desk_id = request.query_params["desk"]
+            for client in await self.find_by_pks(request, pks):
+                client.desk_id = request.query_params["desk"]
                 session.add(Client)
         if request.query_params["responsible"] != "none":
-            for Client in await self.find_by_pks(request, pks):
-                Client.responsible_id = request.query_params["responsible"]
+            for client in await self.find_by_pks(request, pks):
+                client.responsible_id = request.query_params["responsible"]
                 session.add(Client)
         if request.query_params["status"] != "none":
-            for Client in await self.find_by_pks(request, pks):
-                Client.status_id = request.query_params["status"]
+            for client in await self.find_by_pks(request, pks):
+                client.status_id = request.query_params["status"]
                 session.add(Client)
         session.commit()
         return "{} clients were successfully changed".format(
@@ -1423,12 +1423,12 @@ class ClientsView(MyModelView):
     async def set_desk_leader(self, request: Request, pks: List[Any]) -> str:
         session: Session = request.state.session
         if request.query_params["responsible"] != "none":
-            for Client in await self.find_by_pks(request, pks):
-                Client.responsible_id = request.query_params["responsible"]
+            for client in await self.find_by_pks(request, pks):
+                client.responsible_id = request.query_params["responsible"]
                 session.add(Client)
         if request.query_params["status"] != "none":
-            for Client in await self.find_by_pks(request, pks):
-                Client.status_id = request.query_params["status"]
+            for client in await self.find_by_pks(request, pks):
+                client.status_id = request.query_params["status"]
                 session.add(Client)
         session.commit()
         return "{} clients were successfully changed".format(
@@ -1516,8 +1516,9 @@ class ClientsView(MyModelView):
                 if desk_result.department_id != request.state.user["department_id"]:
                     raise ActionFailed("ID not from your department")
         session: Session = request.state.session
-        for Client in await self.find_by_pks(request, pks):
-            Client.responsible_id = request.query_params["id"]
+        for client in await self.find_by_pks(request, pks):
+            responsible_id = request.query_params["id"]
+            client.responsible_id = responsible_id
             session.add(Client)
         session.commit()
         return "{} clients were successfully changed to responsible with id: {}".format(
