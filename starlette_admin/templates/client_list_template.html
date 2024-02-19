@@ -180,6 +180,26 @@ block content %}
                   </div>
               </div>
 
+                  <div class="modal modal-blur fade" id="modal-action-status" tabindex="-1" role="dialog" aria-hidden="true">
+                  <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+                      <div class="modal-content">
+                          <div class="modal-body">
+                              <div id="actionConfirmationStatus"></div></br>
+                              Status
+                              <select class="form-select" name="status" id="statusesSelect">
+                                  <option value="none">no change</option>
+                              </select>
+                          </div>
+                          <div class="modal-footer">
+                              <button type="button" class="btn btn-link link-secondary me-auto"
+                                      data-bs-dismiss="modal">{{ _("Cancel") }}</button>
+                              <button id="actionSubmitStatus" type="button" class="btn btn-primary"
+                                      data-bs-dismiss="modal">{{ _("Yes, Proceed") }}</button>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+
                   <script>
                       fetch('/admin/api/department?include_relationships=0')
                           .then(response => response.json())
@@ -311,6 +331,14 @@ block content %}
                               optionElement.value = status.id;
                               optionElement.textContent = status.name.toUpperCase();
                               selectElementDesk.appendChild(optionElement);
+                            })
+
+                            const selectStatuses = document.getElementById('statusesSelect');
+                            data.items.forEach(status => {
+                              const optionElement = document.createElement('option');
+                              optionElement.value = status.id;
+                              optionElement.textContent = status.name.toUpperCase();
+                              selectStatuses.appendChild(optionElement);
                             })
                             ;
                           })
