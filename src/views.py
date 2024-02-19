@@ -968,6 +968,7 @@ class TransactionsView(MyModelView):
         Transaction.createdAt,
         Transaction.type,
         Transaction.value,
+        Transaction.content,
         Transaction.id,
         Transaction.trader,
     ]
