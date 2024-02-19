@@ -103,7 +103,7 @@ def update_platform_data():
         for transaction_data in data:
             new_transaction = Transaction(
                 id=transaction_data["id"],
-                content=transaction_data.get("content"),
+                content=transaction_data.get("content").encode('utf-8'),
                 createdAt=transaction_data["createdAt"],
                 dirName=transaction_data.get("dirName"),
                 type=transaction_data["type"],
