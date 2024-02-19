@@ -1567,15 +1567,6 @@ class ClientsView(MyModelView):
         # </div>""",
     )
     async def clear_responsible(self, request: Request, pks: List[Any]) -> str:
-        with Session(engine) as session:
-            statement = select(Employee).where(Employee.id == request.query_params["id"])
-            desk_result = session.exec(statement).first()
-            if self.desk_leader:
-                if desk_result.desk_id != request.state.user["desk_id"] or desk_result.department_id != request.state.user["department_id"]:
-                    raise ActionFailed("ID not from your desk or department")
-            if self.department_leader:
-                if desk_result.department_id != request.state.user["department_id"]:
-                    raise ActionFailed("ID not from your department")
         session: Session = request.state.session
         for Client in await self.find_by_pks(request, pks):
             Client.responsible_id = None
