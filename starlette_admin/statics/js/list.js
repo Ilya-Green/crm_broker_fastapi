@@ -454,9 +454,9 @@ $(function () {
                                 }
                                 console.log(query);
 
-                                $('#modal-action-status :input').each(function() {
-                                    query.append(this.name, $(this).val());
-                                });
+                                // $('#modal-action-status :input').each(function() {
+                                //     query.append(this.name, $(this).val());
+                                // });
 
                                     const url = window.location.origin + "/admin/api/client/action?" + query.toString();
                                     fetch(url, {
@@ -682,6 +682,54 @@ $(function () {
 
                                   // Выводим объект parameters в консоль (вы можете сделать что-то другое с ним)
                                   console.log(parameters);
+
+
+                              $("#modal-action-status").on("show.bs.modal", function (event) {
+                              console.log('modal-action-status');
+                              var button = $(event.relatedTarget); // Button that triggered the modal
+                              var confirmation = button.data("confirmation");
+                              var form = button.data("form");
+                              var name = button.data("name");
+                              var submit_btn_text = button.data("submit-btn-text");
+                              var submit_btn_class = button.data("submit-btn-class");
+
+                              var modal = $(this);
+                              modal.find("#actionConfirmation").text(confirmation);
+                              var modalForm = modal.find("#modal-form");
+                              console.log(modalForm,"492");
+                              $('#modal-form').html(form);
+                              var actionSubmit = modal.find("#actionSubmitStatus");
+                              actionSubmit.text(submit_btn_text);
+                              actionSubmit.removeClass().addClass(`btn ${submit_btn_class}`);
+                              actionSubmit.unbind();
+                              actionSubmit.on("click", function (event) {
+                                console.log('status-action-click')
+                                  const formElement = modalForm.find("form");
+                                  console.log(formElement,"500");
+                                  const formData = formElement.length
+                                      ? new FormData(formElement.get(0))
+                                      : new FormData();
+                                  var selectsInModal = $("#modal-action-status select");
+                                  var parameters = {}; // Создаем объект для хранения параметров
+
+                                  selectsInModal.each(function() {
+                                      // Получаем значение выбранной опции и ключ (например, значение атрибута name)
+                                      var selectedValue = $(this).val();
+                                      var key = $(this).attr("name"); // Предполагается, что у элементов <select> есть атрибут name
+
+                                      // Добавляем значение в объект parameters с ключом key
+                                      parameters['id'] = selectedValue;
+                                  });
+
+                                  // Выводим объект parameters в консоль (вы можете сделать что-то другое с ним)
+                                  console.log('parametrs', parameters);
+                                  console.log('formData', formData);
+                              // values end tut
+                                  submitActionStatus(name, formData, parameters);
+                              });
+                          });
+
+
   function submitAction(name, formData) {
     $("#modal-loading").modal("show");
     query = new URLSearchParams();
