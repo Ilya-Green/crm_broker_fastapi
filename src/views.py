@@ -113,10 +113,16 @@ class NotesView(MyModelView):
             statement = select(Client).where(Client.id == this_note.client_id)
             this_client = session.exec(statement).first()
 
-        if request.state.user["department_leader"] is True and this_client.department_id == request.state.user["department_id"]:
+        if self.sys_admin:
             return True
-        if request.state.user["desk_leader"] is True and this_client.department_id == request.state.user["department_id"] and this_client.desk_id == request.state.user["desk_id"]:
+        if self.head:
             return True
+        if self.department_leader:
+            if this_client.department_id == request.state.user["department_id"]:
+                return True
+        if self.desk_leader:
+            if this_client.department_id == request.state.user["department_id"] and this_client.desk_id == request.state.user["desk_id"]:
+                return True
         if request.state.user["clients_can_access"] is True and this_client and this_client.responsible_id == user_id:
             return True
         return False
