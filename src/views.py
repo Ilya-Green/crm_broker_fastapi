@@ -1360,10 +1360,10 @@ class ClientsView(MyModelView):
     )
     async def set_admin(self, request: Request, pks: List[Any]) -> str:
         session: Session = request.state.session
-        Clients = await self.find_by_pks(request, pks)
+        clients = await self.find_by_pks(request, pks)
 
         updates = []
-        for client in Clients:
+        for client in clients:
             update_data = {'id': client.id}
             if request.query_params["department"] != "none":
                 update_data['department_id'] = request.query_params["department"]
@@ -1402,14 +1402,15 @@ class ClientsView(MyModelView):
     )
     async def set_department_leader(self, request: Request, pks: List[Any]) -> str:
         session: Session = request.state.session
-        if request.query_params["desk"] != "none":
-            for client in await self.find_by_pks(request, pks):
-                client.desk_id = request.query_params["desk"]
-                session.add(Client)
-        if request.query_params["responsible"] != "none":
-            for client in await self.find_by_pks(request, pks):
-                client.responsible_id = request.query_params["responsible"]
-                session.add(Client)
+        clients = await self.find_by_pks(request, pks)
+
+        updates = []
+        for client in clients:
+            update_data = {'id': client.id}
+            if request.query_params["desk"] != "none":
+                update_data['desk_id'] = request.query_params["desk"]
+            if request.query_params["responsible"] != "none":
+                update_data['responsible_id'] = request.query_params["responsible"]
                 if client.trader_id is not None:
                     with Session(engine) as session:
                         statement = select(Trader).where(Trader.id == client.trader_id)
@@ -1417,11 +1418,14 @@ class ClientsView(MyModelView):
                     if trader:
                         trader.responsible_id = request.query_params["responsible"]
                         session.merge(trader)
-        if request.query_params["status"] != "none":
-            for client in await self.find_by_pks(request, pks):
-                client.status_id = request.query_params["status"]
-                session.add(Client)
-        session.commit()
+            if request.query_params["status"] != "none":
+                update_data['status_id'] = request.query_params["status"]
+            updates.append(update_data)
+
+        if updates:
+            session.bulk_update_mappings(Client, updates)
+            session.commit()
+
         return "{} clients were successfully changed".format(
             len(pks)
         )
@@ -1438,10 +1442,13 @@ class ClientsView(MyModelView):
     )
     async def set_desk_leader(self, request: Request, pks: List[Any]) -> str:
         session: Session = request.state.session
-        if request.query_params["responsible"] != "none":
-            for client in await self.find_by_pks(request, pks):
-                client.responsible_id = request.query_params["responsible"]
-                session.add(Client)
+        clients = await self.find_by_pks(request, pks)
+
+        updates = []
+        for client in clients:
+            update_data = {'id': client.id}
+            if request.query_params["responsible"] != "none":
+                update_data['responsible_id'] = request.query_params["responsible"]
                 if client.trader_id is not None:
                     with Session(engine) as session:
                         statement = select(Trader).where(Trader.id == client.trader_id)
@@ -1449,11 +1456,14 @@ class ClientsView(MyModelView):
                     if trader:
                         trader.responsible_id = request.query_params["responsible"]
                         session.merge(trader)
-        if request.query_params["status"] != "none":
-            for client in await self.find_by_pks(request, pks):
-                client.status_id = request.query_params["status"]
-                session.add(Client)
-        session.commit()
+            if request.query_params["status"] != "none":
+                update_data['status_id'] = request.query_params["status"]
+            updates.append(update_data)
+
+        if updates:
+            session.bulk_update_mappings(Client, updates)
+            session.commit()
+
         return "{} clients were successfully changed".format(
             len(pks)
         )
