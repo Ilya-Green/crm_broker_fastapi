@@ -23,7 +23,7 @@ TG_CHAT_ID = os.getenv("TG_CHAT_ID")
 
 BACKUP_DIR = os.getenv("BACKUP_DIR", "backup")
 TIMESTAMP = datetime.now().strftime("%Y%m%d%H%M%S")
-BACKUP_FILE = f"{BACKUP_DIR}/backup_{TIMESTAMP}.sql"
+BACKUP_FILE = f"{BACKUP_DIR}/backup-{APP_DOMAIN}_{TIMESTAMP}.sql"
 
 os.makedirs(BACKUP_DIR, exist_ok=True)
 
