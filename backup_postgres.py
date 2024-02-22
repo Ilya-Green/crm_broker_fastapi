@@ -41,7 +41,7 @@ try:
     subprocess.run(zip_command)
     print("Архив успешно создан")
 
-    send_url = f"https://api.telegram.org/bot{TG_TOKEN}/sendDocument?chat_id={TG_CHAT_ID}"
+    send_url = f"https://api.telegram.org/bot{TG_TOKEN}/sendDocument?chat_id={TG_CHAT_ID}&disable_notification=true"
     with open(ARCHIVE_FILE, "rb") as file:
         response = requests.post(send_url, files={"document": file})
     if response.ok:
