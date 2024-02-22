@@ -27,18 +27,7 @@ BACKUP_FILE = f"{BACKUP_DIR}/backup_{TIMESTAMP}.sql"
 
 os.makedirs(BACKUP_DIR, exist_ok=True)
 
-backup_command = [
-    "pg_dump",
-    "-h", DB_HOST,
-    "-p", DB_PORT,
-    "-U", DB_USER,
-    "-d", DB_NAME,
-    "-F", "c",
-    "-b",
-    "-v",
-    "--file-level-encryption-password", DB_PASSWORD,
-    "-f", BACKUP_FILE
-]
+backup_command = f"pg_dump -h {DB_HOST} -p {DB_PORT} -U {DB_USER} -d {DB_NAME} -F c -b -v > {BACKUP_FILE}"
 
 try:
     subprocess.run(backup_command, shell=True, check=True, env={"PGPASSWORD": DB_PASSWORD})
