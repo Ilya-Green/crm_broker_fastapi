@@ -24,6 +24,7 @@ TG_CHAT_ID = os.getenv("TG_CHAT_ID")
 BACKUP_DIR = os.getenv("BACKUP_DIR", "backup")
 TIMESTAMP = datetime.now().strftime("%Y%m%d%H%M%S")
 BACKUP_FILE = f"{BACKUP_DIR}/backup-{APP_DOMAIN}_{TIMESTAMP}.sql"
+ARCHIVE_FILE = f"{BACKUP_DIR}/backup-{APP_DOMAIN}_{TIMESTAMP}.zip"
 
 os.makedirs(BACKUP_DIR, exist_ok=True)
 
@@ -36,8 +37,12 @@ try:
     url = f"https://api.telegram.org/bot{TG_TOKEN}/sendMessage?chat_id={TG_CHAT_ID}&text={APP_DOMAIN} : {APP_TYPE} : Резервное копирование успешно создано: {BACKUP_FILE}&disable_notification=true"
     print(requests.get(url).json())
 
+    zip_command = ['zip', '--password', DB_PASSWORD, ARCHIVE_FILE, BACKUP_FILE]
+    subprocess.run(zip_command)
+    print("Архив успешно создан")
+
     send_url = f"https://api.telegram.org/bot{TG_TOKEN}/sendDocument?chat_id={TG_CHAT_ID}"
-    with open(BACKUP_FILE, "rb") as file:
+    with open(ARCHIVE_FILE, "rb") as file:
         response = requests.post(send_url, files={"document": file})
     if response.ok:
         print("Файл успешно отправлен в Telegram")
