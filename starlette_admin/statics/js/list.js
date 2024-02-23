@@ -383,6 +383,19 @@ $(function () {
     },
   });
 
+  $(document).ready(function() {
+    table.search('').draw();
+    var dtPromise = new Promise(function(resolve, reject) {
+        table.on('init.dt', function () {
+            resolve();
+        });
+    });
+    dtPromise.then(function() {
+        table.rows().deselect();
+    });
+});
+
+
   $("#searchInput").on("keyup", function () {
     table.search($(this).val()).draw();
   });
