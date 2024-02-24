@@ -52,13 +52,13 @@ try:
 except subprocess.CalledProcessError as e:
     print(f"Ошибка при создании резервной копии: {e}")
 
-    url = f"https://api.telegram.org/bot{TG_TOKEN}/sendMessage?chat_id={TG_CHAT_ID}&text={APP_DOMAIN} : {APP_TYPE} : Ошибка при создании резервной копии: {e}&disable_notification=true"
+    url = f"https://api.telegram.org/bot{TG_TOKEN}/sendMessage?chat_id={TG_CHAT_ID}&text={APP_DOMAIN} : {APP_TYPE} : Ошибка при создании резервной копии: {e}"
     print(requests.get(url).json())
 
 except Exception as e:
     print(f"Произошла ошибка: {e}")
 
-    url = f"https://api.telegram.org/bot{TG_TOKEN}/sendMessage?chat_id={TG_CHAT_ID}&text={APP_DOMAIN} : {APP_TYPE} : Произошла ошибка при создании резервной копии: {e}&disable_notification=true"
+    url = f"https://api.telegram.org/bot{TG_TOKEN}/sendMessage?chat_id={TG_CHAT_ID}&text={APP_DOMAIN} : {APP_TYPE} : Произошла ошибка при создании резервной копии: {e}"
     print(requests.get(url).json())
 
 finally:
