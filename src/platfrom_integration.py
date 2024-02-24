@@ -9,6 +9,7 @@ from sqlmodel import Session, select
 from src import engine
 from src.config import PLATFORM_INTEGRATION_IS_ON, PLATFORM_INTEGRATION_URL
 from src.models import Trader, Client, Order, Transaction
+from starlette_admin.exceptions import ActionFailed
 
 logger = logging.getLogger("api")
 
@@ -391,6 +392,41 @@ def change_account_password_platform(trader: Trader, password: str):
             print(response.content)
             logger.info(f'Неудачная попытка обновить пароль трейдера: {trader}')
             print("Ошибка при выполнении запроса")
+
+
+def change_account_balance_platform(trader: Trader, mainBalance: str, bonuses: str, credFacilities: str):
+    if PLATFORM_INTEGRATION_IS_ON:
+        url = f"{PLATFORM_INTEGRATION_URL}/api/admin/user/edit"
+        query_params = {
+            "token": "value1",
+        }
+        body = {
+            "id": trader.id
+        }
+
+        if mainBalance is not None:
+            body["mainBalance"] = mainBalance
+
+        if mainBalance is not None:
+            body["balance"] = mainBalance
+
+        if bonuses is not None:
+            body["bonuses"] = bonuses
+
+        if credFacilities is not None:
+            body["credFacilities"] = credFacilities
+
+        response = requests.put(url, params=query_params, json=body)
+        if response.status_code == 200:
+            print("Запрос успешно выполнен")
+            print(response.content)
+            logger.info(f'Обновлен баланс трейдера: {trader} {mainBalance},  {bonuses}, {credFacilities}')
+        else:
+            print(response.status_code)
+            print(response.content)
+            logger.info(f'Неудачная попытка обновить баланс трейдера: {trader}')
+            print("Ошибка при выполнении запроса")
+            raise ActionFailed("Sorry, something went wrong")
 
 
 def create_transaction(trader: Trader, value: int, type: str, description: str):

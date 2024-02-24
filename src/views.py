@@ -59,7 +59,8 @@ from starlette_admin.helpers import html_params
 from .models import Employee, Role, Client, Desk, Affiliate, Department, Note, Trader, Order, Transaction, Status
 from . import engine
 from .platfrom_integration import update_platform_data, edit_account_platform, change_account_password_platform, \
-    update_order, edit_order_platform, update_orders, update_platform_data_by_id, create_transaction
+    update_order, edit_order_platform, update_orders, update_platform_data_by_id, create_transaction, \
+    change_account_balance_platform
 
 logger = logging.getLogger("api")
 
@@ -845,6 +846,43 @@ class TradersView(MyModelView):
         for Trader in await self.find_by_pks(request, pks):
             change_account_password_platform(Trader, request.query_params["password"])
         return "{} passwords were successfully set".format(
+            len(pks)
+        )
+
+    @action(
+        name="change_balance",
+        text="Change balance",
+        confirmation="Enter the balance you want to set",
+        submit_btn_text="Yes, proceed",
+        submit_btn_class="btn-success",
+        form="""
+            <div class="input-group input-group-sm mb-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="main-balance-label">Main Balance, $:</span>
+                </div>
+                <input name="mainBalance" type="text" class="form-control" aria-label="Main Balance" aria-describedby="main-balance-label">
+            </div>
+            
+            <div class="input-group input-group-sm mb-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="bonuses-label">Bonuses, $:</span>
+                </div>
+                <input name="bonuses" type="text" class="form-control" aria-label="Secondary Balance" aria-describedby="secondary-balance-label">
+            </div>
+            
+            <div class="input-group input-group-sm mb-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="credFacilities-label">Credit Facilities, $:</span>
+                </div>
+                <input name="credFacilities" type="text" class="form-control" aria-label="Extra Balance" aria-describedby="extra-balance-label">
+            </div>
+            """,
+    )
+    async def change_balance(self, request: Request, pks: List[Any]) -> str:
+        session: Session = request.state.session
+        for trader in await self.find_by_pks(request, pks):
+            change_account_balance_platform(trader, request.query_params["mainBalance"], request.query_params["bonuses"], request.query_params["credFacilities"])
+        return "{} balance(s)  were successfully changed".format(
             len(pks)
         )
 
