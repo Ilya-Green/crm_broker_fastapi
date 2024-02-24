@@ -395,10 +395,15 @@ $(function () {
     });
 });
 
+var searchTimeout;
+$("#searchInput").on("keyup", function () {
+    clearTimeout(searchTimeout);
 
-  $("#searchInput").on("keyup", function () {
-    table.search($(this).val()).draw();
-  });
+    var searchText = $(this).val();
+    searchTimeout = setTimeout(function() {
+        table.search(searchText).draw();
+    }, 500);
+});
 
   function onSelectChange() {
     selectedRows = table.rows({ selected: true }).ids().toArray();
