@@ -347,11 +347,11 @@ def edit_account_platform(obj: Any,):
         if response.status_code == 200:
             print("Запрос успешно выполнен")
             print(response.content)
-            logger.info(f'Обновлены данные ордера: {obj}')
+            logger.info(f'Обновлены данные трейдера: {obj}')
         else:
             print(response.status_code)
             print(response.content)
-            logger.info(f'Неудачная попытка обновить данные ордера: {obj}')
+            logger.info(f'Неудачная попытка обновить данные трейдера: {obj}')
             print("Ошибка при выполнении запроса")
 
 
@@ -385,11 +385,11 @@ def change_account_password_platform(trader: Trader, password: str):
         if response.status_code == 200:
             print("Запрос успешно выполнен")
             print(response.content)
-            logger.info(f'Обновлены данные ордера: {trader}')
+            logger.info(f'Обновлены пароль трейдера: {trader}')
         else:
             print(response.status_code)
             print(response.content)
-            logger.info(f'Неудачная попытка обновить данные ордера: {trader}')
+            logger.info(f'Неудачная попытка обновить пароль трейдера: {trader}')
             print("Ошибка при выполнении запроса")
 
 
@@ -414,5 +414,5 @@ def create_transaction(trader: Trader, value: int, type: str, description: str):
         else:
             print(response.status_code)
             print(response.content)
-            logger.info(f'Неудачная попытка обновить данные ордера: {trader} : {value}$ {type} {description}')
+            logger.info(f'Неудачная попытка добавления транзакции: {trader} : {value}$ {type} {description}')
             print("Ошибка при выполнении запроса")
