@@ -18,8 +18,11 @@ from typing import (
     Union,
 )
 
+import pytz
 from starlette.datastructures import FormData, UploadFile
 from starlette.requests import Request
+
+from src.config import CRM_TIMEZONE
 from starlette_admin._types import RequestAction
 from starlette_admin.helpers import extract_fields, html_params, is_empty_file
 from starlette_admin.i18n import (
@@ -701,6 +704,11 @@ class DateTimeField(NumberField):
         assert isinstance(
             value, (datetime, date, time)
         ), f"Expect datetime | date | time, got  {type(value)}"
+
+        value = value.replace(tzinfo=None)
+        value = pytz.timezone('UTC').localize(value)
+        if CRM_TIMEZONE:
+            value = value.astimezone(pytz.timezone(CRM_TIMEZONE))
         if action != RequestAction.EDIT:
             return format_datetime(value, self.output_format)
         return value.isoformat()

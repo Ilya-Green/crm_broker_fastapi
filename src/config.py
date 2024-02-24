@@ -9,6 +9,8 @@ APP_TYPE = os.environ.get("APP_TYPE")
 APP_SECRET = os.environ.get("APP_SECRET")
 ADMIN_PSWD = os.environ.get("ADMIN_PSWD")
 
+CRM_TIMEZONE = os.environ.get("CRM_TIMEZONE")
+
 DB_URI = os.environ.get("DB_URI")
 DB_FILE = os.environ.get("DB_FILE")
 
