@@ -207,7 +207,7 @@ def update_platform_data_by_id(ids: list):
         response = requests.get(url=f'{PLATFORM_INTEGRATION_URL}/api/admin/transaction/all', params=params)
         data = response.json()
         for transaction_data in data:
-            if user_data["userId"] in ids:
+            if transaction_data["userId"] in ids:
                 new_transaction = Transaction(
                     id=transaction_data["id"],
                     content=transaction_data.get("content"),
