@@ -1851,6 +1851,10 @@ class StatusesView(MyModelView):
     column_visibility = True
     search_builder = True
 
+    def can_create(self, request: Request) -> bool:
+        if request.state.user["sys_admin"]:
+            return True
+
     def can_edit(self, request: Request) -> bool:
         if request.state.user["sys_admin"]:
             return True
@@ -1890,6 +1894,10 @@ class RetainStatusesView(MyModelView):
         if request.state.user["retain"] is True:
             return True
         return False
+
+    def can_create(self, request: Request) -> bool:
+        if request.state.user["sys_admin"]:
+            return True
 
     def can_edit(self, request: Request) -> bool:
         if request.state.user["sys_admin"]:
