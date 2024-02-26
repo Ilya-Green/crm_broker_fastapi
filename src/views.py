@@ -1824,6 +1824,22 @@ class ClientsView(MyModelView):
 
 
 class StatusesView(MyModelView):
+
+    def is_accessible(self, request: Request) -> bool:
+        referer_url = urlparse(request.headers.get("referer"))
+        query_dict = parse_qs(referer_url.query)
+        self.query = query_dict
+        self.id = request.state.user["id"]
+        self.desk_id = request.state.user["desk_id"]
+        self.department_id = request.state.user["department_id"]
+        self.desk_leader = request.state.user["desk_leader"]
+        self.department_leader = request.state.user["department_leader"]
+        self.head = request.state.user["head"]
+        self.sys_admin = request.state.user["sys_admin"]
+        self.retain = request.state.user["retain"]
+
+        return True
+
     fields = [
         Status.id,
         Status.name,
@@ -1835,10 +1851,12 @@ class StatusesView(MyModelView):
     column_visibility = True
     search_builder = True
 
-    def can_delete(self, request: Request) -> bool:
+    def can_edit(self, request: Request) -> bool:
         if request.state.user["sys_admin"]:
             return True
-        if request.state.user["head"]:
+
+    def can_delete(self, request: Request) -> bool:
+        if request.state.user["sys_admin"]:
             return True
 
 
@@ -1873,10 +1891,12 @@ class RetainStatusesView(MyModelView):
             return True
         return False
 
-    def can_delete(self, request: Request) -> bool:
+    def can_edit(self, request: Request) -> bool:
         if request.state.user["sys_admin"]:
             return True
-        if request.state.user["retain"]:
+
+    def can_delete(self, request: Request) -> bool:
+        if request.state.user["sys_admin"]:
             return True
 
 
