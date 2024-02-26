@@ -5,6 +5,7 @@ from fastapi.responses import JSONResponse
 from starlette.applications import Starlette
 from starlette.responses import HTMLResponse, PlainTextResponse
 from starlette.routing import Route
+from sqlalchemy_utils import database_exists, create_database
 from starlette.staticfiles import StaticFiles
 from starlette.templating import Jinja2Templates
 from starlette_admin.contrib.sqlmodel import Admin
@@ -58,6 +59,8 @@ logger = logging.getLogger("uvicorn.access")
 
 @app.on_event("startup")
 async def startup_event():
+    if not database_exists(engine.url):
+        create_database(engine.url)
     init_database()
     if APP_TYPE != "DEV":
         logger.warning(f"{APP_DOMAIN} : {APP_TYPE} : server_turned_on")
