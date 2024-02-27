@@ -233,6 +233,7 @@ class Status(SQLModel, table=True):
 class RetainStatus(SQLModel, table=True):
     id: Optional[int] = Field(primary_key=True)
     name: str = Field()
+    hide: bool = Field(default=False)
 
     traders: Trader = Relationship(back_populates="status")
 
