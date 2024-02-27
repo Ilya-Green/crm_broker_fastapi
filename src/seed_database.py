@@ -185,6 +185,18 @@ def seed_database():
                     name="Live"
                 )
             )
+            session.add(
+                RetainStatus(
+                    name="inactive",
+                    hide=1,
+                )
+            )
+            session.add(
+                RetainStatus(
+                    name="New",
+                    hide=0,
+                )
+            )
             session.commit()
 
             session.add(
