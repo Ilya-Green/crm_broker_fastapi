@@ -263,7 +263,7 @@ $(function () {
     searchHighlight: true,
     responsive: model.responsiveTable,
     serverSide: true,
-    scrollX: false,
+    scrollX: true,
     lengthMenu: model.lengthMenu,
     pagingType: "full_numbers",
     pageLength: model.pageSize,
@@ -351,6 +351,12 @@ $(function () {
       return order;
     })(),
     initComplete: function () {
+          $('.dataTables_scrollHead').css('overflow', 'auto');
+
+    // Sync THEAD scrolling with TBODY
+    $('.dataTables_scrollHead').on('scroll', function () {
+        $('.dataTables_scrollBody').scrollLeft($(this).scrollLeft());
+    });
       new $.fn.dataTable.Buttons(table, {
         name: "main",
         buttons: buttons,
