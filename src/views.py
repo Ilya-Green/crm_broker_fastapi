@@ -628,21 +628,52 @@ class TradersView(MyModelView):
 
     def get_list_query(self):
         update_platform_data()
+        if "hide" not in self.query:
+            with Session(engine) as session:
+                statement = select(RetainStatus).where(RetainStatus.hide == False)
+                statuses = session.exec(statement).all()
+                exc_statuses = [status.id for status in statuses]
+            query = super().get_list_query().where(or_(Trader.status_id.in_(exc_statuses), Trader.status_id.is_(None)))
+        else:
+            query = super().get_list_query()
+
+        if "responsible_id" in self.query:
+            query = query.where(Trader.responsible_id == self.query["responsible_id"][0])
+        if "status_id" in self.query:
+            query = query.where(Trader.status_id == self.query["status_id"][0])
+        # if "affiliate_id" in self.query:
+        #     query = query.where(Trader.affiliate_id == self.query["affiliate_id"][0])
         if self.sys_admin:
-            return super().get_list_query()
+            return query
         if self.head:
-            return super().get_list_query()
+            return query
         if self.retain:
-            return super().get_list_query().where(Trader.responsible_id == self.id)
+            query = query.where(Trader.responsible_id == self.id)
+            return query
 
     def get_count_query(self):
         # update_platform_data()
+        if "hide" not in self.query:
+            with Session(engine) as session:
+                statement = select(RetainStatus).where(RetainStatus.hide == False)
+                statuses = session.exec(statement).all()
+                exc_statuses = [status.id for status in statuses]
+            query = super().get_count_query().where(or_(Trader.status_id.in_(exc_statuses), Trader.status_id.is_(None)))
+        else:
+            query = super().get_count_query()
+        if "responsible_id" in self.query:
+            query = query.where(Trader.responsible_id == self.query["responsible_id"][0])
+        if "status_id" in self.query:
+            query = query.where(Trader.status_id == self.query["status_id"][0])
+        # if "affiliate_id" in self.query:
+        #     query = query.where(Trader.affiliate_id == self.query["affiliate_id"][0])
         if self.sys_admin:
-            return super().get_count_query()
+            return query
         if self.head:
-            return super().get_count_query()
+            return query
         if self.retain:
-            return super().get_count_query().where(Trader.responsible_id == self.id)
+            query = query.where(Trader.responsible_id == self.id)
+            return query
 
     # fields = [
     #     Trader.

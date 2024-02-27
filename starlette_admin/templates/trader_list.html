@@ -1,0 +1,386 @@
+{% extends "layout.html" %}
+{% block header %}
+    <div class="d-flex justify-content-between align-items-center">
+        <h1>{{ model.label }}</h1>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="{{ url_for(__name__ ~ ':index') }}">{{ _("Admin") }}</a>
+            </li>
+            <li class="breadcrumb-item active">{{ model.label }}</li>
+        </ol>
+    </div>
+{% endblock %}
+{% block modal %}
+    {% include "modals/loading.html" %}
+    {% include "modals/error.html" %}
+    {% include "modals/actions.html" %}
+{% endblock %}
+{% block content %}
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <div id="btn_container" class="card-title"></div>
+                        <div class="card-actions">
+                            <div class="btn-list">
+                                <div class="dropdown" id="actions-dropdown" style="display: none">
+                                    <button type="button"
+                                            class="btn dropdown-toggle"
+                                            data-bs-toggle="dropdown"
+                                            id="actionDropdownButton">
+                                        {{ _("With selected") }} (<span class="actions-selected-counter">0</span
+                                    >)
+                                    </button>
+                                    <div class="dropdown-menu" aria-labelledby="actionDropdownButton">
+                                        {% for action in _actions %}
+                                            <!-- prettier-ignore -->
+                                            <a class="dropdown-item action-item"
+                                               type="button"
+                                               href="#"
+                                                    {% if action.confirmation %} data-bs-toggle="modal"
+                                               data-bs-target="#modal-action"
+                                               data-confirmation="{{ action.confirmation }}" {% else %}
+                                               data-no-confirmation-action="true" {% endif %}
+                                               data-form="{{ action.form }}"
+                                               data-name="{{ action.name }}"
+                                               data-submit-btn-text="{{ action.submit_btn_text }}"
+                                               data-submit-btn-class="{{ action.submit_btn_class }}"
+                                               >
+                                                {{ action.text }}
+                                            </a>
+                                        {% endfor %}
+                                    </div>
+
+                                      <div class="modal modal-blur fade" id="modal-action-status" tabindex="-1" role="dialog" aria-hidden="true">
+                                      <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+                                          <div class="modal-content">
+                                              <div class="modal-body">
+                                                  <div id="actionConfirmationStatus"></div></br>
+                                                  Select status
+                                                  <select class="form-select" name="status" id="statusesSelect">
+                                                      <option value="none">no change</option>
+                                                  </select>
+                                              </div>
+                                              <div class="modal-footer">
+                                                  <button type="button" class="btn btn-link link-secondary me-auto"
+                                                          data-bs-dismiss="modal">{{ _("Cancel") }}</button>
+                                                  <button id="actionSubmitStatus" type="button" class="btn btn-primary"
+                                                          data-bs-dismiss="modal">{{ _("Yes, Proceed") }}</button>
+                                              </div>
+                                          </div>
+                                      </div>
+                                  </div>
+
+                                    <script>
+                                    fetch('/admin/api/employee?include_relationships=0')
+                                      .then(response => response.json())
+                                      .then(data => {
+                                          console.log(data)
+                                          const responsibleSelect = document.getElementById('responsible-filter');
+                                          const itemsFilter = data.items;
+                                        itemsFilter.forEach(item => {
+                                          const optionElement = document.createElement('option');
+                                          optionElement.value = item.id;
+                                          optionElement.textContent = item.login.toUpperCase();
+                                            responsibleSelect.appendChild(optionElement)
+                                        })
+                                          function getQueryParam(param) {
+                                                const urlParams = new URLSearchParams(window.location.search);
+                                                return urlParams.get(param);
+                                            }
+                                            const selectedOption = getQueryParam('responsible_id');
+                                            if (selectedOption){
+                                                const selectElement = document.getElementById('responsible-filter');
+                                                selectElement.value = selectedOption;
+                                            }
+                                        const selectElement = document.getElementById('status-responsible');
+                                        const items = data.items;
+                                        items.forEach(item => {
+                                          const optionElement = document.createElement('option');
+                                          optionElement.value = item.id;
+                                          optionElement.textContent = item.login.toUpperCase();
+                                          selectElement.appendChild(optionElement)
+                                        })
+                                        const selectElementDepartment = document.getElementById('status-responsible-department');
+                                        const itemsDepartment = data.items;
+                                        itemsDepartment.forEach(item => {
+                                          const optionElement = document.createElement('option');
+                                          optionElement.value = item.id;
+                                          optionElement.textContent = item.login.toUpperCase();
+                                          selectElementDepartment.appendChild(optionElement);
+                                        })
+                                        const selectElementDesk = document.getElementById('status-responsible-desk');
+                                        const itemsDesk = data.items;
+                                        itemsDesk.forEach(item => {
+                                          const optionElement = document.createElement('option');
+                                          optionElement.value = item.id;
+                                          optionElement.textContent = item.login.toUpperCase();
+                                          selectElementDesk.appendChild(optionElement);
+                                        })
+                                        ;
+                                      })
+                                      .catch(error => {
+                                        console.error('Error:', error);
+                                      });
+                                    fetch('/admin/api/retain-status?include_relationships=0')
+                                      .then(response => response.json())
+                                      .then(data => {
+                                          const selectElementFilter = document.getElementById('status-filter');
+                                          data.items.forEach(status => {
+                                              const optionElement = document.createElement('option');
+                                              optionElement.value = status.id;
+                                              optionElement.textContent = status.name.toUpperCase();
+                                              selectElementFilter.appendChild(optionElement);
+                                            })
+
+
+                                          function getQueryParam(param) {
+                                                const urlParams = new URLSearchParams(window.location.search);
+                                                return urlParams.get(param);
+                                            }
+                                            const selectedOption = getQueryParam('status_id');
+                                            if (selectedOption){
+                                                const selectElement = document.getElementById('status-filter');
+                                                selectElement.value = selectedOption;
+                                            }
+                                      })
+                                      .catch(error => {
+                                        console.error('Error:', error);
+                                      });
+                                    </script>
+
+                                </div>
+                                {% if model.can_create(request) %}
+                                    <a href="{{ url_for(__name__ ~ ':create', identity=model.identity) }}"
+                                       class="btn btn-primary btn-block ms-2">
+                                        <i class="fa-solid fa-plus me-2"></i>
+                                        {{ _("New %(name)s", name=model.name ) }}
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body border-bottom p-0">
+                        <div class="d-flex m-3">
+                            <div id="pageLength_container">
+                               <select class="form-select" name="department" id="responsible-filter" style="width: 80px; display: inline-block;">
+                                    <option value="none"> all </option>
+                              </select>
+                              <script>
+                              function responsibleFunc() {
+                                var url = new URL(window.location.href);
+                                var id = document.getElementById('responsible-filter').value;
+                                    if (id === 'none') {
+                                    url.searchParams.delete('responsible_id');
+                                } else {
+                                    url.searchParams.set('responsible_id', id);
+                                }
+
+                                window.location.href = url.toString();
+                              }
+
+                              var selectElement = document.getElementById("responsible-filter");
+                              selectElement.addEventListener("change", function() {
+                                responsibleFunc();
+                            });
+                              </script>
+                            <select class="form-select" name="department" id="status-filter" style="width: 80px; display: inline-block;">
+                                <option value="none"> all </option>
+                            </select>
+                          <script>
+                              function statusFunc() {
+                                var url = new URL(window.location.href);
+
+                                var id = document.getElementById('status-filter').value;
+
+                                if (id === 'none') {
+                                    url.searchParams.delete('status_id');
+                                } else {
+                                    url.searchParams.set('status_id', id);
+                                }
+
+                                window.location.href = url.toString();
+                              }
+
+                              var selectElement = document.getElementById("status-filter");
+
+                              selectElement.addEventListener("change", function() {
+                                statusFunc();
+                                // statusFunc();
+                            });
+                          </script>
+
+                              <button id="showButton" class="btn btn-light" onclick="showFunc()">Show inactive</button>
+                              <button id="hideButton" class="btn btn-light" onclick="hideFunc()">Hide</button>
+                              <script>
+                              function showFunc() {
+                                // Получаем текущий URL-адрес
+                                var url = new URL(window.location.href);
+                                // Добавляем параметры
+                                url.searchParams.set('hide', 'false');
+                                // Перенаправляем на обновленный URL-адрес
+                                window.location.href = url.toString();
+                              }
+                              function hideFunc() {
+                                // Получаем текущий URL-адрес
+                                var url = new URL(window.location.href);
+                                // Добавляем параметры
+                                url.searchParams.delete('hide');
+                                // Перенаправляем на обновленный URL-адрес
+                                window.location.href = url.toString();
+                              }
+                              </script>
+                              <script>
+                                var urlParams = new URLSearchParams(window.location.search);
+
+                                if (urlParams.get('hide') === 'false') {
+                                    document.getElementById('hideButton').style.display = 'inline-block';
+                                    document.getElementById('showButton').style.display = 'none';
+                                } else {
+                                    document.getElementById('hideButton').style.display = 'none';
+                                    document.getElementById('showButton').style.display = 'inline-block';
+                                }
+                              </script>
+                              <button class="btn btn-light" onclick="clearFunc()">Clear filters</button>
+                              <script>
+                              function clearFunc() {
+                                const currentURL = new URL(window.location.href);
+                                currentURL.search = '';
+                                window.location.href = currentURL.toString();
+                              }
+                              </script>
+                            </div>
+                            <div class="ms-auto text-muted">
+                                <div class="ms-2 d-inline-block">
+                                    <div class="input-icon">
+                                        <span class="input-icon-addon">
+                                            <!-- Download SVG icon from http://tabler-icons.io/i/search -->
+                                            <svg xmlns="http://www.w3.org/2000/svg"
+                                                 class="icon"
+                                                 width="24"
+                                                 height="24"
+                                                 viewBox="0 0 24 24"
+                                                 stroke-width="2"
+                                                 stroke="currentColor"
+                                                 fill="none"
+                                                 stroke-linecap="round"
+                                                 stroke-linejoin="round">
+                                                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                                                <circle cx="10" cy="10" r="7"/>
+                                                <line x1="21" y1="21" x2="15" y2="15"/>
+                                            </svg>
+                                        </span>
+                                        <input type="search"
+                                               id="searchInput"
+                                               value=""
+                                               class="form-control"
+                                               placeholder="{{ _('Search') }}..."
+                                               aria-label="Search in list"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="alertContainer"></div>
+                    </div>
+                    <table id="dt" class="table table-vcenter text-nowrap">
+                        <thead>
+                        <tr id="table-header">
+                            <th></th>
+                            <th></th>
+                        </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block head_css %}
+    <link rel="stylesheet"
+          href="{{ url_for(__name__ ~ ':statics', path='css/dt.min.css') }}"/>
+    <link rel="stylesheet"
+          href="{{ url_for(__name__ ~ ':statics', path='css/dt.checkboxes.css') }}"/>
+    {% for link in model._additional_css_links(request, "LIST" | ra) %}
+        <link rel="stylesheet" href="{{ link }}">
+    {% endfor %}
+    <style>
+        div.dataTables_wrapper div.dataTables_info {
+            padding-top: 0;
+        }
+
+        table.dataTable span.highlight {
+            background-color: #ffff88;
+            border-radius: 0.28571429rem;
+        }
+
+        table.dataTable span.column_highlight {
+            background-color: #ffcc99;
+            border-radius: 0.28571429rem;
+        }
+
+        table.dataTable.dtr-inline.collapsed > tbody > tr > td.dtr-control:before,
+        table.dataTable.dtr-inline.collapsed > tbody > tr > th.dtr-control:before {
+            background-color: #206bc4;
+        }
+
+        table.dataTable {
+            margin-top: 0px !important;
+            margin-bottom: 0px !important;
+        }
+
+        .info-container {
+            text-align: left; /* выравниваем текст по центру */
+            margin-bottom: 10px; /* добавляем немного отступа снизу */
+            margin-left: 20px;
+            /*margin-top: 7px;*/
+        }
+
+        .info-box {
+            padding: 10px; /* внутренний отступ */
+            border-radius: 5px; /* скругление углов */
+            display: inline-block; /* чтобы блок был рядом с остальным контентом */
+}
+
+/*.dataTables_scrollBody {*/
+/*    transform: rotateX(180deg);*/
+/*}*/
+
+/*.dataTables_scrollBody table {*/
+/*    transform: rotateX(180deg);*/
+/*}*/
+    </style>
+{% endblock %}
+{% block script %}
+    <script type="text/javascript"
+            src="{{ url_for(__name__ ~ ':statics', path='js/vendor/moment.min.js') }}"></script>
+    {% if get_locale() != 'en' %}
+        <script type="text/javascript"
+                src="{{ url_for(__name__ ~ ':statics', path='i18n/momentjs/' ~ get_locale() ~ '.js') }}"></script>
+    {% endif %}
+    {% if 'pdf' in model.export_types %}
+        <script type="text/javascript"
+                src="{{ url_for(__name__ ~ ':statics', path='js/vendor/pdfmake.min.js') }}"></script>
+        <script type="text/javascript"
+                src="{{ url_for(__name__ ~ ':statics', path='js/vendor/vfs_fonts.js') }}"></script>
+    {% endif %}
+    <script type="text/javascript"
+            src="{{ url_for(__name__ ~ ':statics', path='js/vendor/dt.min.js') }}"></script>
+    <script type="text/javascript"
+            src="{{ url_for(__name__ ~ ':statics', path='js/vendor/dt.checkboxes.js') }}"></script>
+    <script type="text/javascript"
+            src="{{ url_for(__name__ ~ ':statics', path='js/vendor/dt.searchHighlight.js') }}"></script>
+    <script type="text/javascript"
+            src="{{ url_for(__name__ ~ ':statics', path='js/utils.js') }}"></script>
+    <script>var model = {{__js_model__ | tojson | safe}};</script>
+    <script type="text/javascript"
+            src="{{ url_for(__name__ ~ ':statics', path='js/render.js') }}"></script>
+    {% if custom_render_js(request) %}
+        <script type="text/javascript" src="{{ custom_render_js(request) }}"></script>
+    {% endif %}
+    {% for link in model._additional_js_links(request, "LIST" | ra) %}
+        <script type="text/javascript" src="{{ link }}"></script>
+    {% endfor %}
+    <script type="text/javascript"
+            src="{{ url_for(__name__ ~ ':statics', path='js/list.js') }}"></script>
+{% endblock %}
