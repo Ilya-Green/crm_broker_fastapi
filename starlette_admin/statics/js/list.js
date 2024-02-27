@@ -254,7 +254,7 @@ $(function () {
   var table = $("#dt").DataTable({
     stateSave: true,
     autoWidth: false,
-    dom: "r<'table-responsive't><'card-footer d-flex align-items-center'<'m-0'i><'m-0 ms-auto'p>>",
+    dom:  "<'card-footer d-flex align-items-center'<'m-0'i><'m-0 ms-auto'p>>r<'table-responsive't><'card-footer d-flex align-items-center'<'m-0'i><'m-0 ms-auto'p>>",
     paging: true,
     lengthChange: true,
     searching: true,
