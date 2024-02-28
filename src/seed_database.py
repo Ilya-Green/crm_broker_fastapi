@@ -2,7 +2,7 @@ from sqlmodel import select, Session
 
 from src import engine
 from src.config import ADMIN_PSWD
-from src.models import Role, Employee, Type, Status
+from src.models import Role, Employee, Type, Status, RetainStatus
 
 
 def seed_database():
