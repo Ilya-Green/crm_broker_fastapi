@@ -633,7 +633,8 @@ class TradersView(MyModelView):
                 statement = select(RetainStatus).where(RetainStatus.hide == False)
                 statuses = session.exec(statement).all()
                 exc_statuses = [status.id for status in statuses]
-            query = super().get_list_query().where(or_(Trader.status_id.in_(exc_statuses), Trader.status_id.is_(None)))
+                print(exc_statuses)
+            query = super().get_list_query().where(and_(Trader.status_id.in_(exc_statuses), Trader.status_id.isnot(None)))
         else:
             query = super().get_list_query()
 
@@ -658,7 +659,7 @@ class TradersView(MyModelView):
                 statement = select(RetainStatus).where(RetainStatus.hide == False)
                 statuses = session.exec(statement).all()
                 exc_statuses = [status.id for status in statuses]
-            query = super().get_count_query().where(or_(Trader.status_id.in_(exc_statuses), Trader.status_id.is_(None)))
+            query = super().get_count_query().where(and_(Trader.status_id.in_(exc_statuses), Trader.status_id.isnot(None)))
         else:
             query = super().get_count_query()
         if "responsible_id" in self.query:
