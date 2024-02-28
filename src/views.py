@@ -1160,21 +1160,28 @@ class OrdersView(MyModelView):
 
     def get_list_query(self):
         update_orders()
+        query = super().get_list_query()
         if self.sys_admin:
-            return super().get_list_query()
+            return query
         if self.head:
-            return super().get_list_query()
+            return query
+        if self.retain and (self.department_leader or self.desk_leader):
+            return query
         if self.retain:
-            return super().get_list_query().where(Order.user_id.in_(self.responsible_user_ids))
+            query = query.where(Order.user_id.in_(self.responsible_user_ids))
+            return query
 
     def get_count_query(self):
-        # update_platform_data()
+        query = super().get_count_query()
         if self.sys_admin:
-            return super().get_count_query()
+            return query
         if self.head:
-            return super().get_count_query()
+            return query
+        if self.retain and (self.department_leader or self.desk_leader):
+            return query
         if self.retain:
-            return super().get_count_query().where(Order.user_id.in_(self.responsible_user_ids))
+            query = query.where(Order.user_id.in_(self.responsible_user_ids))
+            return query
 
     async def edit(self, request: Request, pk: Any, data: Dict[str, Any]) -> Any:
         try:
