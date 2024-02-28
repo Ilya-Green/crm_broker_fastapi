@@ -60,7 +60,7 @@ from .models import Employee, Role, Client, Desk, Affiliate, Department, Note, T
 from . import engine
 from .platfrom_integration import update_platform_data, edit_account_platform, change_account_password_platform, \
     update_order, edit_order_platform, update_orders, update_platform_data_by_id, create_transaction, \
-    change_account_balance_platform
+    change_account_balance_platform, register_account
 
 logger = logging.getLogger("api")
 
@@ -1467,6 +1467,39 @@ class ClientsView(MyModelView):
             session.commit()
 
         return "{} clients were successfully changed".format(
+            len(pks)
+        )
+
+    @action(
+        name="send_to_ret",
+        text="Send to retention",
+    )
+    async def send_to_ret(self, request: Request, pks: List[Any]) -> str:
+        session_1: Session = request.state.session
+        clients = await self.find_by_pks(request, pks)
+
+        with Session(engine) as session:
+            for client in clients:
+                statement = select(Trader).where(
+                    (Trader.email == client.email) | (Trader.phone_number == client.phone_number)
+                )
+                current_trader = session.exec(statement).first()
+                if current_trader:
+                    client.trader_id = current_trader.id
+                    session_1.add(client)
+                    if current_trader.status_id == 1 or current_trader.status_id is None:
+                        current_trader.status_id = 2
+                        session.add(current_trader)
+                else:
+                    new_trader = register_account(client)
+                    client.trader_id = new_trader.id
+                    session_1.add(client)
+                    new_trader.status_id = 2
+                    session.add(new_trader)
+            session.commit()
+        session_1.commit()
+
+        return "{} clients were successfully send to ret".format(
             len(pks)
         )
 
