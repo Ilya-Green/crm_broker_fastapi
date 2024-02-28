@@ -31,7 +31,7 @@ def register_account(client: Client):
             "password": generate_password(10),
             "phone": client.phone_number,
             "date": 1685823000002,
-            "country": client.country_code,
+            "country": 'RU',
         }
         headers = {
             "Content-Type": "application/json"
@@ -76,9 +76,6 @@ def register_account(client: Client):
             autologin_link=f"{PLATFORM_INTEGRATION_URL}/autoologin?token=" + autologin if autologin else "",
             status_id=1,
         )
-        with Session(engine) as session:
-            session.merge(new_trader)
-            session.commit()
         return new_trader
 
 

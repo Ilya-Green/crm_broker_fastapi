@@ -1497,10 +1497,10 @@ class ClientsView(MyModelView):
                         session.add(current_trader)
                 else:
                     new_trader = register_account(client)
-                    client.trader_id = new_trader.id
-                    session_1.add(client)
                     new_trader.status_id = 2
                     session.add(new_trader)
+                    client.trader_id = new_trader.id
+                    session_1.add(client)
             session.commit()
         session_1.commit()
 
