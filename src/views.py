@@ -574,6 +574,7 @@ class AffiliatesView(MyModelView):
 
 class TradersView(MyModelView):
     detail_template: str = "trader_detail.html"
+    list_template: str = "trader_list.html"
 
     # responsive_table = True
     column_visibility = True
