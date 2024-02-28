@@ -650,6 +650,8 @@ class TradersView(MyModelView):
             return query
         if self.head:
             return query
+        if self.retain and (self.department_leader or self.desk_leader):
+            return query
         if self.retain:
             query = query.where(Trader.responsible_id == self.id)
             return query
@@ -673,6 +675,8 @@ class TradersView(MyModelView):
         if self.sys_admin:
             return query
         if self.head:
+            return query
+        if self.retain and (self.department_leader or self.desk_leader):
             return query
         if self.retain:
             query = query.where(Trader.responsible_id == self.id)
