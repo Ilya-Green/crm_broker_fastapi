@@ -56,7 +56,8 @@ import logging
 from sqlalchemy import select as sqlalchemy_select
 
 from starlette_admin.helpers import html_params
-from .models import Employee, Role, Client, Desk, Affiliate, Department, Note, Trader, Order, Transaction, Status
+from .models import Employee, Role, Client, Desk, Affiliate, Department, Note, Trader, Order, Transaction, Status, \
+    RetainStatus
 from . import engine
 from .platfrom_integration import update_platform_data, edit_account_platform, change_account_password_platform, \
     update_order, edit_order_platform, update_orders, update_platform_data_by_id, create_transaction, \
