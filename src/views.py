@@ -1481,9 +1481,12 @@ class ClientsView(MyModelView):
 
         with Session(engine) as session:
             for client in clients:
-                statement = select(Trader).where(
-                    (Trader.email == client.email) | (Trader.phone_number == client.phone_number)
-                )
+                if client.trader_id:
+                    statement = select(Trader).where(Trader.id == client.trader_id)
+                else:
+                    statement = select(Trader).where(
+                        (Trader.email == client.email) | (Trader.phone_number == client.phone_number)
+                    )
                 current_trader = session.exec(statement).first()
                 if current_trader:
                     client.trader_id = current_trader.id
