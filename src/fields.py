@@ -71,7 +71,7 @@ class CustomPhoneField(StringField):
 
 
 @dataclass
-class NotesField(StringField):
+class NotesField(CustomRelationField):
     """This field is used to represent any kind of long text content.
     For short text contents, use [StringField][starlette_admin.fields.StringField]"""
 
@@ -259,7 +259,7 @@ class EmailCopyField(EmailField):
 
 
 @dataclass
-class TraderStatusField(StringField):
+class TraderStatusField(CustomRelationField):
     """This field is used to represent any kind of long text content.
     For short text contents, use [StringField][starlette_admin.fields.StringField]"""
 
@@ -275,7 +275,7 @@ class TraderStatusField(StringField):
 
 
 @dataclass
-class StatusField(StringField):
+class StatusField(CustomRelationField):
     """This field is used to represent any kind of long text content.
     For short text contents, use [StringField][starlette_admin.fields.StringField]"""
 
