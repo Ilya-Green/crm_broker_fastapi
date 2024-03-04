@@ -221,8 +221,9 @@ class DepartmentField(StringField):
     exclude_from_edit: Optional[bool] = True
     exclude_from_list: Optional[bool] = False
 
+
 @dataclass
-class AffiliateField(StringField):
+class AffiliateField(CustomRelationField):
     """This field is used to represent any kind of long text content.
     For short text contents, use [StringField][starlette_admin.fields.StringField]"""
 
