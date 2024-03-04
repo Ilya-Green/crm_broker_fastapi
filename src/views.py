@@ -408,24 +408,6 @@ class EmployeeView(MyModelView):
             return self.can_delete(request)
         return True
 
-
-    fields = [
-        Employee.id,
-        Employee.login,
-        PasswordField("password"),
-        Employee.role,
-        Employee.desk,
-        # Employee.clients_responsible,
-        Employee.department,
-        # Employee.notes,
-        Employee.actions,
-    ]
-
-    exclude_fields_from_create = [Employee.actions, Employee.notes]
-    # exclude_fields_from_list = [Employee.password]
-    # exclude_fields_from_detail = [Employee.password]
-    # exc
-
     # def get_list_query(self):
     #     if self.sys_admin:
     #         return super().get_list_query()
