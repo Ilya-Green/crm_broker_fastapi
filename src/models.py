@@ -279,7 +279,7 @@ class Desk(SQLModel, table=True):
 
     client: Client = Relationship(back_populates="desk")
 
-    department_id: Optional[int] = Field(foreign_key="department.id", default=0)
+    department_id: Optional[int] = Field(foreign_key="department.id", default=None)
     department: "Department" = Relationship(back_populates="desk")
 
     # responsible_id: Optional[int] = Field(foreign_key="employee.id")
