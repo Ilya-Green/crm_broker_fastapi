@@ -275,7 +275,7 @@ class Desk(SQLModel, table=True):
     name: str = Field()
     description: Optional[str] = Field()
     creation_date: Optional[datetime] = Field(sa_column=Column(DateTime(timezone=True), default=datetime.utcnow))
-    language_id: Optional[int] = Field()
+    language_id: Optional[str] = Field()
 
     client: Client = Relationship(back_populates="desk")
 
