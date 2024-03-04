@@ -29,7 +29,8 @@ from starlette_admin import (
 from starlette_admin.contrib.sqla.helpers import build_query, build_order_clauses
 from starlette_admin.fields import FileField, RelationField, BooleanField
 from .fields import PasswordField, CopyField, NotesField, EmailCopyField, StatusField, TraderField, ResponsibleField, \
-    CustomPhoneField
+    CustomPhoneField, LeadField, TraderStatusField, RoleField, AffiliateField, DeskField, EmployeesField, \
+    LeadWithCommentsField, OrderField, TransactionField, LeadCompactField
 from starlette_admin.contrib.sqlmodel import ModelView
 from starlette.requests import Request
 from sqlalchemy.orm import Session, joinedload, sessionmaker
@@ -57,7 +58,7 @@ from sqlalchemy import select as sqlalchemy_select
 
 from starlette_admin.helpers import html_params
 from .models import Employee, Role, Client, Desk, Affiliate, Department, Note, Trader, Order, Transaction, Status, \
-    RetainStatus
+    RetainStatus, Type
 from . import engine
 from .platfrom_integration import update_platform_data, edit_account_platform, change_account_password_platform, \
     update_order, edit_order_platform, update_orders, update_platform_data_by_id, create_transaction, \
@@ -96,6 +97,17 @@ class NotesView(MyModelView):
             if request.state.user["retain"] is True:
                 return True
         return False
+
+    fields = [
+        Note.id,
+        Note.content,
+        Note.created_at,
+        Note.employee_name,
+        LeadCompactField("client"),
+        Note.client,
+        ResponsibleField("employee"),
+        Note.employee,
+    ]
 
 
     def can_view_details(self, request: Request) -> bool:
@@ -226,6 +238,24 @@ class EmployeeView(MyModelView):
             if request.state.user["desk_leader"] is True:
                 return True
         return False
+
+    fields = [
+        Employee.id,
+        Employee.name,
+        Employee.login,
+        PasswordField("password"),
+        RoleField("role"),
+        DeskField("department"),
+        DeskField("desk"),
+        Employee.clients_responsible,
+        # Employee.notes,
+        # Employee.actions,
+        Employee.role,
+        Employee.department,
+        Employee.desk,
+    ]
+
+    exclude_fields_from_create = [Employee.actions, Employee.notes]
 
     def get_list_query(self):
         if self.sys_admin:
@@ -420,6 +450,21 @@ class RolesView(MyModelView):
                 return True
         return False
 
+    fields = [
+        Role.id,
+        Role.name,
+        Role.sys_admin,
+        Role.head,
+        Role.department_leader,
+        Role.desk_leader,
+        Role.accounts_can_access,
+        Role.roles_can_access,
+        Role.clients_can_access,
+        Role.retain,
+        EmployeesField("user"),
+        Role.user,
+    ]
+
 
 class DepartmentsView(MyModelView):
     responsive_table = True
@@ -475,12 +520,14 @@ class DepartmentsView(MyModelView):
         if self.department_leader:
             return super().get_list_query().where(Department.id == self.department_id)
 
-    # fields = [
-    #     Department.name,
-    #     Department.desk,
-    #     Department.employee,
-    #     Department.clients,
-    # ]
+    fields = [
+        Department.name,
+        DeskField("desk"),
+        EmployeesField("employee"),
+        Department.desk,
+        Department.employee,
+        Department.clients,
+    ]
 
 
 class DesksView(MyModelView):
@@ -553,6 +600,17 @@ class DesksView(MyModelView):
         if self.desk_leader:
             return super().get_count_query().where(Desk.id == self.desk_id)
 
+    fields = [
+        Desk.id,
+        Desk.name,
+        DeskField("department"),
+        Desk.language_id,
+        Desk.creation_date,
+        Desk.department,
+        LeadField("client"),
+        Desk.client,
+    ]
+
     exclude_fields_from_create = [Desk.creation_date]
     exclude_fields_from_edit = [Desk.creation_date]
 
@@ -564,6 +622,7 @@ class AffiliatesView(MyModelView):
         Affiliate.id,
         Affiliate.name,
         CopyField("auth_key"),
+        LeadField("clients"),
         Affiliate.clients,
     ]
 
@@ -687,17 +746,21 @@ class TradersView(MyModelView):
     # ]
 
     fields = [
+        Trader.id,
         Trader.name,
         Trader.surname,
         Trader.email,
-        Trader.phone_number,
+        CustomPhoneField("phone_number"),
+        # Trader.phone_number,
         # Trader.date,
         Trader.country,
         Trader.created_at_tp,
         Trader.balance,
-        Trader.status,
-        Trader.responsible,
-        Trader.client,
+        StatusField("status"),
+        ResponsibleField("responsible"),
+        # LeadWithCommentsField("client"),
+        OrderField("orders"),
+        TransactionField("transactions"),
         Trader.orders,
         Trader.bonuses,
         Trader.credFacilities,
@@ -710,6 +773,9 @@ class TradersView(MyModelView):
         # Trader.autologin_link,
         Trader.autologin,
         Trader.transactions,
+        Trader.status,
+        Trader.client,
+        Trader.responsible,
     ]
 
     exclude_fields_from_list = [
@@ -1392,15 +1458,18 @@ class ClientsView(MyModelView):
         Client.second_name,
         EmailCopyField("email"),
         CustomPhoneField("phone_number"),
-        NotesField("notes", label="LAST NOTE"),
+        NotesField("notes"),
         StatusField("status"),
         ResponsibleField("responsible"),
         CountryField("country_code"),
         Client.creation_date,
         Client.funnel_name,
+        DeskField("desk"),
+        DeskField("department"),
 
         Client.description,
         Client.status,
+        StatusField("type"),
         Client.type,
         Client.title,
         Client.patronymic,
@@ -1414,7 +1483,10 @@ class ClientsView(MyModelView):
         Client.department,
         Client.responsible,
         Client.actions,
+        AffiliateField("affiliate"),
         Client.affiliate,
+        TraderField("trader"),
+        DeskField("trader"),
         Client.trader,
         Client.notes,
         Client.responsible_id,
@@ -1926,8 +1998,9 @@ class StatusesView(MyModelView):
     fields = [
         Status.id,
         Status.name,
-        BooleanField("hide", label="Hide from clients"),
-        # Status.hide,
+        BooleanField("hide", label="Hide in clients tab"),
+        LeadField("client"),
+        Status.client,
     ]
 
     responsive_table = True
@@ -1951,6 +2024,14 @@ class RetainStatusesView(MyModelView):
     responsive_table = True
     column_visibility = True
     search_builder = True
+
+    fields = [
+        RetainStatus.id,
+        RetainStatus.name,
+        RetainStatus.hide,
+        TraderField("traders"),
+        RetainStatus.traders,
+    ]
 
     def is_accessible(self, request: Request) -> bool:
         referer_url = urlparse(request.headers.get("referer"))
@@ -1995,6 +2076,13 @@ class TypesView(MyModelView):
     responsive_table = True
     column_visibility = True
     search_builder = True
+
+    fields = [
+        Type.id,
+        Type.name,
+        LeadField("client"),
+        Type.client,
+    ]
 
     def can_delete(self, request: Request) -> bool:
         if request.state.user["sys_admin"]:

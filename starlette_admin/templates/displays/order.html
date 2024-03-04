@@ -1,0 +1,159 @@
+{% if data | is_iter %}
+{% for value in data %}
+<div class="page-body">
+  <div class="container-xl">
+    <div class="card">
+      <div class="card-header">
+        <a href="{{ value._detail_url }}">
+          <h3 class="card-title">{{ value.id }}</h3>
+        </a>
+      </div>
+      <div class="card-body">
+        <div class="datagrid">
+          <div class="datagrid-item">
+            <div class="datagrid-title">Asset Name</div>
+            <div class="datagrid-content">
+              <span class="status status-green">
+                {{ value.asset_name }}
+              </span>
+            </div>
+          </div>
+          <div class="datagrid-item">
+            <div class="datagrid-title">Amount</div>
+            <div class="datagrid-content">
+              <span class="status status-green">
+                {{ value.amount }}
+              </span>
+            </div>
+          </div>
+          <div class="datagrid-item">
+            <div class="datagrid-title">Opening price</div>
+            <div class="datagrid-content">{{ value.opening_price }}</div>
+          </div>
+          <div class="datagrid-item">
+            <div class="datagrid-title">Closed price</div>
+            <div class="datagrid-content">{{ value.closed_price }}</div>
+          </div>
+          <div class="datagrid-item">
+            <div class="datagrid-title">Type</div>
+            <div class="datagrid-content">
+              <span class="status status-green">
+                {{ value.type }}
+              </span>
+            </div>
+          </div>
+          <div class="datagrid-item">
+            <div class="datagrid-title">Closed</div>
+            <div class="datagrid-content">
+              <span class="status status-green">
+                {{ value.is_closed }}
+              </span>
+            </div>
+          </div>
+          <div class="datagrid-item">
+            <div class="datagrid-title">Created at</div>
+            <div class="datagrid-content">{{ value.created_at }}</div>
+          </div>
+          <div class="datagrid-item">
+            <div class="datagrid-title">Closed at</div>
+            <div class="datagrid-content">{{ value.closed_at }}</div>
+          </div>
+          <div class="datagrid-item">
+            <div class="datagrid-title">Take profit</div>
+            <div class="datagrid-content">{{ value.take_profit }}</div>
+          </div>
+          <div class="datagrid-item">
+            <div class="datagrid-title">Stop loss</div>
+            <div class="datagrid-content">{{ value.stop_loss }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endfor %}
+{% else %}
+<div class="page-body">
+  <div class="container-xl">
+    <div class="card">
+      <div class="card-header">
+        <a href="{{ value._detail_url }}">
+          <h3 class="card-title">{{ data.id }}</h3>
+        </a>
+      </div>
+      <div class="card-body">
+        <div class="datagrid">
+          <div class="datagrid-item">
+            <div class="datagrid-title">Asset Name</div>
+            <div class="datagrid-content">
+              <span class="status status-green">
+                {{ data.asset_name }}
+              </span>
+            </div>
+          </div>
+          <div class="datagrid-item">
+            <div class="datagrid-title">Amount</div>
+            <div class="datagrid-content">
+              <span class="status status-green">
+                {{ data.amount }}
+              </span>
+            </div>
+          </div>
+          <div class="datagrid-item">
+            <div class="datagrid-title">Opening price</div>
+            <div class="datagrid-content">{{ data.opening_price }}</div>
+          </div>
+          <div class="datagrid-item">
+            <div class="datagrid-title">Closed price</div>
+            <div class="datagrid-content">{{ data.closed_price }}</div>
+          </div>
+          <div class="datagrid-item">
+            <div class="datagrid-title">Type</div>
+            <div class="datagrid-content">
+              <span class="status status-green">
+                {{ data.type }}
+              </span>
+            </div>
+          </div>
+          <div class="datagrid-item">
+            <div class="datagrid-title">Closed</div>
+            <div class="datagrid-content">
+              <span class="status status-green">
+                {{ data.is_closed }}
+              </span>
+            </div>
+          </div>
+          <div class="datagrid-item">
+            <div class="datagrid-title">Created at</div>
+            <div class="datagrid-content">{{ data.created_at }}</div>
+          </div>
+          <div class="datagrid-item">
+            <div class="datagrid-title">Closed at</div>
+            <div class="datagrid-content">{{ data.closed_at }}</div>
+          </div>
+          <div class="datagrid-item">
+            <div class="datagrid-title">Take profit</div>
+            <div class="datagrid-content">{{ data.take_profit }}</div>
+          </div>
+          <div class="datagrid-item">
+            <div class="datagrid-title">Stop loss</div>
+            <div class="datagrid-content">{{ data.stop_loss }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+{% set total_count = data|length %}
+{% if total_count > 1 and data | is_iter %}
+<div class="page-body">
+    <div class="container-xl">
+        <div class="mt-3">
+        <!--        <p class="lead">Count: {{ total_count }}</p>-->
+            <span class="badge bg-primary">Count: {{ total_count }}</span>
+        </div>
+    </div>
+</div>
+{% endif %}

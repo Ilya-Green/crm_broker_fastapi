@@ -235,6 +235,11 @@ class StringField(BaseField):
 
 
 @dataclass
+class CustomRelationField(StringField):
+    rows: int = 6
+
+
+@dataclass
 class TextAreaField(StringField):
     """This field is used to represent any kind of long text content.
     For short text contents, use [StringField][starlette_admin.fields.StringField]"""

@@ -1,0 +1,173 @@
+<!--{% if data | is_iter %}-->
+<!--    {% for value in data %}-->
+<!--        <div class="list-group">-->
+<!--          <a href={{ value._detail_url }} class="list-group-item list-group-item-action flex-column align-items-start active">-->
+<!--              <p class="mb-1">{{ value.name }}</p>-->
+<!--          </a>-->
+<!--        </div>-->
+<!--    {% endfor %}-->
+<!--{% else %}-->
+<!--    <div class="list-group">-->
+<!--        <a href={{ data._detail_url }} class="list-group-item list-group-item-action flex-column align-items-start active">-->
+<!--            <p class="mb-1">{{ data.name }}</p>-->
+<!--        </a>-->
+<!--    </div>-->
+<!--{% endif %}-->
+
+{% if data | is_iter %}
+{% for value in data %}
+
+    {% set status_info = value.status %}
+    {% set status_id = status_info.split("id=")[1].split(" ")[0] if status_info and "id=" in status_info %}
+    {% set status_name = status_info.split("name='")[1].split("'")[0] if status_info and "name='" in status_info %}
+
+    <div class="card">
+      <div class="card-header">
+        <a href="{{ value._detail_url }}">
+          <h3 class="card-title">{{ value.first_name }} {{ value.second_name }}</h3>
+        </a>
+      </div>
+      <div class="card-body">
+        <div class="datagrid">
+          <a href="{{ value._detail_url }}">
+            <div class="datagrid-item">
+              <div class="datagrid-title">Name</div>
+              <div class="datagrid-content">{{ value.first_name }} {{ value.second_name }}</div>
+            </div>
+          </a>
+          <div class="datagrid-item">
+            <div class="datagrid-title">Email</div>
+            <div class="datagrid-content">
+              <span class="status status-green">
+                <a href="{{ value._detail_url }}">{{ value.email }}</a>
+              </span>
+            </div>
+          </div>
+          <div class="datagrid-item">
+            <div class="datagrid-title">Status</div>
+            <div class="datagrid-content">
+              <span class="status status-green">
+                <a href="/admin/status/detail/{{ status_id }}">{{ status_name }}</a>
+              </span>
+            </div>
+          </div>
+          <div class="datagrid-item">
+            <div class="datagrid-title">Funnel Name</div>
+            <div class="datagrid-content">{{ value.funnel_name }}</div>
+          </div>
+          <div class="datagrid-item">
+            <div class="datagrid-title">Funnel Link</div>
+            <a href="{{ value.funnel_link }}">
+                <div class="datagrid-content">{{ value.funnel_link }}</div>
+            </a>
+          </div>
+          <div class="datagrid-item">
+            <div class="datagrid-title">Country</div>
+            <div class="datagrid-content">{{ value.country_code }}</div>
+          </div>
+          <div class="datagrid-item">
+            <div class="datagrid-title">Creation Date</div>
+            <div class="datagrid-content">{{ value.creation_date }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+      <div class="list-group">
+    <ul>
+    {% if data | is_iter %}
+    {% for note in value.notes.split('), Note(') %}
+        {% set content = note.split("content='")[1].split("'")[0] if "content='" in note %}
+        {% set employee_name = note.split("employee_name='")[1].split("'")[0] if "employee_name='" in note %}
+        {% set created_at = note.split("created_at=datetime.datetime(")[1].split(")")[0] if "created_at=datetime.datetime(" in note %}
+        {% set id = note.split("id=")[1].split(",")[0] if "id=" in note %}
+          <a href=/admin/note/detail/{{ id }} class="list-group-item list-group-item-action flex-column align-items-start active">
+            <div class="d-flex w-100 justify-content-between">
+              <h5 class="mb-1">{{ employee_name }}</h5>
+              <small>{{ id }}</small>
+            </div>
+            <p class="mb-1">{{ content }}</p>
+            <small id="commentDate{{id}}">{{ created_at }}</small>
+          </a>
+
+        <script>
+            var date = new Date({{ created_at }});
+            var options = { year: 'numeric', month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
+            var formattedDate = new Intl.DateTimeFormat('en-US', options).format(date);
+            document.getElementById('commentDate{{id}}').innerText = formattedDate;
+        </script>
+    {% endfor %}
+    {% endif %}
+    </ul>
+</div>
+
+
+{% endfor %}
+{% else %}
+{% set role_info = data.role %}
+{% set role_name = role_info.split("name='")[1].split("'")[0] %}
+{% set role_id = role_info.split("id=")[1].split(" ")[0] %}
+{% set department_info = data.department %}
+{% set department_id = department_info.split("id=")[1].split(" ")[0] %}
+{% set department_info = data.department %}
+{% set department_name = department_info.split("name='")[1].split("'")[0] %}
+{% set desk_info = data.desk %}
+{% set desk_name = desk_info.split("name='")[1].split("'")[0] %}
+{% set desk_id = desk_info.split("id=")[1].split("'")[0] %}
+<div class="card-header">
+    <a href={{ data._detail_url }}>
+        <h3 class="card-title">{{ data.name }}</h3>
+    </a>
+</div>
+<div class="card-body">
+    <div class="datagrid">
+      <a href={{ data._detail_url }}>
+      <div class="datagrid-item">
+        <div class="datagrid-title">Login</div>
+          <div class="datagrid-content">{{ data.login }}</div>
+      </div>
+      </a>
+      <div class="datagrid-item">
+        <div class="datagrid-title">Role</div>
+        <div class="datagrid-content">
+          <span class="status status-green">
+              <a href=/admin/role/detail/{{ role_id }}>
+                {{ role_name }}
+              </a>
+          </span>
+        </div>
+      </div>
+      <div class="datagrid-item">
+        <div class="datagrid-title">Department</div>
+        <div class="datagrid-content">
+          <span class="status status-green">
+              <a href=/admin/department/detail/{{ department_id }}>
+                {{ department_name }}
+              </a>
+          </span>
+        </div>
+      </div>
+      <div class="datagrid-item">
+        <div class="datagrid-title">Desk</div>
+        <div class="datagrid-content">
+          <span class="status status-green">
+              <a href=/admin/desk/detail/{{ desk_id }}>
+                {{ desk_name }}
+              </a>
+          </span>
+        </div>
+      </div>
+    </div>
+</div>
+{% endif %}
+
+{% set total_count = data|length %}
+{% if total_count > 1 and data | is_iter %}
+<div class="page-body">
+    <div class="container-xl">
+        <div class="mt-3">
+        <!--        <p class="lead">Count: {{ total_count }}</p>-->
+            <span class="badge bg-primary">Count: {{ total_count }}</span>
+        </div>
+    </div>
+</div>
+{% endif %}

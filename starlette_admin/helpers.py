@@ -81,6 +81,8 @@ def extract_fields(
             or (action == RequestAction.DETAIL and field.exclude_from_detail)
             or (action == RequestAction.CREATE and field.exclude_from_create)
             or (action == RequestAction.EDIT and field.exclude_from_edit)
+            or (action == RequestAction.LIST and (field.type == 'HasOne' or field.type == 'HasMany'))
+            or (action == RequestAction.DETAIL and (field.type == 'HasOne' or field.type == 'HasMany'))
         ):
             continue
         arr.append(field)

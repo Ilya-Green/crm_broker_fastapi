@@ -17,6 +17,7 @@ from jinja2 import Template
 from starlette.requests import Request
 from starlette.responses import Response
 from starlette.templating import Jinja2Templates
+
 from starlette_admin._types import ExportType, RequestAction
 from starlette_admin.actions import action
 from starlette_admin.exceptions import ActionFailed
@@ -25,7 +26,7 @@ from starlette_admin.fields import (
     CollectionField,
     FileField,
     HasOne,
-    RelationField,
+    RelationField, CustomRelationField,
 )
 from starlette_admin.helpers import extract_fields
 from starlette_admin.i18n import get_locale, ngettext
@@ -541,6 +542,8 @@ class BaseModelView(BaseView):
                             for v in value[-1:]
                         ]
             elif not isinstance(field, RelationField):
+                if isinstance(field, CustomRelationField) and action == RequestAction.LIST:
+                    continue
                 value = await field.parse_obj(request, obj)
                 obj_serialized[field.name] = await self.serialize_field_value(
                     value, field, action, request

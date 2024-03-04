@@ -1,27 +1,142 @@
-<!--<div class="list-group">-->
-<!--    {%if data | is_iter %}-->
-<!--        <ul>-->
-<!--    {% for value in data %}-->
+{% if data | is_iter %}
+{% for value in data %}
+    {% set role_info = value.role %}
+    {% set role_name = role_info.split("name='")[1].split("'")[0] if role_info and "name=" in role_info %}
+    {% set role_id = role_info.split("role_id=")[1].split(",")[0] if role_info and "role_id" in role_info %}
 
-<!--  <a href={{ value._detail_url }} class="list-group-item list-group-item-action flex-column align-items-start active">-->
-<!--    <div class="d-flex w-100 justify-content-between">-->
-<!--      <h5 class="mb-1">{{ value.employee_name }}</h5>-->
-<!--      <small>{{ value.id }}</small>-->
-<!--    </div>-->
-<!--    <p class="mb-1">{{ value.name }}</p>-->
-<!--    <small>{{ value.created_at }} UTC</small>-->
-<!--  </a>-->
-<!--    {% endfor %}-->
-<!--    </ul>-->
-<!--    {%else%}-->
-<!--      <a href={{ data._detail_url }} class="list-group-item list-group-item-action flex-column align-items-start active">-->
-<!--          <p class="mb-1">{{ data.name }}</p>-->
-<!--      </a>-->
-<!--    {%endif%}-->
-<!--</div>-->
+    {% set department_info = value.department %}
+    {% set department_name = department_info.split("name='")[1].split("'")[0] if department_info and "name" in department_info %}
+    {% set department_id = department_info.split("id=")[1].split(" ")[0] if department_info and "id" in department_info %}
 
-<div class="list-group">
-  <a href={{ data._detail_url }} class="list-group-item list-group-item-action flex-column align-items-start active">
-      <p class="mb-1">{{ data.login }}</p>
-  </a>
+    {% set desk_info = value.desk %}
+    {% set desk_name = desk_info.split("name='")[1].split("'")[0] if desk_info and "name='" in desk_info %}
+    {% set desk_id = desk_info.split("id=")[1].split(",")[0] if desk_info and "id=" in desk_info %}
+
+<div class="page-body">
+<div class="container-xl">
+<div class="card">
+<div class="card-header">
+    <a href={{ value._detail_url }}>
+        <h3 class="card-title">{{ value.name }}</h3>
+    </a>
 </div>
+<div class="card-body">
+    <div class="datagrid">
+      <a href={{ value._detail_url }}>
+      <div class="datagrid-item">
+        <div class="datagrid-title">Login</div>
+          <div class="datagrid-content">{{ value.login }}</div>
+      </div>
+      </a>
+      <div class="datagrid-item">
+        <div class="datagrid-title">Role</div>
+        <div class="datagrid-content">
+          <span class="status status-green">
+              <a href=/admin/role/detail/{{ role_id }}>
+                {{ role_name }}
+              </a>
+          </span>
+        </div>
+      </div>
+      <div class="datagrid-item">
+        <div class="datagrid-title">Department</div>
+        <div class="datagrid-content">
+          <span class="status status-green">
+              <a href=/admin/department/detail/{{ department_id }}>
+                {{ department_name }}
+              </a>
+          </span>
+        </div>
+      </div>
+      <div class="datagrid-item">
+        <div class="datagrid-title">Desk</div>
+        <div class="datagrid-content">
+          <span class="status status-green">
+              <a href=/admin/desk/detail/{{ desk_id }}>
+                {{ desk_name }}
+              </a>
+          </span>
+        </div>
+      </div>
+    </div>
+</div>
+</div>
+</div>
+</div>
+{% endfor %}
+{% else %}
+
+{% set role_info = data.role if data.role %}
+{% set role_name = role_info.split("name='")[1].split("'")[0] if role_info and "name=" in role_info %}
+{% set role_id = role_info.split("role_id=")[1].split(",")[0] if role_info and "role_id" in role_info %}
+{% set role_id = role_info.split("id=")[1].split(",")[0] if role_info and "id" in role_info %}
+
+{% set department_info = data.department if data.department%}
+{% set department_name = department_info.split("name='")[1].split("'")[0] if department_info and "name" in department_info %}
+{% set department_id = department_info.split("id=")[1].split(" ")[0] if department_info and "id" in department_info %}
+
+{% set desk_info = data.desk if data.desk %}
+{% set desk_name = desk_info.split("name='")[1].split("'")[0] if desk_info and "name='" in desk_info %}
+{% set desk_id = desk_info.split("id=")[1].split(",")[0] if desk_info and "id=" in desk_info %}
+
+<div class="card">
+<div class="card-header">
+    <a href={{ data._detail_url }}>
+        <h3 class="card-title">{{ data.name }}</h3>
+    </a>
+</div>
+<div class="card-body">
+    <div class="datagrid">
+      <a href={{ data._detail_url }}>
+      <div class="datagrid-item">
+        <div class="datagrid-title">Login</div>
+          <div class="datagrid-content">{{ data.login }}</div>
+      </div>
+      </a>
+      <div class="datagrid-item">
+        <div class="datagrid-title">Role</div>
+        <div class="datagrid-content">
+          <span class="status status-green">
+              <a href=/admin/role/detail/{{ role_id }}>
+                {{ role_name }}
+              </a>
+          </span>
+        </div>
+      </div>
+      <div class="datagrid-item">
+        <div class="datagrid-title">Department</div>
+        <div class="datagrid-content">
+          <span class="status status-green">
+              <a href=/admin/department/detail/{{ department_id }}>
+                {{ department_name }}
+              </a>
+          </span>
+        </div>
+      </div>
+      <div class="datagrid-item">
+        <div class="datagrid-title">Desk</div>
+        <div class="datagrid-content">
+          <span class="status status-green">
+              <a href=/admin/desk/detail/{{ desk_id }}>
+                {{ desk_name }}
+              </a>
+          </span>
+        </div>
+      </div>
+    </div>
+</div>
+</div>
+
+{% endif %}
+
+{% set total_count = data|length %}
+{% if total_count > 1 and data | is_iter %}
+<div class="page-body">
+    <div class="container-xl">
+        <div class="mt-3">
+        <!--        <p class="lead">Count: {{ total_count }}</p>-->
+            <span class="badge bg-primary">Count: {{ total_count }}</span>
+        </div>
+    </div>
+</div>
+{% endif %}

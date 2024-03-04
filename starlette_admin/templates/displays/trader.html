@@ -1,0 +1,30 @@
+{% if data | is_iter %}
+{% for value in data %}
+
+<div class="list-group">
+  <a href={{ value._detail_url }} class="list-group-item list-group-item-action flex-column align-items-start active">
+      <p class="mb-1">{{ value.name }}  {{ value.surname }}</p>
+  </a>
+</div>
+
+{% endfor %}
+{% else %}
+
+<div class="list-group">
+  <a href={{ data._detail_url }} class="list-group-item list-group-item-action flex-column align-items-start active">
+      <p class="mb-1">{{ data.name }}  {{ data.surname }}</p>
+  </a>
+</div>
+{% endif %}
+
+{% set total_count = data|length %}
+{% if total_count > 1 and data | is_iter %}
+<div class="page-body">
+    <div class="container-xl">
+        <div class="mt-3">
+        <!--        <p class="lead">Count: {{ total_count }}</p>-->
+            <span class="badge bg-primary">Count: {{ total_count }}</span>
+        </div>
+    </div>
+</div>
+{% endif %}

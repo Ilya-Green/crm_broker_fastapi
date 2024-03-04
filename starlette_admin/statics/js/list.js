@@ -52,23 +52,25 @@ $(function () {
           fringe.unshift(field.field);
         }
       } else if (!field.exclude_from_list) {
-        $("#table-header").append(`<th>${field.label}</th>`);
-        dt_columns.push({
-          name: field.name,
-          data: field.name,
-          orderable: field.orderable,
-          searchBuilderType: field.search_builder_type,
-          render: function (data, type, full, meta) {
-            return render[field.render_function_key](
-              data,
-              type,
-              full,
-              meta,
-              field
-            );
-          },
-        });
-        dt_fields.push(field);
+        if (field.render_function_key != "relation") {
+          $("#table-header").append(`<th>${field.label}</th>`);
+          dt_columns.push({
+            name: field.name,
+            data: field.name,
+            orderable: field.orderable,
+            searchBuilderType: field.search_builder_type,
+            render: function (data, type, full, meta) {
+              return render[field.render_function_key](
+                  data,
+                  type,
+                  full,
+                  meta,
+                  field
+              );
+            },
+          });
+          dt_fields.push(field);
+        }
       }
     }
   })();
