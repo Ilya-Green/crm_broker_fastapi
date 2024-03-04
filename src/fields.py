@@ -322,7 +322,7 @@ class EmployeesField(CustomRelationField):
 
 
 @dataclass
-class TraderField(StringField):
+class TraderField(CustomRelationField):
     """This field is used to represent any kind of long text content.
     For short text contents, use [StringField][starlette_admin.fields.StringField]"""
 
