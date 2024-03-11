@@ -270,6 +270,9 @@ class RetainStatus(SQLModel, table=True):
 
     traders: Trader = Relationship(back_populates="status")
 
+    async def __admin_repr__(self, request: Request):
+        return "id " + str(self.id) + ": " + str(self.name)
+
 
 class Action(SQLModel, table=True):
     id: Optional[int] = Field(primary_key=True)
