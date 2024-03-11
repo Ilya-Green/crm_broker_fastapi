@@ -55,9 +55,8 @@ class Employee(SQLModel, table=True):
     department_id: Optional[int] = Field(foreign_key="department.id")
     department: "Department" = Relationship(back_populates="employee")
 
-
     async def __admin_repr__(self, request: Request):
-        return self.login
+        return str(self.login)
 
 
 class Role(SQLModel, table=True):
@@ -81,9 +80,8 @@ class Role(SQLModel, table=True):
         data_dict.update({'role': self.name})
         return data_dict
 
-
     async def __admin_repr__(self, request: Request):
-        return self.name
+        return str(self.name)
 
 
 class Affiliate(SQLModel, table=True):
@@ -94,9 +92,8 @@ class Affiliate(SQLModel, table=True):
 
     clients: "Client" = Relationship(back_populates="affiliate")
 
-
     async def __admin_repr__(self, request: Request):
-        return self.name
+        return str(self.name)
 
 
 class Client(SQLModel, table=True):
@@ -156,9 +153,8 @@ class Client(SQLModel, table=True):
             raise ValueError("Недопустимый код страны")
         return value
 
-
     async def __admin_repr__(self, request: Request):
-        return self.email + ": " + self.first_name + " " + self.second_name
+        return str(self.email) + ": " + str(self.first_name) + " " + str(self.second_name)
 
 
 class Trader(SQLModel, table=True):
@@ -201,9 +197,8 @@ class Trader(SQLModel, table=True):
 
     transactions: "Transaction" = Relationship(back_populates="trader")
 
-
     async def __admin_repr__(self, request: Request):
-        return self.email + ": " + self.name + " " + self.surname
+        return str(self.email) + ": " + str(self.name) + " " + str(self.surname)
 
 
 class Transaction(SQLModel, table=True):
@@ -219,7 +214,7 @@ class Transaction(SQLModel, table=True):
     trader: "Trader" = Relationship(back_populates="transactions")
 
     async def __admin_repr__(self, request: Request):
-        return str(self.value) + "$: " + self.type + ": " + self.createdAt.strftime("%Y-%m-%d")
+        return str(self.value) + "$: " + str(self.type) + ": " + self.createdAt.strftime("%Y-%m-%d")
 
 
 class Order(SQLModel, table=True):
@@ -244,7 +239,7 @@ class Order(SQLModel, table=True):
     trader: "Trader" = Relationship(back_populates="orders")
 
     async def __admin_repr__(self, request: Request):
-        return self.asset_name + ": " + str(self.amount) + ": " + self.created_at.strftime("%m-%d %H:%M")
+        return str(self.asset_name) + ": " + str(self.amount) + ": " + self.created_at.strftime("%m-%d %H:%M")
 
 
 class Type(SQLModel, table=True):
@@ -254,7 +249,7 @@ class Type(SQLModel, table=True):
     client: Client = Relationship(back_populates="type")
 
     async def __admin_repr__(self, request: Request):
-        return "id " + str(self.id) + ": " + self.name
+        return "id " + str(self.id) + ": " + str(self.name)
 
 
 class Status(SQLModel, table=True):
@@ -265,7 +260,7 @@ class Status(SQLModel, table=True):
     client: Client = Relationship(back_populates="status")
 
     async def __admin_repr__(self, request: Request):
-        return "id " + str(self.id) + ": " + self.name
+        return "id " + str(self.id) + ": " + str(self.name)
 
 
 class RetainStatus(SQLModel, table=True):
@@ -307,10 +302,8 @@ class Note(SQLModel, table=True):
     employee_id: Optional[int] = Field(foreign_key="employee.id")
     employee: Employee = Relationship(back_populates="notes")
 
-
-
     async def __admin_repr__(self, request: Request):
-        return self.created_at.strftime("%m-%d %H:%M") + ": " + self.content
+        return self.created_at.strftime("%m-%d %H:%M") + ": " + str(self.content)
 
 
 class Desk(SQLModel, table=True):
@@ -328,10 +321,8 @@ class Desk(SQLModel, table=True):
     # responsible_id: Optional[int] = Field(foreign_key="employee.id")
     employee: Employee = Relationship(back_populates="desk")
 
-
-
     async def __admin_repr__(self, request: Request):
-        return self.name
+        return str(self.name)
 
 
 class Department(SQLModel, table=True):
@@ -344,6 +335,5 @@ class Department(SQLModel, table=True):
 
     clients: Client = Relationship(back_populates="department")
 
-
     async def __admin_repr__(self, request: Request):
-        return self.name
+        return str(self.name)
