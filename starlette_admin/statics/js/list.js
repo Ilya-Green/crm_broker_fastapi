@@ -52,7 +52,7 @@ $(function () {
           fringe.unshift(field.field);
         }
       } else if (!field.exclude_from_list) {
-        if (field.render_function_key != "relation") {
+        // if (field.render_function_key != "relation") {
           $("#table-header").append(`<th>${field.label}</th>`);
           dt_columns.push({
             name: field.name,
@@ -70,7 +70,7 @@ $(function () {
             },
           });
           dt_fields.push(field);
-        }
+        // }
       }
     }
   })();

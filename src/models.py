@@ -4,12 +4,15 @@ from typing import Any, Dict, List, Optional, Set, Union, Sequence
 import secrets
 
 from babel import Locale
+from jinja2 import Template
 from pydantic import AnyHttpUrl, BaseModel, EmailStr, constr, validator
 from pydantic import Field as PydField
 from pydantic.color import Color
 from sqlalchemy import JSON, Column, DateTime, Enum, String, Text
 
 from sqlmodel import Field, Relationship, SQLModel, MetaData
+from starlette.requests import Request
+from starlette.templating import Jinja2Templates
 
 from starlette_admin.i18n import get_countries_list
 
@@ -23,6 +26,9 @@ NAMING_CONVENTION = {
 
 metadata = SQLModel.metadata
 metadata.naming_convention = NAMING_CONVENTION
+
+templates_dir = "starlette_admin/templates"
+templates = Jinja2Templates(templates_dir, extensions=["jinja2.ext.i18n"])
 
 
 class Employee(SQLModel, table=True):
@@ -50,6 +56,10 @@ class Employee(SQLModel, table=True):
     department: "Department" = Relationship(back_populates="employee")
 
 
+    async def __admin_repr__(self, request: Request):
+        return self.login
+
+
 class Role(SQLModel, table=True):
     id: Optional[int] = Field(primary_key=True)
     sys_admin: bool = Field(default=0)
@@ -72,6 +82,10 @@ class Role(SQLModel, table=True):
         return data_dict
 
 
+    async def __admin_repr__(self, request: Request):
+        return self.name
+
+
 class Affiliate(SQLModel, table=True):
     id: Optional[int] = Field(primary_key=True)
     name: Optional[str] = Field()
@@ -79,6 +93,10 @@ class Affiliate(SQLModel, table=True):
     email: Optional[EmailStr] = Field()
 
     clients: "Client" = Relationship(back_populates="affiliate")
+
+
+    async def __admin_repr__(self, request: Request):
+        return self.name
 
 
 class Client(SQLModel, table=True):
@@ -139,6 +157,10 @@ class Client(SQLModel, table=True):
         return value
 
 
+    async def __admin_repr__(self, request: Request):
+        return self.email + ": " + self.first_name + " " + self.second_name
+
+
 class Trader(SQLModel, table=True):
     # id: Optional[str] = Field(primary_key=True)
     # name: Optional[str] = Field()
@@ -180,6 +202,10 @@ class Trader(SQLModel, table=True):
     transactions: "Transaction" = Relationship(back_populates="trader")
 
 
+    async def __admin_repr__(self, request: Request):
+        return self.email + ": " + self.name + " " + self.surname
+
+
 class Transaction(SQLModel, table=True):
     id: Optional[str] = Field(primary_key=True)
     content: Optional[str] = Field()
@@ -191,6 +217,9 @@ class Transaction(SQLModel, table=True):
 
     trader_id: str = Field(foreign_key="trader.id")
     trader: "Trader" = Relationship(back_populates="transactions")
+
+    async def __admin_repr__(self, request: Request):
+        return str(self.value) + "$: " + self.type + ": " + self.createdAt.strftime("%Y-%m-%d")
 
 
 class Order(SQLModel, table=True):
@@ -214,12 +243,18 @@ class Order(SQLModel, table=True):
     user_id: Optional[str] = Field(foreign_key="trader.id")
     trader: "Trader" = Relationship(back_populates="orders")
 
+    async def __admin_repr__(self, request: Request):
+        return self.asset_name + ": " + str(self.amount) + ": " + self.created_at.strftime("%m-%d %H:%M")
+
 
 class Type(SQLModel, table=True):
     id: Optional[int] = Field(primary_key=True)
     name: str = Field()
 
     client: Client = Relationship(back_populates="type")
+
+    async def __admin_repr__(self, request: Request):
+        return "id " + str(self.id) + ": " + self.name
 
 
 class Status(SQLModel, table=True):
@@ -228,6 +263,9 @@ class Status(SQLModel, table=True):
     hide: Optional[bool] = Field()
 
     client: Client = Relationship(back_populates="status")
+
+    async def __admin_repr__(self, request: Request):
+        return "id " + str(self.id) + ": " + self.name
 
 
 class RetainStatus(SQLModel, table=True):
@@ -270,6 +308,11 @@ class Note(SQLModel, table=True):
     employee: Employee = Relationship(back_populates="notes")
 
 
+
+    async def __admin_repr__(self, request: Request):
+        return self.created_at.strftime("%m-%d %H:%M") + ": " + self.content
+
+
 class Desk(SQLModel, table=True):
     id: Optional[int] = Field(primary_key=True)
     name: str = Field()
@@ -286,6 +329,11 @@ class Desk(SQLModel, table=True):
     employee: Employee = Relationship(back_populates="desk")
 
 
+
+    async def __admin_repr__(self, request: Request):
+        return self.name
+
+
 class Department(SQLModel, table=True):
     id: Optional[int] = Field(primary_key=True)
     name: str = Field()
@@ -295,3 +343,7 @@ class Department(SQLModel, table=True):
     employee: Employee = Relationship(back_populates="department")
 
     clients: Client = Relationship(back_populates="department")
+
+
+    async def __admin_repr__(self, request: Request):
+        return self.name

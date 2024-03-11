@@ -103,9 +103,9 @@ class NotesView(MyModelView):
         Note.content,
         Note.created_at,
         Note.employee_name,
-        LeadCompactField("client"),
+        # LeadCompactField("client"),
         Note.client,
-        ResponsibleField("employee"),
+        # ResponsibleField("employee"),
         Note.employee,
     ]
 
@@ -244,11 +244,11 @@ class EmployeeView(MyModelView):
         Employee.name,
         Employee.login,
         PasswordField("password"),
-        RoleField("role"),
-        DeskField("department"),
-        DeskField("desk"),
+        # RoleField("role"),
+        # DeskField("department"),
+        # DeskField("desk"),
         Employee.clients_responsible,
-        # Employee.notes,
+        Employee.notes,
         # Employee.actions,
         Employee.role,
         Employee.department,
@@ -443,7 +443,7 @@ class RolesView(MyModelView):
         Role.roles_can_access,
         Role.clients_can_access,
         Role.retain,
-        EmployeesField("user"),
+        # EmployeesField("user"),
         Role.user,
     ]
 
@@ -504,8 +504,8 @@ class DepartmentsView(MyModelView):
 
     fields = [
         Department.name,
-        DeskField("desk"),
-        EmployeesField("employee"),
+        # DeskField("desk"),
+        # EmployeesField("employee"),
         Department.desk,
         Department.employee,
         Department.clients,
@@ -585,11 +585,11 @@ class DesksView(MyModelView):
     fields = [
         Desk.id,
         Desk.name,
-        DeskField("department"),
+        # DeskField("department"),
         Desk.language_id,
         Desk.creation_date,
         Desk.department,
-        LeadField("client"),
+        # LeadField("client"),
         Desk.client,
     ]
 
@@ -604,7 +604,7 @@ class AffiliatesView(MyModelView):
         Affiliate.id,
         Affiliate.name,
         CopyField("auth_key"),
-        LeadField("clients"),
+        # LeadField("clients"),
         Affiliate.clients,
     ]
 
@@ -738,11 +738,11 @@ class TradersView(MyModelView):
         Trader.country,
         Trader.created_at_tp,
         Trader.balance,
-        StatusField("status"),
-        ResponsibleField("responsible"),
+        # StatusField("status"),
+        # ResponsibleField("responsible"),
         # LeadWithCommentsField("client"),
-        OrderField("orders"),
-        TransactionField("transactions"),
+        # OrderField("orders"),
+        # TransactionField("transactions"),
         Trader.orders,
         Trader.bonuses,
         Trader.credFacilities,
@@ -1094,7 +1094,7 @@ class TransactionsView(MyModelView):
     #         return super().get_count_query().where(Trader.responsible_id == self.id)
 
     fields = [
-        TraderField("trader"),
+        # TraderField("trader"),
         Transaction.createdAt,
         Transaction.type,
         Transaction.value,
@@ -1180,7 +1180,7 @@ class OrdersView(MyModelView):
         return True
 
     fields = [
-        TraderField("trader"),
+        # TraderField("trader"),
 
         Order.asset_name,
         Order.amount,
@@ -1434,24 +1434,24 @@ class ClientsView(MyModelView):
 
     fields = [
 
-        Client.status_id,
+        # Client.status_id,
         Client.id,
         Client.first_name,
         Client.second_name,
         EmailCopyField("email"),
         CustomPhoneField("phone_number"),
-        NotesField("notes"),
-        StatusField("status"),
-        ResponsibleField("responsible"),
+        # NotesField("notes"),
+        # StatusField("status"),
+        # ResponsibleField("responsible"),
         CountryField("country_code"),
         Client.creation_date,
         Client.funnel_name,
-        DeskField("desk"),
-        DeskField("department"),
+        # DeskField("desk"),
+        # DeskField("department"),
 
         Client.description,
         Client.status,
-        StatusField("type"),
+        # # StatusField("type"),
         Client.type,
         Client.title,
         Client.patronymic,
@@ -1465,10 +1465,10 @@ class ClientsView(MyModelView):
         Client.department,
         Client.responsible,
         Client.actions,
-        AffiliateField("affiliate"),
+        # # AffiliateField("affiliate"),
         Client.affiliate,
-        TraderField("trader"),
-        DeskField("trader"),
+        # # TraderField("trader"),
+        # # DeskField("trader"),
         Client.trader,
         Client.notes,
         Client.responsible_id,
@@ -1981,7 +1981,7 @@ class StatusesView(MyModelView):
         Status.id,
         Status.name,
         BooleanField("hide", label="Hide in clients tab"),
-        LeadField("client"),
+        # LeadField("client"),
         Status.client,
     ]
 
@@ -2011,7 +2011,7 @@ class RetainStatusesView(MyModelView):
         RetainStatus.id,
         RetainStatus.name,
         RetainStatus.hide,
-        TraderField("traders"),
+        # TraderField("traders"),
         RetainStatus.traders,
     ]
 
@@ -2062,7 +2062,7 @@ class TypesView(MyModelView):
     fields = [
         Type.id,
         Type.name,
-        LeadField("client"),
+        # LeadField("client"),
         Type.client,
     ]
 

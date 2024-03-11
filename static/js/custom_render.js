@@ -133,7 +133,7 @@ const render = {
     return `<div class="d-flex flex-row">${data
       .map(
         (e) =>
-          `<a class='mx-1 btn-link' href="${e._detail_url}"><span class='m-1 py-1 px-2 badge bg-blue-lt lead d-inline-block text-truncate' data-toggle="tooltip" data-placement="bottom" title='id: ${e._repr}'  style="max-width: 20em;">id: ${e._repr}</span></a>`
+          `<a class='mx-1 btn-link' href="${e._detail_url}"><span class='m-1 py-1 px-2 badge bg-blue-lt lead d-inline-block text-truncate' data-toggle="tooltip" data-placement="bottom" title='${e._repr}'  style="max-width: 20em;">${e._repr}</span></a>`
       )
       .join("")}</div>`;
   },
