@@ -573,7 +573,14 @@ class BaseModelView(BaseView):
         Override this function to customize item representation in
         relationships columns
         """
-        return str(getattr(obj, self.pk_attr))  # type: ignore
+        repr_method = getattr(
+            obj,
+            "__admin_repr__",
+            lambda request: str(getattr(obj, self.pk_attr)),  # type: ignore[arg-type]
+        )
+        if inspect.iscoroutinefunction(repr_method):
+            return await repr_method(request)
+        return repr_method(request)
 
     async def select2_result(self, obj: Any, request: Request) -> str:
         """
