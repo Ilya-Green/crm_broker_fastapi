@@ -1,0 +1,9 @@
+
+  <a href=/admin/note/detail/{{ obj.id }} class="list-group-item list-group-item-action flex-column align-items-start active">
+    <div class="d-flex w-100 justify-content-between">
+      <h5 class="mb-1">{{ obj.employee_name }}</h5>
+      <small>{{ obj.id }}</small>
+    </div>
+    <p class="mb-1">{{ obj.content }}</p>
+    <small>{{ obj.created_at }}</small>
+  </a>

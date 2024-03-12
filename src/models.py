@@ -314,6 +314,13 @@ class Note(SQLModel, table=True):
     async def __admin_repr__(self, request: Request):
         return self.created_at.strftime("%m-%d %H:%M") + ": " + str(self.content)
 
+    async def __detail_repr__(self, obj: Any) -> str:
+        template = templates.get_template("displays/notes.html")
+        rendered_template = template.render(obj=self)
+        outer_template = templates.get_template("displays/notes_wrapper.html")
+        wrapped_template = outer_template.render(content=rendered_template)
+        return wrapped_template
+
 
 class Desk(SQLModel, table=True):
     id: Optional[int] = Field(primary_key=True)
