@@ -358,8 +358,6 @@ class Department(SQLModel, table=True):
 
     clients: Client = Relationship(back_populates="department")
 
-    traders: Trader = Relationship(back_populates="department")
-
     affiliate2: "Affiliate" = Relationship(back_populates="department")
 
     async def __admin_repr__(self, request: Request):
