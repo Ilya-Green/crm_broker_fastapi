@@ -344,8 +344,6 @@ class Desk(SQLModel, table=True):
 
     affiliate: "Affiliate" = Relationship(back_populates="desk")
 
-    trader: Trader = Relationship(back_populates="desk")
-
     async def __admin_repr__(self, request: Request):
         return str(self.name)
 
