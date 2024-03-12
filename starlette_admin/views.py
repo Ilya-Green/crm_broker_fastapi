@@ -553,6 +553,8 @@ class BaseModelView(BaseView):
                 obj, request
             )
             obj_serialized["_select2_result"] = await self.select2_result(obj, request)
+        if action == RequestAction.DETAIL:
+            obj_serialized["_detail_repr"] = await self.detail_repr(obj, request, templates)
         obj_serialized["_repr"] = await self.repr(obj, request)
         assert self.pk_attr is not None
         pk = getattr(obj, self.pk_attr)
@@ -608,6 +610,18 @@ class BaseModelView(BaseView):
             if not isinstance(field, (RelationField, FileField))
         ]
         return Template(template_str, autoescape=True).render(obj=obj, fields=fields)
+
+    async def detail_repr(self, obj: Any, request: Request, templates: Jinja2Templates) -> str:
+        def empty_jinja_variable(request):
+            return Template("").render()
+        html_repr_method = getattr(
+            obj,
+            "__detail_repr__",
+            lambda request: empty_jinja_variable(request),
+        )
+        if inspect.iscoroutinefunction(html_repr_method):
+            return await html_repr_method(request)
+        return html_repr_method(request)
 
     async def select2_selection(self, obj: Any, request: Request) -> str:
         """
