@@ -419,7 +419,7 @@ class BaseAdmin:
                 "request": request,
                 "model": model,
                 "raw_obj": obj,
-                "obj": await model.serialize(obj, request, RequestAction.DETAIL),
+                "obj": await model.serialize(obj, request, RequestAction.DETAIL, templates=self.templates),
             },
         )
 
