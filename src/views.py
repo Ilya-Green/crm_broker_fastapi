@@ -430,6 +430,8 @@ class RolesView(MyModelView):
         if "roles_can_access" in request.state.user:
             if request.state.user["sys_admin"] is True:
                 return True
+            if request.state.user["roles_can_access"] is True:
+                return True
         return False
 
     fields = [
