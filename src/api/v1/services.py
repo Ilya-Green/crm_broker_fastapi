@@ -65,6 +65,8 @@ def api_client_create(data: ClientCreateIn) -> ClientCreateOut:
             with Session(engine) as session:
                 new_client = Client(**data.dict(),
                                     affiliate_id=auth.id,
+                                    department_id=auth.department_id,
+                                    desk_id=auth.desk_id,
                                     status_id=1,
                                     type_id=1,
                                     trader_id=response_json["id"],
@@ -82,6 +84,8 @@ def api_client_create(data: ClientCreateIn) -> ClientCreateOut:
             with Session(engine) as session:
                 new_client = Client(**data.dict(),
                                     affiliate_id=auth.id,
+                                    department_id=auth.department_id,
+                                    desk_id=auth.desk_id,
                                     status_id=1,
                                     type_id=1
                                     )

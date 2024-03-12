@@ -606,6 +606,8 @@ class AffiliatesView(MyModelView):
         CopyField("auth_key"),
         # LeadField("clients"),
         Affiliate.clients,
+        Affiliate.department,
+        Affiliate.desk,
     ]
 
     def is_accessible(self, request: Request) -> bool:

@@ -90,6 +90,12 @@ class Affiliate(SQLModel, table=True):
     auth_key: Optional[str] = Field(default=secrets.token_hex(32), unique=True)
     email: Optional[EmailStr] = Field()
 
+    desk_id: Optional[int] = Field(foreign_key="desk.id")
+    desk: "Desk" = Relationship(back_populates="affiliate")
+
+    department_id: Optional[int] = Field(foreign_key="department.id")
+    department: "Department" = Relationship(back_populates="affiliate2")
+
     clients: "Client" = Relationship(back_populates="affiliate")
 
     async def __admin_repr__(self, request: Request):
@@ -324,6 +330,10 @@ class Desk(SQLModel, table=True):
     # responsible_id: Optional[int] = Field(foreign_key="employee.id")
     employee: Employee = Relationship(back_populates="desk")
 
+    affiliate: "Affiliate" = Relationship(back_populates="desk")
+
+    trader: Trader = Relationship(back_populates="desk")
+
     async def __admin_repr__(self, request: Request):
         return str(self.name)
 
@@ -337,6 +347,10 @@ class Department(SQLModel, table=True):
     employee: Employee = Relationship(back_populates="department")
 
     clients: Client = Relationship(back_populates="department")
+
+    traders: Trader = Relationship(back_populates="department")
+
+    affiliate2: "Affiliate" = Relationship(back_populates="department")
 
     async def __admin_repr__(self, request: Request):
         return str(self.name)
