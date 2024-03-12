@@ -494,6 +494,7 @@ class BaseModelView(BaseView):
         obj: Any,
         request: Request,
         action: RequestAction,
+        templates: Jinja2Templates = None,
         include_relationships: bool = True,
         include_select2: bool = False,
     ) -> Dict[str, Any]:
