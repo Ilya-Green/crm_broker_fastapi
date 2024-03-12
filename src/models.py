@@ -206,6 +206,11 @@ class Trader(SQLModel, table=True):
     async def __admin_repr__(self, request: Request):
         return str(self.email) + ": " + str(self.name) + " " + str(self.surname)
 
+    async def __detail_repr__(self, obj: Any) -> str:
+        template = templates.get_template("displays/trader.html")
+        rendered_template = template.render(obj=self)
+        return rendered_template
+
 
 class Transaction(SQLModel, table=True):
     id: Optional[str] = Field(primary_key=True)
