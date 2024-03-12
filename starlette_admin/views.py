@@ -517,7 +517,7 @@ class BaseModelView(BaseView):
                         )
                     else:
                         obj_serialized[field.name] = await foreign_model.serialize(
-                            value, request, action, include_relationships=False
+                            value, request, action, include_relationships=False, templates=templates
                         )
                 else:
                     if action == RequestAction.EDIT:
@@ -527,7 +527,7 @@ class BaseModelView(BaseView):
                     elif action == RequestAction.DETAIL:
                         obj_serialized[field.name] = [
                             await foreign_model.serialize(
-                                v, request, action, include_relationships=False
+                                v, request, action, include_relationships=False, templates=templates
                             )
                             for v in value
                         ]
