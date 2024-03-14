@@ -79,8 +79,17 @@ def register_account(client: Client):
         return new_trader
 
 
+last_execution_time = None
+
 
 def update_platform_data():
+    global last_execution_time
+    current_time = time.time()
+    if last_execution_time is None or current_time - last_execution_time > 30:
+        pass
+    else:
+        return
+    last_execution_time = time.time()
     if PLATFORM_INTEGRATION_IS_ON:
         params = {'token': 'value1'}
         response = requests.get(url=f'{PLATFORM_INTEGRATION_URL}/api/admin/user/all', params=params)
