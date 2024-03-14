@@ -255,6 +255,10 @@ $(function () {
   // Datatable instance
   var table = $("#dt").DataTable({
     stateSave: true,
+    stateLoadParams: function (settings, data) {
+      data.search.search = "";
+      data.select.rows = [];
+    },
     autoWidth: false,
     dom:  "<'card-footer d-flex align-items-center'<'m-0'i><'m-0 ms-auto'p>>r<'table-responsive't><'card-footer d-flex align-items-center'<'m-0'i><'m-0 ms-auto'p>>",
     paging: true,
@@ -391,17 +395,6 @@ $(function () {
     },
   });
 
-  $(document).ready(function() {
-    table.search('').draw();
-    var dtPromise = new Promise(function(resolve, reject) {
-        table.on('init.dt', function () {
-            resolve();
-        });
-    });
-    dtPromise.then(function() {
-        table.rows().deselect();
-    });
-});
 
 var searchTimeout;
 $("#searchInput").on("keyup", function () {
