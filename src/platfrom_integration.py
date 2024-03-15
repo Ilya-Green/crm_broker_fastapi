@@ -11,7 +11,7 @@ from sqlmodel import Session, select
 from src import engine
 from src.config import PLATFORM_INTEGRATION_IS_ON, PLATFORM_INTEGRATION_URL
 from src.models import Trader, Client, Order, Transaction
-from starlette_admin.exceptions import ActionFailed
+from starlette_admin.exceptions import ActionFailed, FormValidationError
 
 logger = logging.getLogger("api")
 
@@ -363,6 +363,15 @@ def update_order(id: int):
 
 def edit_order_platform(obj: Any,):
     if PLATFORM_INTEGRATION_IS_ON:
+        if obj.stop_loss is not None and obj.stop_loss == 0:
+            raise FormValidationError({'stop_loss': 'not 0'})
+        if obj.take_profit is not None and obj.take_profit == 0:
+            raise FormValidationError({'take_profit': 'not 0'})
+        if obj.stop_loss is not None and obj.stop_loss < 0:
+            raise FormValidationError({'stop_loss': 'positive number only'})
+        if obj.take_profit is not None and obj.take_profit < 0:
+            raise FormValidationError({'take_profit': 'positive number only'})
+
         url = f"{PLATFORM_INTEGRATION_URL}/api/admin/order/edit"
         query_params = {
             "token": "value1",
