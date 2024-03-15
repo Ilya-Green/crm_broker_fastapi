@@ -235,9 +235,9 @@ class ModelView(BaseModelView):
     async def find_by_pk(self, request: Request, pk: Any) -> Any:
         session: Union[Session, AsyncSession] = request.state.session
         stmt = select(self.model).where(self._pk_column == self._pk_coerce(pk))
-        for field in self.fields:
-            if isinstance(field, RelationField):
-                stmt = stmt.options(joinedload(getattr(self.model, field.name)))
+        # for field in self.fields:
+        #     if isinstance(field, RelationField):
+        #         stmt = stmt.options(joinedload(getattr(self.model, field.name)))
         if isinstance(session, AsyncSession):
             return (await session.execute(stmt)).scalars().unique().one_or_none()
         return (
