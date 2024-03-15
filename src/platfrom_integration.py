@@ -133,7 +133,7 @@ def update_platform_data():
             if current_trader is not None:
                 new_trader.responsible_id = current_trader.responsible_id
                 new_trader.status_id = current_trader.status_id
-                if user_data["balance"] > 0:
+                if user_data["balance"] is not None and user_data["balance"] > 0:
                     with Session(engine) as session:
                         statement = select(Client).where(Client.trader_id == new_trader.id)
                         current_client = session.exec(statement).first()
