@@ -167,6 +167,8 @@ class ModelView(BaseModelView):
             ]:
                 attr = getattr(self.model, field.name)
                 clauses.append(cast(attr, String).ilike(f"%{term}%"))
+        id_clause = cast(self.model.id, String).ilike(f"%{term}%")
+        clauses.append(id_clause)
         return or_(*clauses)
 
     async def count(
