@@ -491,16 +491,23 @@ def change_account_balance_platform(trader: Trader, mainBalance: str, bonuses: s
         }
 
         if mainBalance is not None:
-            body["mainBalance"] = mainBalance
-
-        if mainBalance is not None:
-            body["balance"] = mainBalance
+            try:
+                body["mainBalance"] = int(mainBalance)
+                body["balance"] = int(mainBalance)
+            except ValueError:
+                pass
 
         if bonuses is not None:
-            body["bonuses"] = bonuses
+            try:
+                body["bonuses"] = int(bonuses)
+            except ValueError:
+                pass
 
         if credFacilities is not None:
-            body["credFacilities"] = credFacilities
+            try:
+                body["credFacilities"] = int(credFacilities)
+            except ValueError:
+                pass
 
         response = requests.put(url, params=query_params, json=body)
         if response.status_code == 200:
