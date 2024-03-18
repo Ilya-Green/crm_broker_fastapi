@@ -71,7 +71,10 @@ class Role(SQLModel, table=True):
     accounts_can_access: bool = Field(default=0)
     roles_can_access: bool = Field(default=0)
     clients_can_access: bool = Field(default=0)
+    clients_can_edit: bool = Field(default=0)
     retain: bool = Field(default=0)
+    orders_can_access: bool = Field(default=0)
+    transactions_can_access: bool = Field(default=0)
 
     user: "Employee" = Relationship(back_populates="role")
 

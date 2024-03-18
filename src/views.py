@@ -496,7 +496,6 @@ class EmployeeView(MyModelView):
 
 
 class RolesView(MyModelView):
-    responsive_table = True
     column_visibility = True
     search_builder = True
 
@@ -511,6 +510,7 @@ class RolesView(MyModelView):
     fields = [
         Role.id,
         Role.name,
+        Role.user,
         Role.sys_admin,
         Role.head,
         Role.department_leader,
@@ -518,9 +518,11 @@ class RolesView(MyModelView):
         Role.accounts_can_access,
         Role.roles_can_access,
         Role.clients_can_access,
+        Role.clients_can_edit,
+
         Role.retain,
-        # EmployeesField("user"),
-        Role.user,
+        Role.orders_can_access,
+        Role.transactions_can_access,
     ]
 
 
@@ -579,6 +581,7 @@ class DepartmentsView(MyModelView):
             return super().get_list_query().where(Department.id == self.department_id)
 
     fields = [
+        Department.id,
         Department.name,
         # DeskField("desk"),
         # EmployeesField("employee"),
@@ -1150,6 +1153,7 @@ class TransactionsView(MyModelView):
         self.head = request.state.user["head"]
         self.sys_admin = request.state.user["sys_admin"]
         self.retain = request.state.user["retain"]
+        self.transactions_can_access = request.state.user["transactions_can_access"]
 
         with Session(engine) as session:
             statement = select(Desk).where(Desk.department_id == request.state.user["department_id"])
@@ -1160,7 +1164,7 @@ class TransactionsView(MyModelView):
 
         if request.state.user["sys_admin"] is True:
             return True
-        if request.state.user["retain"] is True:
+        if request.state.user["transactions_can_access"] is True:
             return True
         return False
 
@@ -1249,6 +1253,7 @@ class OrdersView(MyModelView):
         self.head = request.state.user["head"]
         self.sys_admin = request.state.user["sys_admin"]
         self.retain = request.state.user["retain"]
+        self.retain = request.state.user["orders_can_access"]
 
         with Session(engine) as session:
             statement = select(Desk).where(Desk.department_id == request.state.user["department_id"])
@@ -1264,7 +1269,7 @@ class OrdersView(MyModelView):
 
         if request.state.user["sys_admin"] is True:
             return True
-        if request.state.user["retain"] is True:
+        if request.state.user["orders_can_access"] is True:
             return True
         return False
 
@@ -1406,6 +1411,7 @@ class ClientsView(MyModelView):
         self.head = request.state.user["head"]
         self.sys_admin = request.state.user["sys_admin"]
         self.retain = request.state.user["retain"]
+        self.clients_can_edit = request.state.user["clients_can_edit"]
         self.query_test = request.query_params
 
         with Session(engine) as session:
@@ -1426,7 +1432,7 @@ class ClientsView(MyModelView):
     def can_edit(self, request: Request) -> bool:
         if request.state.user["sys_admin"] is True:
             return True
-        if request.state.user["head"] is True:
+        if request.state.user["clients_can_edit"] is True:
             return True
 
     def can_delete(self, request: Request) -> bool:
