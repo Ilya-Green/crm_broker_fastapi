@@ -29,10 +29,10 @@ from sqlmodel import SQLModel
 
 from .config import APP_SECRET, APP_DOMAIN, APP_TYPE, TG_TOKEN, TG_CHAT_ID, SENTRY_TOKEN, SENTRY_RATE, CRM_NAME
 from .models import Employee, Role, Client, Note, Desk, Action, Department, Status, Affiliate, Type, Trader, Order, \
-    RetainStatus, Transaction
+    RetainStatus, Transaction, RetainNote
 from .seed_database import seed_database
 from .views import MyModelView, EmployeeView, ClientsView, RolesView, DepartmentsView, DesksView, AffiliatesView, \
-    StatusesView, TypesView, TradersView, OrdersView, RetainStatusesView, TransactionsView, NotesView
+    StatusesView, TypesView, TradersView, OrdersView, RetainStatusesView, TransactionsView, NotesView, RetainNotesView
 from . import engine
 from src.api.v1.api import affApiV1
 
@@ -153,6 +153,7 @@ admin.add_view(TransactionsView(Transaction, label="Transactions"))
 admin.add_view(OrdersView(Order, label="Orders", icon="fa-solid fa-wallet"))
 
 admin.add_view(NotesView(Note))
+admin.add_view(RetainNotesView(RetainNote))
 admin.add_view(MyModelView(Action))
 admin.add_view(StatusesView(Status, label="Statuses", icon="fa-solid fa-tags"))
 admin.add_view(RetainStatusesView(RetainStatus, label="Retain Statuses"))
