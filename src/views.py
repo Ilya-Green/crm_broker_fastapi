@@ -25,6 +25,7 @@ from starlette_admin import (
     PhoneField,
     TimeField,
     TimeZoneField,
+    FloatField,
 )
 from starlette_admin.contrib.sqla.helpers import build_query, build_order_clauses
 from starlette_admin.fields import FileField, RelationField, BooleanField
@@ -1297,7 +1298,7 @@ class OrdersView(MyModelView):
         Order.opening_price,
         Order.closed_price,
         Order.type,
-        Order.pledge,
+        FloatField("pledge", label="Used Margin"),
         Order.is_closed,
         Order.created_at,
         Order.closed_at,
