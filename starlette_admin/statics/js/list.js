@@ -396,14 +396,11 @@ $(function () {
   });
 
 
-var searchTimeout;
-$("#searchInput").on("keyup", function () {
-    clearTimeout(searchTimeout);
-
-    var searchText = $(this).val();
-    searchTimeout = setTimeout(function() {
-        table.search(searchText).draw();
-    }, 500);
+$("#searchInput").on("keydown", function (event) {
+    if (event.keyCode === 13) {
+      var searchText = $(this).val();
+      table.search(searchText).draw();
+    }
 });
 
   function onSelectChange() {
