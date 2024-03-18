@@ -199,7 +199,7 @@
     function submitActionComment(name, formData) {
     $("#modal-loading").modal("show");
     query = new URLSearchParams();
-      query.append("pks", {{ obj[pk] }});
+      query.append("pks", "{{ obj[pk] }}");
     query.append("name", name);
 
     $('#modal-action-comment :input').each(function() {
