@@ -58,7 +58,7 @@ from sqlalchemy import select as sqlalchemy_select
 
 from starlette_admin.helpers import html_params
 from .models import Employee, Role, Client, Desk, Affiliate, Department, Note, Trader, Order, Transaction, Status, \
-    RetainStatus, Type
+    RetainStatus, Type, RetainNote
 from . import engine
 from .platfrom_integration import update_platform_data, edit_account_platform, change_account_password_platform, \
     update_order, edit_order_platform, update_orders, update_platform_data_by_id, create_transaction, \
@@ -178,6 +178,79 @@ class NotesView(MyModelView):
         #     query = query.where(Client.desk_id != 0).where(Client.department_id == self.department_id).where(Client.desk_id == self.desk_id)
         #     return query
         query = query.where(Note.employee_id == self.id)
+        return query
+
+
+class RetainNotesView(MyModelView):
+    def is_accessible(self, request: Request) -> bool:
+        self.id = request.state.user["id"]
+        self.desk_id = request.state.user["desk_id"]
+        self.department_id = request.state.user["department_id"]
+        self.desk_leader = request.state.user["desk_leader"]
+        self.department_leader = request.state.user["department_leader"]
+        self.head = request.state.user["head"]
+        self.sys_admin = request.state.user["sys_admin"]
+        self.retain = request.state.user["retain"]
+
+        # with Session(engine) as session:
+        #     statement = select(Desk).where(Desk.department_id == request.state.user["department_id"])
+        #     desks = session.exec(statement).all()
+        #     self.department_desks = [desk.id for desk in desks]
+
+        if "sys_admin" in request.state.user:
+            if request.state.user["sys_admin"] is True:
+                return True
+        if "retain" in request.state.user:
+            if request.state.user["retain"] is True:
+                return True
+        return False
+
+    fields = [
+        RetainNote.id,
+        RetainNote.content,
+        RetainNote.created_at,
+        RetainNote.employee_name,
+        RetainNote.trader,
+        RetainNote.employee,
+    ]
+
+    def get_list_query(self):
+        query = super().get_list_query()
+        if self.sys_admin:
+            return query
+        if self.head:
+            return query
+        if self.department_leader:
+            return query
+        if self.desk_leader:
+            return query
+        # if self.department_leader:
+        #     query = query.where(Client.department_id != 0).where(Client.department_id == self.department_id)
+        #     return query
+        # if self.desk_leader:
+        #     query = query.where(Client.desk_id != 0).where(Client.department_id == self.department_id).where(Client.desk_id == self.desk_id)
+        #     return query
+        query = query.where(RetainNote.employee_id == self.id)
+        return query
+
+    def get_count_query(self) -> Select:
+        query = super().get_count_query()
+        if self.sys_admin:
+            return query
+        if self.head:
+            # test = super().get_list_query().where(Desk.department_id == self.department_id)
+            return query
+        if self.department_leader:
+            return query
+        if self.desk_leader:
+            return query
+        # if self.department_leader:
+        #     query = query.where(Client.department_id != 0).where(Client.department_id == self.department_id)
+        #     return query
+        # if self.desk_leader:
+        #     query = query.where(Client.desk_id != 0).where(Client.department_id == self.department_id).where(Client.desk_id == self.desk_id)
+        #     return query
+        query = query.where(RetainNote.employee_id == self.id)
         return query
 
 
@@ -737,6 +810,7 @@ class TradersView(MyModelView):
         Trader.surname,
         Trader.email,
         CustomPhoneField("phone_number"),
+        Trader.notes,
         # Trader.phone_number,
         # Trader.date,
         Trader.country,
@@ -762,6 +836,7 @@ class TradersView(MyModelView):
         Trader.status,
         Trader.client,
         Trader.responsible,
+        Trader.last_note,
     ]
 
     exclude_fields_from_list = [
@@ -805,6 +880,37 @@ class TradersView(MyModelView):
     #         return obj
     #     except Exception as e:
     #         self.handle_exception(e)
+
+    @action(
+        name="add_note",
+        text="Add note",
+        confirmation="Enter note",
+        submit_btn_text="Yes, proceed",
+        submit_btn_class="btn-success",
+        #         <input name="id" class="form-control" id="floating-input" value="">
+        form="""<div class="input-group input-group-sm mb-3">,
+            <div class="input-group-prepend">
+                <span class="input-group-text">Note:</span>
+            </div>
+            <textarea name="note" class="form-control" aria-label="With textarea"></textarea>
+            </div>""",
+    )
+    async def add_note(self, request: Request, pks: List[Any]) -> str:
+        session: Session = request.state.session
+        if request.query_params["note"] == "":
+            return "Note is too short"
+        for trader in await self.find_by_pks(request, pks):
+            new_note = RetainNote(content=request.query_params["note"],
+                                  trader_id=trader.id,
+                                  employee_id=request.state.user["id"],
+                                  employee_name=request.state.user["name"])
+            session.add(new_note)
+            trader.last_note = datetime.utcnow()
+            session.add(trader)
+        session.commit()
+        return "{} Note was successfully added".format(
+            len(pks)
+        )
 
     async def find_all(
         self,

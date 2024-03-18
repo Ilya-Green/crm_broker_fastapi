@@ -43,6 +43,8 @@ class Employee(SQLModel, table=True):
 
     notes: "Note" = Relationship(back_populates="employee")
 
+    RetainNotes: "RetainNote" = Relationship(back_populates="employee")
+
     desk_id: Optional[int] = Field(foreign_key="desk.id")
     desk: "Desk" = Relationship(back_populates="employee")
 
@@ -190,6 +192,7 @@ class Trader(SQLModel, table=True):
     isVipStatus: Optional[bool] = Field()
     autologin: Optional[str] = Field()
     autologin_link: Optional[AnyHttpUrl] = Field()
+    last_note: Optional[datetime] = Field(sa_column=Column(DateTime(timezone=True)))
 
     status_id: Optional[int] = Field(foreign_key="retainstatus.id")
     status: "RetainStatus" = Relationship(back_populates="traders")
@@ -202,6 +205,8 @@ class Trader(SQLModel, table=True):
     orders: "Order" = Relationship(back_populates="trader")
 
     transactions: "Transaction" = Relationship(back_populates="trader")
+
+    notes: "RetainNote" = Relationship(back_populates="trader")
 
     async def __admin_repr__(self, request: Request):
         return str(self.email) + ": " + str(self.name) + " " + str(self.surname)
@@ -315,6 +320,31 @@ class Note(SQLModel, table=True):
     employee_name: Optional[str] = Field()
     employee_id: Optional[int] = Field(foreign_key="employee.id")
     employee: Employee = Relationship(back_populates="notes")
+
+    async def __admin_repr__(self, request: Request):
+        return self.created_at.strftime("%m-%d %H:%M") + ": " + str(self.content)
+
+    async def __detail_repr__(self, obj: Any) -> str:
+        template = templates.get_template("displays/notes.html")
+        rendered_template = template.render(obj=self)
+        outer_template = templates.get_template("displays/notes_wrapper.html")
+        wrapped_template = outer_template.render(content=rendered_template)
+        return wrapped_template
+
+
+class RetainNote(SQLModel, table=True):
+    id: Optional[int] = Field(primary_key=True)
+    content: str = Field(sa_column=Column(Text))
+    created_at: Optional[datetime] = Field(
+        sa_column=Column(DateTime(timezone=False), default=datetime.utcnow)
+    )
+
+    trader_id: Optional[str] = Field(foreign_key="trader.id")
+    trader: Trader = Relationship(back_populates="notes")
+
+    employee_name: Optional[str] = Field()
+    employee_id: Optional[int] = Field(foreign_key="employee.id")
+    employee: Employee = Relationship(back_populates="RetainNotes")
 
     async def __admin_repr__(self, request: Request):
         return self.created_at.strftime("%m-%d %H:%M") + ": " + str(self.content)
