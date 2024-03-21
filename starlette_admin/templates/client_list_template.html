@@ -291,6 +291,12 @@ block content %}
                           .then(data => {
                               const responsibleSelect = document.getElementById('responsible-filter');
                               const itemsFilter = data.items;
+
+                              if (itemsFilter.length === 0) {
+                                  responsibleSelect.style.display = 'none';
+                                  return;
+                              }
+
                             itemsFilter.forEach(item => {
                               const optionElement = document.createElement('option');
                               optionElement.value = item.id;
