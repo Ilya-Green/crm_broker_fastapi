@@ -203,6 +203,31 @@ block content %}
                       fetch('/admin/api/department?include_relationships=0')
                           .then(response => response.json())
                           .then(data => {
+                            const responsibleSelect = document.getElementById('department-filter');
+                              const itemsFilter = data.items;
+
+                              if (itemsFilter.length === 0) {
+                                  responsibleSelect.style.display = 'none';
+                                  return;
+                              }
+
+                            itemsFilter.forEach(item => {
+                              const optionElement = document.createElement('option');
+                              optionElement.value = item.id;
+                              optionElement.textContent = item.name.toUpperCase();
+                                responsibleSelect.appendChild(optionElement)
+                            })
+
+                                function getQueryParam(param) {
+                                    const urlParams = new URLSearchParams(window.location.search);
+                                    return urlParams.get(param);
+                                }
+                                const selectedOption = getQueryParam('department_id');
+                                if (selectedOption){
+                                    const selectElement = document.getElementById('department-filter');
+                                    selectElement.value = selectedOption;
+                                }
+
                             const selectElementModal = document.getElementById('status-department');
                             data.items.forEach(status => {
                               const optionElement = document.createElement('option');
@@ -218,6 +243,31 @@ block content %}
                       fetch('/admin/api/desk?include_relationships=0')
                           .then(response => response.json())
                           .then(data => {
+                              const responsibleSelect = document.getElementById('desk-filter');
+                              const itemsFilter = data.items;
+
+                              if (itemsFilter.length === 0) {
+                                  responsibleSelect.style.display = 'none';
+                                  return;
+                              }
+
+                            itemsFilter.forEach(item => {
+                              const optionElement = document.createElement('option');
+                              optionElement.value = item.id;
+                              optionElement.textContent = item.name.toUpperCase();
+                                responsibleSelect.appendChild(optionElement)
+                            })
+
+                              function getQueryParam(param) {
+                                    const urlParams = new URLSearchParams(window.location.search);
+                                    return urlParams.get(param);
+                                }
+                                const selectedOption = getQueryParam('desk_id');
+                                if (selectedOption){
+                                    const selectElement = document.getElementById('desk-filter');
+                                    selectElement.value = selectedOption;
+                                }
+
                             const selectElement = document.getElementById('status-desk');
                             data.items.forEach(status => {
                               const optionElement = document.createElement('option');
@@ -412,6 +462,51 @@ block content %}
                     // statusFunc();
                 });
                   </script>
+
+                <select class="form-select" name="department" id="department-filter" style="width: 80px; display: inline-block;">
+                        <option value="none"> all </option>
+                  </select>
+                  <script>
+                  function departmentFunc() {
+                    var url = new URL(window.location.href);
+                    var id = document.getElementById('department-filter').value;
+                        if (id === 'none') {
+                        url.searchParams.delete('department_id');
+                    } else {
+                        url.searchParams.set('department_id', id);
+                    }
+
+                    window.location.href = url.toString();
+                  }
+
+                  var selectElement = document.getElementById("department-filter");
+                  selectElement.addEventListener("change", function() {
+                    departmentFunc();
+                });
+                  </script>
+
+                <select class="form-select" name="department" id="desk-filter" style="width: 80px; display: inline-block;">
+                        <option value="none"> all </option>
+                  </select>
+                  <script>
+                  function deskFunc() {
+                    var url = new URL(window.location.href);
+                    var id = document.getElementById('desk-filter').value;
+                        if (id === 'none') {
+                        url.searchParams.delete('desk_id');
+                    } else {
+                        url.searchParams.set('desk_id', id);
+                    }
+
+                    window.location.href = url.toString();
+                  }
+
+                  var selectElement = document.getElementById("desk-filter");
+                  selectElement.addEventListener("change", function() {
+                    deskFunc();
+                });
+                  </script>
+
                    <select class="form-select" name="department" id="responsible-filter" style="width: 80px; display: inline-block;">
                         <option value="none"> all </option>
                   </select>

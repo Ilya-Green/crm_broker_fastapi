@@ -1492,6 +1492,10 @@ class ClientsView(MyModelView):
             query = query.where(Client.status_id == self.query["status_id"][0])
         if "affiliate_id" in self.query:
             query = query.where(Client.affiliate_id == self.query["affiliate_id"][0])
+        if "department_id" in self.query:
+            query = query.where(Client.department_id == self.query["department_id"][0])
+        if "desk_id" in self.query:
+            query = query.where(Client.desk_id == self.query["desk_id"][0])
         if self.sys_admin:
             return query
         if self.head:
