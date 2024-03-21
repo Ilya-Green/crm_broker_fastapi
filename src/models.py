@@ -325,7 +325,7 @@ class Note(SQLModel, table=True):
     employee: Employee = Relationship(back_populates="notes")
 
     async def __admin_repr__(self, request: Request):
-        return self.created_at.strftime("%m-%d %H:%M") + ": " + str(self.content)
+        return self.created_at.strftime("%m-%d %H:%M") + ": " + str(self.employee_name) + ": " + str(self.content)
 
     async def __detail_repr__(self, obj: Any) -> str:
         template = templates.get_template("displays/notes.html")
