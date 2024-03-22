@@ -1125,6 +1125,21 @@ class TradersView(MyModelView):
         )
 
     async def is_action_allowed(self, request: Request, name: str) -> bool:
+        if name == "change_balance":
+            if request.state.user["sys_admin"]:
+                return True
+            if request.state.user["can_change_balance"]:
+                return True
+        if name == "create_deposit":
+            if request.state.user["sys_admin"]:
+                return True
+            if request.state.user["can_create_deposit"]:
+                return True
+        if name == "change_password":
+            if request.state.user["sys_admin"]:
+                return True
+            if request.state.user["can_change_password"]:
+                return True
         if name == "change_responsible":
             if request.state.user["sys_admin"]:
                 return True
@@ -1133,7 +1148,7 @@ class TradersView(MyModelView):
             return False
         if name == "delete":
             return self.can_delete(request)
-        return True
+        return False
 
 
 class TransactionsView(MyModelView):
