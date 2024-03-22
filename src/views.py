@@ -902,7 +902,7 @@ class TradersView(MyModelView):
     async def add_note(self, request: Request, pks: List[Any]) -> str:
         session: Session = request.state.session
         if request.query_params["note"] == "":
-            return "Note is too short"
+            raise ActionFailed("Note is too short")
         for trader in await self.find_by_pks(request, pks):
             new_note = RetainNote(content=request.query_params["note"],
                                   trader_id=trader.id,
@@ -1144,6 +1144,12 @@ class TradersView(MyModelView):
             if request.state.user["sys_admin"]:
                 return True
             if request.state.user["head"]:
+                return True
+            return False
+        if name == "add_note":
+            if request.state.user["sys_admin"]:
+                return True
+            if request.state.user["retain"]:
                 return True
             return False
         if name == "delete":
