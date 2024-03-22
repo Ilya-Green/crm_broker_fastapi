@@ -6,6 +6,8 @@ import requests
 from sqlalchemy.orm import aliased, joinedload, load_only
 from sqlmodel import Session, select, asc, desc
 import logging
+
+from src.platfrom_integration import register_account
 from src.views import update_platform_data
 from src.config import PLATFORM_INTEGRATION_IS_ON, PLATFORM_INTEGRATION_URL
 
@@ -41,54 +43,29 @@ def api_client_create(data: ClientCreateIn) -> ClientCreateOut:
             unique_phone = session.exec(statement).first()
         if unique_phone:
             raise HTTPException(status_code=403, detail="Phone Duplicate")
+        new_client = Client(**data.dict(),
+                            affiliate_id=auth.id,
+                            department_id=auth.department_id,
+                            desk_id=auth.desk_id,
+                            status_id=1,
+                            type_id=1
+                            )
         if PLATFORM_INTEGRATION_IS_ON:
-            url = f"{PLATFORM_INTEGRATION_URL}/api/client/user/autologin"
-            payload = {
-                "name": data.first_name,
-                "surname": data.second_name,
-                "email": data.email,
-                "password": generate_password(10),
-                "phone": data.phone_number,
-                "date": 1685823000002,
-                "country": data.country_code,
-            }
-            headers = {
-                "Content-Type": "application/json"
-            }
-            response = requests.post(url, data=payload)
-            response_json = json.loads(response.content.decode())
-            if response.status_code == 403:
-                logger_api.warning(f"already registered in platform {data}")
-                raise HTTPException(status_code=403, detail="Duplicate")
-            update_platform_data()
+            new_trader = register_account(new_client)
+            new_client.trader_id = new_trader.id
+            autologin = new_trader.autologin
+            session.add(new_trader)
+            session.commit()
 
             with Session(engine) as session:
-                new_client = Client(**data.dict(),
-                                    affiliate_id=auth.id,
-                                    department_id=auth.department_id,
-                                    desk_id=auth.desk_id,
-                                    status_id=1,
-                                    type_id=1,
-                                    trader_id=response_json["id"],
-                                    )
                 session.add(new_client)
                 session.commit()
                 session.refresh(new_client)
             logger_api.warning(f"created {new_client}")
-            # return JSONResponse(['success',
-            #                        {new_client},
-            #                        "https://general-investment.com/autologin?token="])
-            autologin = response_json["autologin"]
+
             return ClientCreateOut(detail='success', autologin=f"{PLATFORM_INTEGRATION_URL}/autoologin?token={autologin}", data=new_client)
         else:
             with Session(engine) as session:
-                new_client = Client(**data.dict(),
-                                    affiliate_id=auth.id,
-                                    department_id=auth.department_id,
-                                    desk_id=auth.desk_id,
-                                    status_id=1,
-                                    type_id=1
-                                    )
                 session.add(new_client)
                 session.commit()
                 session.refresh(new_client)
