@@ -71,6 +71,10 @@
                                                 {% endif %}
                                             {% endwith %}
                                 {% endfor %}
+                                <button class="btn btn-primary btn-block me-2" type="button" href="#" data-bs-toggle="modal" data-bs-target="#modal-action-deposit" data-confirmation="Enter comment" data-name="create_deposit" data-submit-btn-text="Yes, proceed" data-submit-btn-class="btn-success">
+                                                Create deposit
+                                </button>
+
                                 <div class="modal modal-blur fade" id="modal-action-comment" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
         <div class="modal-content">
@@ -94,7 +98,50 @@
     </div>
 </div>
 
+                                <div class="modal modal-blur fade" id="modal-action-deposit" tabindex="-1" role="dialog" aria-hidden="true">
+                                    <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-body">
+                                                <div id="actionConfirmation">Enter the password you want to set</div><br>
+                                                <div id="modal-form">
+                                            <div class="input-group input-group-sm mb-3">,
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text" id="inputGroup-sizing-sm">Value($):</span>
+                                                </div>
+                                            <input name="value" type="text" class="form-control" aria-label="Small" aria-describedby="inputGroup-sizing-sm">
+                                            </div>
 
+                                            <div class="form-group">
+                                                <label for="selectOption">Select Option:</label>
+                                                <select class="form-control" id="selectOption" name="selectOption">
+                                                    <option value="deposit">Deposit</option>
+                                                    <option value="credFacilities">Credit Facilities</option>
+                                                    <option value="bonuses">Bonuses</option>
+                                                </select>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label for="description">Description:</label>
+                                                <input type="text" class="form-control" id="description" name="description">
+                                            </div>
+                                            </div>
+                                            </div>
+
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-link link-secondary me-auto"
+                                                        data-bs-dismiss="modal">{{ _("Cancel") }}</button>
+                                                <button id="actionSubmitDeposit" type="button" class="btn btn-primary"
+                                                        data-bs-dismiss="modal">{{ _("Yes, Proceed") }}</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+<!--                                                </a>-->
+<!--                                                {% endif %}-->
+<!--                                            {% endwith %}-->
+<!--                                {% endfor %}-->
 
 
 
@@ -255,6 +302,71 @@
             : new FormData();
           console.log(formData);
           submitActionComment(name, formData);
+        });
+  });
+
+        function submitActionDeposit(name, formData) {
+            $("#modal-loading").modal("show");
+            query = new URLSearchParams();
+              query.append("pks", "{{ obj[pk] }}");
+            query.append("name", name);
+            console.log(name);
+
+            $('#modal-action-deposit :input').each(function() {
+                query.append(this.name, $(this).val());
+                console.log(this.name, $(this).val());
+            });
+            console.log(query);
+
+                const url = window.location.origin + "/admin/api/trader/action?" + query.toString();
+                fetch(url, {
+                    method: "POST",
+                    body: formData,
+                })
+              .then(async (response) => {
+                  location.reload();
+                await new Promise((r) => setTimeout(r, 500));
+                $("#modal-loading").modal("hide");
+                if (response.ok) {
+                  table.rows().deselect();
+                  table.ajax.reload();
+                  successAlert((await response.json())["msg"]);
+                } else {
+                  if (response.status == 400) {
+                    return Promise.reject((await response.json())["msg"]);
+                  }
+                  return Promise.reject("Something went wrong!");
+                }
+              })
+              .catch(async (error) => {
+                await new Promise((r) => setTimeout(r, 500));
+                dangerAlert(error);
+              });
+          }
+
+        $("#modal-action-deposit").on("show.bs.modal", function (event) {
+        var button = $(event.relatedTarget); // Button that triggered the modal
+        var confirmation = button.data("confirmation");
+        var form = button.data("form");
+        var name = button.data("name");
+        var submit_btn_text = button.data("submit-btn-text");
+        var submit_btn_class = button.data("submit-btn-class");
+
+        var modal = $(this);
+        modal.find("#actionConfirmation").text(confirmation);
+        var modalForm = modal.find("#modal-form");
+        $('#modal-form').html(form);
+        var actionSubmit = modal.find("#actionSubmitDeposit");
+        actionSubmit.text(submit_btn_text);
+        actionSubmit.removeClass().addClass(`btn ${submit_btn_class}`);
+        actionSubmit.unbind();
+        actionSubmit.on("click", function (event) {
+          const formElement = modalForm.find("form");
+          const formData = formElement.length
+            ? new FormData(formElement.get(0))
+            : new FormData();
+          console.log(formData);
+          submitActionDeposit(name, formData);
         });
   });
 
