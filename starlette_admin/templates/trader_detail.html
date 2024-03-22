@@ -58,19 +58,6 @@
                                                 Add comment
                                 </button>
 
-                                {% for field in model._extract_fields('DETAIL') %}
-                                        <td data-label="Value">
-                                            {% with data=obj[field.name] %}
-                                            {% if field.name == "autologin_link" %}
-                                                <a href="{{ data }}" target="_blank">
-                                                <button type="button" class="btn btn-primary btn-block me-2">
-                                                    <i class="fa-solid fa-key"></i>
-                                                    Login in
-                                                </button>
-                                                </a>
-                                                {% endif %}
-                                            {% endwith %}
-                                {% endfor %}
                                 <button class="btn btn-primary btn-block me-2" type="button" href="#" data-bs-toggle="modal" data-bs-target="#modal-action-deposit" data-confirmation="Enter comment" data-name="create_deposit" data-submit-btn-text="Yes, proceed" data-submit-btn-class="btn-success">
                                                 Create deposit
                                 </button>
@@ -137,11 +124,6 @@
                                     </div>
                                 </div>
 
-
-<!--                                                </a>-->
-<!--                                                {% endif %}-->
-<!--                                            {% endwith %}-->
-<!--                                {% endfor %}-->
 
 
 
