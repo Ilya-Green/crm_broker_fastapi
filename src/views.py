@@ -523,6 +523,9 @@ class RolesView(MyModelView):
         Role.retain,
         Role.orders_can_access,
         Role.transactions_can_access,
+        Role.can_create_deposit,
+        Role.can_change_password,
+        Role.can_change_balance,
     ]
 
 
