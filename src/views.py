@@ -1265,7 +1265,9 @@ class OrdersView(MyModelView):
     column_visibility = True
     search_builder = True
 
+    list_template = "list_order.html"
     edit_template = "edit_order.html"
+    detail_template = "detail_order.html"
     def is_accessible(self, request: Request) -> bool:
         referer_url = urlparse(request.headers.get("referer"))
         query_dict = parse_qs(referer_url.query)

@@ -1,0 +1,250 @@
+{% extends "layout.html" %}
+{% set pk = model.pk_attr %}
+{% block header %}
+    <div class="d-flex justify-content-between align-items-center">
+        <h1>{{ model.label }}</h1>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="{{ url_for(__name__ ~ ':index') }}">{{ _("Admin") }}</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{{ url_for(__name__ ~ ':list', identity=model.identity) }}">{{ model.label }}</a>
+            </li>
+            <li class="breadcrumb-item active">{{ _("Detail") }}</li>
+        </ol>
+    </div>
+{% endblock %}
+{% block modal %}
+    {% include "modals/loading.html" %}
+    {% include "modals/error.html" %}
+    {% include "modals/delete.html" %}
+<!--    {% include "modals/actions.html" %}-->
+{% endblock %}
+{% block content %}
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+<!--                    <div id="alertContainer"></div>-->
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <strong>#{{ obj[pk] }}</strong>
+                        </h3>
+                        <div class="card-actions">
+                            <div class="btn-list">
+                                {% if model.can_delete(request) %}
+                                    <button id="delete-btn"
+                                            type="button"
+                                            class="btn btn-danger btn-block"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#modal-delete">
+                                        <i class="fas fa-trash-alt me-2"></i>
+                                        {{ _("Delete") }}
+                                    </button>
+                                {% endif %}
+                                {% if model.can_edit(request) %}
+                                    <a href="{{ url_for(__name__ ~ ':edit', identity=model.identity,pk=obj[pk]) }}">
+                                        <button type="button" class="btn btn-primary btn-block me-2">
+                                            <i class="fa-solid fa-edit me-2"></i>
+                                            {{ _("Edit") }}
+                                        </button>
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="ms-auto text-muted">
+                            <div class="ms-2 d-inline-block">
+                                <div class="input-icon">
+                                    <span class="input-icon-addon">
+                                        <!-- Download SVG icon from http://tabler-icons.io/i/search -->
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                            <circle cx="10" cy="10" r="7"></circle>
+                                            <line x1="21" y1="21" x2="15" y2="15"></line>
+                                        </svg>
+                                    </span>
+                                    <input type="search" id="searchInput" value="" class="form-control" placeholder="{{ _('Search') }}..." aria-label="Search in table">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-vcenter table-mobile-md">
+                                <thead>
+                                <tr>
+                                    <th>{{ _("Attribute") }}</th>
+                                    <th>{{ _("Value") }}</th>
+                                </tr>
+                                </thead>
+                                <tbody id="tableContent">
+                                {% for field in model._extract_fields('DETAIL') %}
+                                    <tr>
+                                        <td data-label="Attribute">
+                                            <div>
+                                                <strong>{{ field.label }}</strong>
+                                            </div>
+                                        </td>
+                                        <td data-label="Value">
+                                            {% with data=obj[field.name] %}
+                                                {% if data == None %}
+                                                    {% include "displays/_null.html" %}
+                                                {% elif (data | is_iter) and (data |length) ==0 %}
+                                                    {% include "displays/_empty.html" %}
+                                                {% else %}
+                                                    {% include field.display_template %}
+                                                {% endif %}
+                                            {% endwith %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block head_css %}
+    {% for link in model._additional_css_links(request, "DETAIL" | ra) %}
+        <link rel="stylesheet" href="{{ link }}">
+    {% endfor %}
+{% endblock %}
+{% block script %}
+    <script type="text/javascript"
+            src="{{ url_for(__name__ ~ ':statics', path='js/utils.js') }}"></script>
+    {% for link in model._additional_js_links(request, "DETAIL" | ra) %}
+        <script type="text/javascript" src="{{ link }}"></script>
+    {% endfor %}
+    <script>
+    $(function () {
+        $("#modal-delete-btn").click(function () {
+            $("#modal-delete").modal('hide');
+            $("#modal-loading").modal('show');
+            fetch("{{ url_for(__name__ ~ ':action', identity=model.identity)  | safe }}?name=delete&pks={{ obj[pk] }}", {
+                method: "POST",
+            }).then(async response => {
+                if (response.ok) {
+                    // localStorage.successAlert = "Successfully deleted {{ obj[pk] }}"
+                    await new Promise(r => setTimeout(r, 500));
+                    $("#modal-loading").modal('hide')
+                    window.location.replace("{{ url_for(__name__ ~ ':list', identity=model.identity)  | safe }}")
+                } else {
+                    if (response.status == 400) {
+                        return Promise.reject((await response.json())["msg"]);
+                    }
+                    return Promise.reject("Something went wrong!");
+                }
+
+            }).catch(async (error) => {
+                await new Promise(r => setTimeout(r, 500));
+                $("#modal-loading").modal('hide');
+                $("#error-body").text(error);
+                $("#modal-error").modal('show');
+            });
+        });
+    })
+    $(document).ready(function(){
+        $("#searchInput").on("keyup", function() {
+          var value = $(this).val().toLowerCase();
+          $("#tableContent tr").filter(function() {
+            $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+          });
+        });
+    });
+
+        var model = {{ __js_model__ | tojson | safe }};
+        const id = {{ obj[pk] | tojson | safe }};
+    </script>
+    <script type="text/javascript"
+    src="{{ url_for(__name__ ~ ':statics', path='js/alerts.js') }}"></script>
+    <script type="text/javascript"
+    src="{{ url_for(__name__ ~ ':statics', path='js/actions.js') }}"></script>
+
+    <script src="{{ url_for(__name__ ~ ':statics', path='js/symbols.js') }}"></script>
+    </script>
+
+    <script>
+        function findLotVolume(currencyName) {
+            const currency = CURRENCIES_SYMBOLS.find(currency => currency.name === currencyName);
+            if (currency) {
+                return currency.lotVolume;
+            } else {
+                return 1; // В случае, если валютная пара не найдена
+            }
+        }
+
+        const lotVolume = findLotVolume("{{ obj.asset_name }}");
+        console.log(lotVolume);
+        const closedPrice = parseFloat("{{ obj.closed_price }}");
+        const openingPrice = parseFloat("{{ obj.opening_price }}");
+        const amount = parseFloat("{{ obj.amount }}");
+
+        const attributeCells = document.querySelectorAll('td[data-label="Attribute"]');
+
+        if ("{{obj.is_closed}}" === "True") {
+            if ("{{obj.type}}" === 'buy') {
+                profit = (closedPrice - openingPrice) * amount * lotVolume;
+            }
+            else {
+                profit = (openingPrice - closedPrice) * amount * lotVolume;
+            }
+            profit = profit.toFixed(4);
+
+            attributeCells.forEach(function(cell) {
+                if (cell.textContent.trim() === "Profit") {
+                    var valueCell = cell.nextElementSibling;
+                    valueCell.innerHTML = '<span class="Value">' + profit + '</span>';
+                }
+            });
+        }
+
+
+        function connectWebSocket() {
+            const baseUrl = "{{ pt_utl }}";
+            const socket = new WebSocket(`wss://${baseUrl}:8443/socket.io/?EIO=3&transport=websocket`);
+
+            socket.onopen = function(event) {
+                console.log('WebSocket connected');
+            };
+
+            socket.onmessage = function(event) {
+                var data = event.data;
+                var messageWithoutPrefix = data.slice(2);
+                var parsedMessage = JSON.parse(messageWithoutPrefix);
+                var message = parsedMessage[1];
+
+                if ("{{obj.is_closed}}" === "False" && "{{obj.asset_name}}" === message.name){
+                    if ("{{obj.type}}" === 'buy') {
+                        profit = (message.price - openingPrice) * amount * lotVolume;
+                    }
+                    else {
+                        profit = (openingPrice - message.price) * amount * lotVolume;
+                    }
+                    profit = profit.toFixed(4);
+
+                    attributeCells.forEach(function(cell) {
+                        if (cell.textContent.trim() === "Profit") {
+                            var valueCell = cell.nextElementSibling;
+                            valueCell.innerHTML = '<span class="Value">' + profit + '</span>';
+                        }
+                    });
+                }
+            };
+
+            socket.onclose = function(event) {
+                console.log('WebSocket disconnected');
+            };
+        }
+
+        window.onload = function() {
+            if ("{{ pt_is_on }}" === "True" && "{{ obj.is_closed }}" !== "True") {
+                connectWebSocket();
+            }
+        };
+    </script>
+{% endblock %}

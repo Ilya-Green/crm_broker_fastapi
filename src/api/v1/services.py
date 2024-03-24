@@ -63,7 +63,7 @@ def api_client_create(data: ClientCreateIn) -> ClientCreateOut:
                 session.refresh(new_client)
             logger_api.warning(f"created {new_client}")
 
-            return ClientCreateOut(detail='success', autologin=f"{PLATFORM_INTEGRATION_URL}/autoologin?token={autologin}", data=new_client)
+            return ClientCreateOut(detail='success', autologin=f"https://{PLATFORM_INTEGRATION_URL}/autoologin?token={autologin}", data=new_client)
         else:
             with Session(engine) as session:
                 session.add(new_client)

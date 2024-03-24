@@ -20,6 +20,8 @@ from starlette.status import (
     HTTP_500_INTERNAL_SERVER_ERROR,
 )
 from starlette.templating import Jinja2Templates
+
+from src.config import PLATFORM_INTEGRATION_IS_ON, PLATFORM_INTEGRATION_URL
 from starlette_admin._types import RequestAction
 from starlette_admin.auth import AuthMiddleware, AuthProvider
 from starlette_admin.exceptions import ActionFailed, FormValidationError, LoginFailed
@@ -392,6 +394,8 @@ class BaseAdmin:
     async def _render_list(self, request: Request) -> Response:
         identity = request.path_params.get("identity")
         model = self._find_model_from_identity(identity)
+        pt_is_on = PLATFORM_INTEGRATION_IS_ON
+        pt_url = PLATFORM_INTEGRATION_URL
         if not model.is_accessible(request):
             raise HTTPException(HTTP_403_FORBIDDEN)
         return self.templates.TemplateResponse(
@@ -401,6 +405,8 @@ class BaseAdmin:
                 "model": model,
                 "_actions": await model.get_all_actions(request),
                 "__js_model__": await model._configs(request),
+                "pt_is_on": pt_is_on,
+                "pt_utl": pt_url,
             },
         )
 
@@ -411,6 +417,8 @@ class BaseAdmin:
             raise HTTPException(HTTP_403_FORBIDDEN)
         pk = request.path_params.get("pk")
         obj = await model.find_by_pk(request, pk)
+        pt_is_on = PLATFORM_INTEGRATION_IS_ON
+        pt_url = PLATFORM_INTEGRATION_URL
         if obj is None:
             raise HTTPException(HTTP_404_NOT_FOUND)
         return self.templates.TemplateResponse(
@@ -420,6 +428,8 @@ class BaseAdmin:
                 "model": model,
                 "raw_obj": obj,
                 "obj": await model.serialize(obj, request, RequestAction.DETAIL, templates=self.templates),
+                "pt_is_on": pt_is_on,
+                "pt_utl": pt_url,
             },
         )
 
