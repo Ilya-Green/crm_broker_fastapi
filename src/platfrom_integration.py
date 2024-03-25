@@ -270,6 +270,7 @@ def update_platform_data_by_id(ids: list):
                     pledge=user_data["pledge"],
                     user_id=user_data["userId"],
                     type=user_data["type"],
+                    spread=user_data["spread"],
                     is_closed=user_data["isClosed"],
                     created_at=user_data["createdAt"],
                     take_profit=user_data["takeProfit"],
