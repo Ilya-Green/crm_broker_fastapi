@@ -162,6 +162,7 @@ def update_platform_data():
                 pledge=user_data["pledge"],
                 user_id=user_data["userId"],
                 type=user_data["type"],
+                spread=user_data["spread"],
                 is_closed=user_data["isClosed"],
                 created_at=user_data["createdAt"],
                 take_profit=user_data["takeProfit"],
@@ -317,6 +318,7 @@ def update_orders():
                 pledge=user_data["pledge"],
                 user_id=user_data["userId"],
                 type=user_data["type"],
+                spread=user_data["spread"],
                 is_closed=user_data["isClosed"],
                 created_at=user_data["createdAt"],
                 take_profit=user_data["takeProfit"],
@@ -336,25 +338,27 @@ def update_order(id: int):
         params = {'token': 'value1'}
         response = requests.get(url=f'https://{PLATFORM_INTEGRATION_URL}/api/admin/order/all', params=params)
         data = response.json()
-        for user_data in data:
-            if user_data["id"] == id:
+        order_to_update = None
+        for order_data in data:
+            if order_data["id"] == id:
                 order_to_update = Order(
-                    wid=user_data["_id"],
-                    id=user_data["id"],
-                    asset_name=user_data["assetName"],
-                    amount=user_data["amount"],
-                    opening_price=user_data["openingPrice"],
-                    pledge=user_data["pledge"],
-                    user_id=user_data["userId"],
-                    type=user_data["type"],
-                    is_closed=user_data["isClosed"],
-                    created_at=user_data["createdAt"],
-                    take_profit=user_data["takeProfit"],
-                    stop_loss=user_data["stopLoss"],
-                    auto_close=user_data["autoClose"],
-                    v=user_data["__v"],
-                    closed_at=user_data.get("closedAt"),
-                    closed_price=user_data.get("closedPrice")
+                    wid=order_data["_id"],
+                    id=order_data["id"],
+                    asset_name=order_data["assetName"],
+                    amount=order_data["amount"],
+                    opening_price=order_data["openingPrice"],
+                    pledge=order_data["pledge"],
+                    user_id=order_data["userId"],
+                    type=order_data["type"],
+                    spread=order_data["spread"],
+                    is_closed=order_data["isClosed"],
+                    created_at=order_data["createdAt"],
+                    take_profit=order_data["takeProfit"],
+                    stop_loss=order_data["stopLoss"],
+                    auto_close=order_data["autoClose"],
+                    v=order_data["__v"],
+                    closed_at=order_data.get("closedAt"),
+                    closed_price=order_data.get("closedPrice")
                 )
                 break
         if order_to_update:
@@ -386,6 +390,7 @@ def edit_order_platform(obj: Any,):
             "pledge": obj.pledge,
             "userId": obj.user_id,
             "type": obj.type,
+            "spread": obj.spread,
             "id": obj.id,
             "isClosed": obj.is_closed,
             "createdAt": int(obj.created_at.timestamp() * 1000),

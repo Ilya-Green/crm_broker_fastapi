@@ -256,6 +256,7 @@ class Order(SQLModel, table=True):
     closed_at: Optional[datetime] = Field()
     closed_price: Optional[float] = Field()
     profit: Optional[float] = Field()
+    spread: Optional[float] = Field()
 
     user_id: Optional[str] = Field(foreign_key="trader.id")
     trader: "Trader" = Relationship(back_populates="orders")

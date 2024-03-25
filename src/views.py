@@ -1331,6 +1331,8 @@ class OrdersView(MyModelView):
         Order.closed_price,
         Order.type,
         FloatField("pledge", label="Used Margin"),
+        Order.profit,
+        Order.spread,
         Order.is_closed,
         Order.created_at,
         Order.closed_at,
@@ -1346,7 +1348,8 @@ class OrdersView(MyModelView):
         Order.v,
     ]
     exclude_fields_from_edit = [
-        Order.trader
+        Order.trader,
+        Order.profit,
     ]
 
     def get_list_query(self):
