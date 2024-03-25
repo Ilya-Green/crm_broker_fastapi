@@ -87,6 +87,11 @@
                                     </div>" data-name="add_note" data-submit-btn-text="Yes, proceed" data-submit-btn-class="btn-success">
                                                 Add comment
                                 </button>
+
+                                <button id="register_account_button" class="btn btn-primary btn-block me-2" type="button" href="#"
+                                        data-name="add_note">
+                                                Create trader account
+                                </button>
 <!--                                <button id="action-btn"-->
 <!--                                            type="button"-->
 <!--                                            class="btn btn-danger btn-block"-->
@@ -482,6 +487,31 @@
           $("#tableContent tr").filter(function() {
             $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
           });
+        });
+    });
+    document.getElementById("register_account_button").addEventListener("click", function() {
+        query = new URLSearchParams();
+        query.append("pks", {{ obj[pk] }});
+        query.append("name", "create_trader_account");
+
+        var register_action_url = window.location.origin + "/admin/api/client/action?" + query.toString();
+        fetch(register_action_url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(async (response) => {
+            // Обработка ответа
+            // successAlert((response.json()));
+            if (response.ok) {
+                console.log('Account registered successfully');
+            } else {
+                console.error('Failed to register');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
         });
     });
     </script>
