@@ -195,6 +195,8 @@
                                 </thead>
                                 <tbody id="tableContent">
 
+                                <div id="alertContainer"></div>
+
 
 
                                 {% for field in model._extract_fields('DETAIL') %}
@@ -489,6 +491,24 @@
           });
         });
     });
+  function successAlert(msg) {
+    $("#alertContainer").empty();
+    $(`<div
+    class="alert alert-success alert-dismissible m-0"
+    role="alert"
+  >
+    <div class="d-flex">
+      <div>
+        <!-- Download SVG icon from http://tabler-icons.io/i/check -->
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon alert-icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l5 5l10 -10" /></svg>
+      </div>
+      <div>${msg}</div>
+    </div>
+    <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
+  </div>
+  `).appendTo("#alertContainer");
+  }
+
     document.getElementById("register_account_button").addEventListener("click", function() {
         query = new URLSearchParams();
         query.append("pks", {{ obj[pk] }});
@@ -504,6 +524,7 @@
         .then(async (response) => {
             // Обработка ответа
             // successAlert((response.json()));
+            successAlert((await response.json())["msg"]);
             if (response.ok) {
                 console.log('Account registered successfully');
             } else {
