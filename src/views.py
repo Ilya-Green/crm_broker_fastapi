@@ -1726,6 +1726,43 @@ class ClientsView(MyModelView):
         )
 
     @action(
+        name="create_trader_account",
+        text="Create trader account",
+    )
+    async def create_trader_account(self, request: Request, pks: List[Any]) -> str:
+        session_1: Session = request.state.session
+        clients = await self.find_by_pks(request, pks)
+        with Session(engine) as session:
+            for client in clients:
+                if client.trader_id:
+                    continue
+                statement = select(Trader).where(
+                    (Trader.email == client.email) | (Trader.phone_number == client.phone_number)
+                )
+                current_trader = session.exec(statement).first()
+                if current_trader:
+                    statement = select(Client).where(Client.trader_id == current_trader.id)
+                    linked_client = session.exec(statement).first()
+                    if linked_client.id != client.id:
+                        return "Client {} already have trader account and is duplicate with {} lead".format(
+                            client.id, linked_client.id
+                        )
+                    client.trader_id = current_trader.id
+                    session_1.add(client)
+                    continue
+                else:
+                    new_trader = register_account(client)
+                    new_trader.status_id = 1
+                    session.add(new_trader)
+                    client.trader_id = new_trader.id
+                    session_1.add(client)
+            session.commit()
+        session_1.commit()
+        return "{} clients were created trader account".format(
+            len(pks)
+        )
+
+    @action(
         name="set_department_leader",
         text="Set",
         confirmation="Enter the department id",
