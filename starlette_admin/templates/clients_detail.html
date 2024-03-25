@@ -542,15 +542,16 @@
         .then(async (response) => {
             // Обработка ответа
             // successAlert((response.json()));
-            successAlert((await response.json())["msg"]);
             if (response.ok) {
                 console.log('Account registered successfully');
+                successAlert('Account registered successfully');
             } else {
                 console.error('Failed to register');
             }
         })
         .catch(error => {
             console.error('Error:', error);
+            dangerAlert(error);
         });
     });
     </script>
