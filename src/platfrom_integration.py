@@ -500,20 +500,20 @@ def change_account_balance_platform(trader: Trader, mainBalance: str, bonuses: s
 
         if mainBalance is not None:
             try:
-                body["mainBalance"] = int(mainBalance)
-                body["balance"] = int(mainBalance)
+                body["mainBalance"] = float(mainBalance)
+                body["balance"] = float(mainBalance)
             except ValueError:
                 pass
 
         if bonuses is not None:
             try:
-                body["bonuses"] = int(bonuses)
+                body["bonuses"] = float(bonuses)
             except ValueError:
                 pass
 
         if credFacilities is not None:
             try:
-                body["credFacilities"] = int(credFacilities)
+                body["credFacilities"] = float(credFacilities)
             except ValueError:
                 pass
 
