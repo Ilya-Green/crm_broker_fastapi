@@ -48,7 +48,8 @@
                                 <a href="{{ url_for(__name__ ~ ':list', identity=model.identity) }}"
                                    class="btn btn-danger">{{ _("Cancel") }}</a>
                                 <button type="submit" name="_add_another"
-                                        class="btn">{{ _("Save and add another") }}</button>
+                                        class="btn">{{ _("Save and add
+                                    another") }}</button>
                                 <button type="submit" name="_continue_editing"
                                         class="btn">{{ _("Save and continue editing") }}</button>
                                 <button type="submit" class="btn btn-success">{{ _("Save") }}</button>
@@ -76,4 +77,85 @@
     {% endfor %}
     <script type="text/javascript"
             src="{{ url_for(__name__ ~ ':statics', path='js/form.js') }}"></script>
+    <script>
+        function findLotVolume(currencyName) {
+            const currency = CURRENCIES_SYMBOLS.find(currency => currency.name === currencyName);
+            if (currency) {
+                return currency.lotVolume;
+            } else {
+                return 1; // В случае, если валютная пара не найдена
+            }
+        }
+
+        const lotVolume = findLotVolume("{{ obj.asset_name }}");
+        const closedPrice = parseFloat("{{ obj.closed_price }}");
+        const openingPrice = parseFloat("{{ obj.opening_price }}");
+        const amount = parseFloat("{{ obj.amount }}");
+
+        var profit_input = document.getElementById('profit');
+        var spread_input = document.getElementById('spread');
+
+        if ("{{obj.is_closed}}" === "True") {
+            if ("{{obj.type}}" === 'buy') {
+                profit = (closedPrice - openingPrice) * amount * lotVolume;
+            }
+            else {
+                profit = (openingPrice - closedPrice) * amount * lotVolume;
+            }
+            profit = profit.toFixed(4);
+
+            attributeCells.forEach(function(cell) {
+                if (cell.textContent.trim() === "Profit") {
+                    var valueCell = cell.nextElementSibling;
+                    valueCell.innerHTML = '<span class="Value">' + profit + '</span>';
+                }
+            });
+        }
+
+        var RealTimePrice;
+
+        function connectWebSocket() {
+            const baseUrl = "{{ pt_utl }}";
+            const socket = new WebSocket(`wss://${baseUrl}:8443/socket.io/?EIO=3&transport=websocket`);
+
+            socket.onopen = function(event) {
+                console.log('WebSocket connected');
+            };
+
+            socket.onmessage = function(event) {
+                var data = event.data;
+                var messageWithoutPrefix = data.slice(2);
+                var parsedMessage = JSON.parse(messageWithoutPrefix);
+                var message = parsedMessage[1];
+
+                if ("{{obj.is_closed}}" === "False" && "{{obj.asset_name}}" === message.name){
+                    RealTimePrice = message.price;
+                    if ("{{obj.type}}" === 'buy') {
+                        profit = (message.price - openingPrice) * amount * lotVolume;
+                    }
+                    else {
+                        profit = (openingPrice - message.price) * amount * lotVolume;
+                    }
+                    profit = profit.toFixed(4);
+
+                    var spread = parseFloat(spread_input.value);
+                    if (isNaN(spread)) {
+                        spread = 0;
+                    }
+                    var profitValue = parseFloat(profit);
+                    profit_input.value = profitValue + spread;
+                }
+            };
+
+            socket.onclose = function(event) {
+                console.log('WebSocket disconnected');
+            };
+        }
+
+        window.onload = function() {
+            if ("{{ pt_is_on }}" === "True" && "{{ obj.is_closed }}" !== "True") {
+                connectWebSocket();
+            }
+        };
+    </script>
 {% endblock %}

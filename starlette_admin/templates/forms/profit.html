@@ -3,7 +3,7 @@
 <label class="form-label">Profit</label>
 
 <div class="{% if error %}{{ error_class }}{% endif %}">
-    <input id="spread" name="{{ id }}"
+    <input id="profit" name="{{ id }}"
            class="field-string form-control {% if error %}is-invalid{% endif %}"
            value="{{ data or '' }}"
            type="number"
@@ -18,10 +18,15 @@
 document.addEventListener("DOMContentLoaded", function() {
     var opening_price = document.getElementById('opening_price');
     var closed_price = document.getElementById('closed_price');
-    var spread = document.getElementById('spread');
+    var profit = document.getElementById('profit');
     var type = document.getElementById("type");
     var amount_order = document.getElementById("amount");
     var checkbox = document.getElementById("is_closed");
+    var spread = document.getElementById("spread");
+    var spreadValueInitial = parseFloat(spread.value);
+    if (isNaN(spreadValueInitial)) {
+        spreadValueInitial = 0;
+    }
     var initial_checked = checkbox.checked;
     var opening_price_value_initial = parseFloat(opening_price.value);
     var closed_price_value_initial = closed_price.value ? parseFloat(closed_price.value) : null;
@@ -42,55 +47,65 @@ document.addEventListener("DOMContentLoaded", function() {
 
     if (closed_price_value_initial !== null) {
         if (type.value === 'buy') {
-            spread.value = (closed_price.value - opening_price.value) * amount_order.value * lotVolume;
+            profit.value = (closed_price.value - opening_price.value) * amount_order.value * lotVolume + spreadValueInitial;
         } else {
-            spread.value = (opening_price.value - closed_price.value) * amount_order.value * lotVolume;
+            profit.value = (opening_price.value - closed_price.value) * amount_order.value * lotVolume + spreadValueInitial;
         }
     }
-
-
-    function recalculate_prices() {
-        var opening_price_value = opening_price.value ? parseFloat(opening_price.value) : null;
-        var closed_price_value = closed_price.value ? parseFloat(closed_price.value) : null;
-        var spread_value = spread.value ? parseFloat(spread.value) : null;
-        var amount_value = amount_order.value ? parseFloat(amount_order.value) : null;
-
-
-        if (spread_value === null) {
-            opening_price.value = opening_price_value_initial;
-            closed_price.value = closed_price_value_initial;
-            checkbox.checked = initial_checked;
-        } else if (closed_price_value_initial === null) {
-            if (type.value === 'buy') {
-                closed_price.value = (spread_value / (amount_value * lotVolume)) + opening_price_value;
-                checkbox.checked = true;
-            } else {
-                closed_price.value = opening_price_value - (spread_value / (amount_value * lotVolume));
-                checkbox.checked = true;
-            }
-        } else if (closed_price_value_initial !== null) {
-            if (type.value === 'buy') {
-                opening_price.value = closed_price_value - (spread_value / (amount_value * lotVolume));
-            } else {
-                opening_price.value = (spread_value / (amount_value * lotVolume)) + closed_price_value;
-            }
-        }
-    }
-
-    spread.addEventListener('input', recalculate_prices);
 
 
     function recalculate_spread() {
-        if (closed_price.value !== null) {
+        // var opening_price_value = opening_price.value ? parseFloat(opening_price.value) : null;
+        // var closed_price_value = closed_price.value ? parseFloat(closed_price.value) : null;
+        // var profit_value = profit.value ? parseFloat(profit.value) : null;
+        // var amount_value = amount_order.value ? parseFloat(amount_order.value) : null;
+
+
+        if (closed_price_value_initial === null) {
             if (type.value === 'buy') {
-                spread.value = (closed_price.value - opening_price.value) * amount_order.value * lotVolume;
+                spread.value = profit.value - ((RealTimePrice - opening_price.value) * amount_order.value * lotVolume);
             } else {
-                spread.value = (opening_price.value - closed_price.value) * amount_order.value * lotVolume;
+                spread.value = profit.value - ((opening_price.value - RealTimePrice) * amount_order.value * lotVolume);
+            }
+        } else if (closed_price_value_initial !== null) {
+            if (type.value === 'buy') {
+                spread.value = profit.value - ((closed_price.value - opening_price.value) * amount_order.value * lotVolume);
+            } else {
+                spread.value = profit.value - ((opening_price.value - closed_price.value) * amount_order.value * lotVolume );
             }
         }
     }
 
-    opening_price.addEventListener('input', recalculate_spread);
-    closed_price.addEventListener('input', recalculate_spread);
+    profit.addEventListener('input', recalculate_spread);
+
+
+    function recalculate_profit() {
+        if (closed_price.value !== null) {
+            var spreadValue = parseFloat(spread.value);
+            if (isNaN(spreadValue)) {
+                spreadValue = 0;
+            }
+            if (type.value === 'buy') {
+                profit.value = (RealTimePrice - opening_price.value) * amount_order.value * lotVolume + spreadValue;
+            } else {
+                profit.value = (opening_price.value - RealTimePrice) * amount_order.value * lotVolume + spreadValue;
+            }
+        }
+        else {
+            var spreadValue = parseFloat(spread.value);
+            if (isNaN(spreadValue)) {
+                spreadValue = 0;
+            }
+            if (type.value === 'buy') {
+                profit.value = (closed_price.value - opening_price.value) * amount_order.value * lotVolume + spreadValue;
+            } else {
+                profit.value = (opening_price.value - closed_price.value) * amount_order.value * lotVolume + spreadValue;
+            }
+        }
+    }
+
+    opening_price.addEventListener('input', recalculate_profit);
+    closed_price.addEventListener('input', recalculate_profit);
+    spread.addEventListener('input', recalculate_profit);
 });
 </script>
