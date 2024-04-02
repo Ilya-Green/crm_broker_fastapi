@@ -1055,7 +1055,7 @@ class TradersView(MyModelView):
 
     @action(
         name="change_balance",
-        text="Change balance",
+        text="Override balance",
         confirmation="Enter the balance you want to set",
         submit_btn_text="Yes, proceed",
         submit_btn_class="btn-success",
