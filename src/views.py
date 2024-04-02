@@ -679,6 +679,7 @@ class DesksView(MyModelView):
         Desk.language_id,
         Desk.creation_date,
         Desk.department,
+        Desk.employee,
         # LeadField("client"),
         Desk.client,
     ]
