@@ -184,7 +184,7 @@ block content %}
                       <div class="modal-content">
                           <div class="modal-body">
                               <div id="actionConfirmationStatus"></div></br>
-                              Status
+                              Select status
                               <select class="form-select" name="status" id="statusesSelect">
                                   <option value="none">no change</option>
                               </select>
@@ -203,36 +203,40 @@ block content %}
                       fetch('/admin/api/department?include_relationships=0')
                           .then(response => response.json())
                           .then(data => {
-                            const responsibleSelect = document.getElementById('department-filter');
-                              const itemsFilter = data.items;
 
-                              if (itemsFilter.length === 0) {
-                                  responsibleSelect.style.display = 'none';
-                                  return;
+                              const multipleSelectElementFilter = document.getElementById('multiple-department-filter');
+
+                              data.items.forEach(status => {
+                                  console.log(status);
+                                  const optionElement = document.createElement('option');
+                                  optionElement.value = status.id;
+                                  optionElement.textContent = status.name;
+                                  multipleSelectElementFilter.appendChild(optionElement);
+                                })
+
+                              function getQueryParams(param) {
+                                    const urlParams = new URLSearchParams(window.location.search);
+                                    const paramValues = urlParams.getAll(param);
+                                    return paramValues.length > 0 ? paramValues : null;
                               }
 
-                            itemsFilter.forEach(item => {
-                              const optionElement = document.createElement('option');
-                              optionElement.value = item.id;
-                              optionElement.textContent = item.name.toUpperCase();
-                                responsibleSelect.appendChild(optionElement)
-                            })
+                              const selectedOptions = getQueryParams('department_id');
 
-                                function getQueryParam(param) {
-                                    const urlParams = new URLSearchParams(window.location.search);
-                                    return urlParams.get(param);
-                                }
-                                const selectedOption = getQueryParam('department_id');
-                                if (selectedOption){
-                                    const selectElement = document.getElementById('department-filter');
-                                    selectElement.value = selectedOption;
-                                }
+                              if (selectedOptions) {
+                                    selectedOptions.forEach(option => {
+                                        const optionElement = document.querySelector(`#multiple-department-filter option[value="${option}"]`);
+                                        if (optionElement) {
+                                          optionElement.selected = true;
+                                        }
+                                    });
+                              }
+
 
                             const selectElementModal = document.getElementById('status-department');
                             data.items.forEach(status => {
                               const optionElement = document.createElement('option');
                               optionElement.value = status.id;
-                              optionElement.textContent = status.name.toUpperCase();
+                              optionElement.textContent = status.name;
                               selectElementModal.appendChild(optionElement);
                             });
 
@@ -243,43 +247,47 @@ block content %}
                       fetch('/admin/api/desk?include_relationships=0')
                           .then(response => response.json())
                           .then(data => {
-                              const responsibleSelect = document.getElementById('desk-filter');
-                              const itemsFilter = data.items;
+                              const multipleSelectElementFilter = document.getElementById('multiple-desk-filter');
 
-                              if (itemsFilter.length === 0) {
-                                  responsibleSelect.style.display = 'none';
-                                  return;
+                              data.items.forEach(status => {
+                                  console.log(status);
+                                  const optionElement = document.createElement('option');
+                                  optionElement.value = status.id;
+                                  optionElement.textContent = status.name;
+                                  multipleSelectElementFilter.appendChild(optionElement);
+                                })
+
+
+                              function getQueryParams(param) {
+                                    const urlParams = new URLSearchParams(window.location.search);
+                                    const paramValues = urlParams.getAll(param);
+                                    return paramValues.length > 0 ? paramValues : null;
                               }
 
-                            itemsFilter.forEach(item => {
-                              const optionElement = document.createElement('option');
-                              optionElement.value = item.id;
-                              optionElement.textContent = item.name.toUpperCase();
-                                responsibleSelect.appendChild(optionElement)
-                            })
+                              const selectedOptions = getQueryParams('desk_id');
 
-                              function getQueryParam(param) {
-                                    const urlParams = new URLSearchParams(window.location.search);
-                                    return urlParams.get(param);
-                                }
-                                const selectedOption = getQueryParam('desk_id');
-                                if (selectedOption){
-                                    const selectElement = document.getElementById('desk-filter');
-                                    selectElement.value = selectedOption;
-                                }
+                              if (selectedOptions) {
+                                    selectedOptions.forEach(option => {
+                                        const optionElement = document.querySelector(`#multiple-desk-filter option[value="${option}"]`);
+                                        if (optionElement) {
+                                          optionElement.selected = true;
+                                        }
+                                    });
+                              }
+
 
                             const selectElement = document.getElementById('status-desk');
                             data.items.forEach(status => {
                               const optionElement = document.createElement('option');
                               optionElement.value = status.id;
-                              optionElement.textContent = status.name.toUpperCase();
+                              optionElement.textContent = status.name;
                               selectElement.appendChild(optionElement);
                             })
                             const selectElementDepartment = document.getElementById('status-desk-department');
                             data.items.forEach(status => {
                               const optionElement = document.createElement('option');
                               optionElement.value = status.id;
-                              optionElement.textContent = status.name.toUpperCase();
+                              optionElement.textContent = status.name;
                               selectElementDepartment.appendChild(optionElement);
                             });
                           })
@@ -289,35 +297,38 @@ block content %}
                       fetch('/admin/api/employee?include_relationships=0')
                           .then(response => response.json())
                           .then(data => {
-                              const responsibleSelect = document.getElementById('responsible-filter');
-                              const itemsFilter = data.items;
+                              const multipleSelectElementFilter = document.getElementById('multiple-responsible-filter');
+                              data.items.forEach(status => {
+                                  console.log(status);
+                                  const optionElement = document.createElement('option');
+                                  optionElement.value = status.id;
+                                  optionElement.textContent = status.name;
+                                  multipleSelectElementFilter.appendChild(optionElement);
+                                })
 
-                              if (itemsFilter.length === 0) {
-                                  responsibleSelect.style.display = 'none';
-                                  return;
+                              function getQueryParams(param) {
+                                    const urlParams = new URLSearchParams(window.location.search);
+                                    const paramValues = urlParams.getAll(param);
+                                    return paramValues.length > 0 ? paramValues : null;
                               }
 
-                            itemsFilter.forEach(item => {
-                              const optionElement = document.createElement('option');
-                              optionElement.value = item.id;
-                              optionElement.textContent = item.login.toUpperCase();
-                                responsibleSelect.appendChild(optionElement)
-                            })
-                              function getQueryParam(param) {
-                                    const urlParams = new URLSearchParams(window.location.search);
-                                    return urlParams.get(param);
-                                }
-                                const selectedOption = getQueryParam('responsible_id');
-                                if (selectedOption){
-                                    const selectElement = document.getElementById('responsible-filter');
-                                    selectElement.value = selectedOption;
-                                }
+                              const selectedOptions = getQueryParams('responsible_id');
+
+                              if (selectedOptions) {
+                                    selectedOptions.forEach(option => {
+                                        const optionElement = document.querySelector(`#multiple-responsible-filter option[value="${option}"]`);
+                                        if (optionElement) {
+                                          optionElement.selected = true;
+                                        }
+                                    });
+                              }
+
                             const selectElement = document.getElementById('status-responsible');
                             const items = data.items;
                             items.forEach(item => {
                               const optionElement = document.createElement('option');
                               optionElement.value = item.id;
-                              optionElement.textContent = item.login.toUpperCase();
+                              optionElement.textContent = item.login;
                               selectElement.appendChild(optionElement)
                             })
                             const selectElementDepartment = document.getElementById('status-responsible-department');
@@ -325,7 +336,7 @@ block content %}
                             itemsDepartment.forEach(item => {
                               const optionElement = document.createElement('option');
                               optionElement.value = item.id;
-                              optionElement.textContent = item.login.toUpperCase();
+                              optionElement.textContent = item.login;
                               selectElementDepartment.appendChild(optionElement);
                             })
                             const selectElementDesk = document.getElementById('status-responsible-desk');
@@ -333,7 +344,7 @@ block content %}
                             itemsDesk.forEach(item => {
                               const optionElement = document.createElement('option');
                               optionElement.value = item.id;
-                              optionElement.textContent = item.login.toUpperCase();
+                              optionElement.textContent = item.login;
                               selectElementDesk.appendChild(optionElement);
                             })
                             ;
@@ -344,45 +355,51 @@ block content %}
                       fetch('/admin/api/status?include_relationships=0')
                           .then(response => response.json())
                           .then(data => {
-                              const selectElementFilter = document.getElementById('status-filter');
+                              const multipleSelectElementFilter = document.getElementById('multiple-status-filter');
                               data.items.forEach(status => {
                                   const optionElement = document.createElement('option');
                                   optionElement.value = status.id;
-                                  optionElement.textContent = status.name.toUpperCase();
-                                  selectElementFilter.appendChild(optionElement);
+                                  optionElement.textContent = status.name;
+                                  multipleSelectElementFilter.appendChild(optionElement);
                                 })
 
+                             function getQueryParams(param) {
+                                const urlParams = new URLSearchParams(window.location.search);
+                                const paramValues = urlParams.getAll(param);
+                                return paramValues.length > 0 ? paramValues : null;
+                            }
 
-                              function getQueryParam(param) {
-                                    const urlParams = new URLSearchParams(window.location.search);
-                                    return urlParams.get(param);
-                                }
-                                const selectedOption = getQueryParam('status_id');
-                                if (selectedOption){
-                                    const selectElement = document.getElementById('status-filter');
-                                    selectElement.value = selectedOption;
-                                }
+                            const selectedOptions = getQueryParams('status_id');
+
+                            if (selectedOptions) {
+                                selectedOptions.forEach(option => {
+                                    const optionElement = document.querySelector(`#multiple-status-filter option[value="${option}"]`);
+                                    if (optionElement) {
+                                      optionElement.selected = true;
+                                    }
+                                });
+                            }
 
 
                             const selectElement = document.getElementById('status-status');
                             data.items.forEach(status => {
                               const optionElement = document.createElement('option');
                               optionElement.value = status.id;
-                              optionElement.textContent = status.name.toUpperCase();
+                              optionElement.textContent = status.name;
                               selectElement.appendChild(optionElement);
                             })
                             const selectElementDepartment = document.getElementById('status-status-department');
                             data.items.forEach(status => {
                               const optionElement = document.createElement('option');
                               optionElement.value = status.id;
-                              optionElement.textContent = status.name.toUpperCase();
+                              optionElement.textContent = status.name;
                               selectElementDepartment.appendChild(optionElement);
                             })
                             const selectElementDesk = document.getElementById('status-status-desk');
                             data.items.forEach(status => {
                               const optionElement = document.createElement('option');
                               optionElement.value = status.id;
-                              optionElement.textContent = status.name.toUpperCase();
+                              optionElement.textContent = status.name;
                               selectElementDesk.appendChild(optionElement);
                             })
 
@@ -390,7 +407,7 @@ block content %}
                             data.items.forEach(status => {
                               const optionElement = document.createElement('option');
                               optionElement.value = status.id;
-                              optionElement.textContent = status.name.toUpperCase();
+                              optionElement.textContent = status.name;
                               selectStatuses.appendChild(optionElement);
                             })
                             ;
@@ -401,23 +418,37 @@ block content %}
                       fetch('/admin/api/affiliate?include_relationships=0')
                           .then(response => response.json())
                           .then(data => {
-                              const selectElementFilter = document.getElementById('affiliate-filter');
+                              const multipleSelectElementFilter = document.getElementById('multiple-affiliate-filter');
+
+                              if (!(data && data.items)) {
+                                      selectElementFilter.style.display = 'none';
+                                      return;
+                              }
                               data.items.forEach(status => {
+                                  console.log(status);
                                   const optionElement = document.createElement('option');
                                   optionElement.value = status.id;
-                                  optionElement.textContent = status.name.toUpperCase();
-                                  selectElementFilter.appendChild(optionElement);
+                                  optionElement.textContent = status.name;
+                                  multipleSelectElementFilter.appendChild(optionElement);
                                 })
 
-                                function getQueryParam(param) {
+
+                              function getQueryParams(param) {
                                     const urlParams = new URLSearchParams(window.location.search);
-                                    return urlParams.get(param);
-                                }
-                                const selectedOption = getQueryParam('affiliate_id');
-                                if (selectedOption){
-                                    const selectElement = document.getElementById('affiliate-filter');
-                                    selectElement.value = selectedOption;
-                                }
+                                    const paramValues = urlParams.getAll(param);
+                                    return paramValues.length > 0 ? paramValues : null;
+                              }
+
+                              const selectedOptions = getQueryParams('affiliate_id');
+
+                              if (selectedOptions) {
+                                    selectedOptions.forEach(option => {
+                                        const optionElement = document.querySelector(`#multiple-affiliate-filter option[value="${option}"]`);
+                                        if (optionElement) {
+                                          optionElement.selected = true;
+                                        }
+                                    });
+                              }
 
 
                           })
@@ -442,119 +473,97 @@ block content %}
           <div class="d-flex m-3">
             <div id="pageLength_container">
 <!--                  <input type="text" id="statusInput" class="form-control" placeholder="id" style="width: 40px; display: inline-block;">-->
-                    <select class="form-select" name="department" id="status-filter" style="width: 80px; display: inline-block;">
-                        <option value="none"> all </option>
-                  </select>
-<!--                  <button class="btn btn-light" onclick="statusFunc()">Status</button>-->
-                  <script>
-                  function statusFunc() {
-                    var url = new URL(window.location.href);
+                <select id="multiple-status-filter" style="width: 120px; display: inline-block;" multiple>
+<!--                    <option value="none"> all </option>-->
+                </select>
+                <script>
+                  $(document).ready(function() {
+                    $('#multiple-status-filter').select2();
+                  });
+                </script>
 
-                    var id = document.getElementById('status-filter').value;
+                <select id="multiple-responsible-filter" style="width: 120px; display: inline-block;" multiple>
+<!--                    <option value="none"> all </option>-->
+                </select>
+                <script>
+                  $(document).ready(function() {
+                    $('#multiple-responsible-filter').select2();
+                  });
+                </script>
 
-                    if (id === 'none') {
-                        url.searchParams.delete('status_id');
-                    } else {
-                        url.searchParams.set('status_id', id);
-                    }
+                <select id="multiple-department-filter" style="width: 120px; display: inline-block;" multiple>
+<!--                    <option value="none"> all </option>-->
+                </select>
+                <script>
+                  $(document).ready(function() {
+                    $('#multiple-department-filter').select2();
+                  });
+                </script>
 
-                    window.location.href = url.toString();
+                <select id="multiple-desk-filter" style="width: 120px; display: inline-block;" multiple>
+<!--                    <option value="none"> all </option>-->
+                </select>
+                <script>
+                  $(document).ready(function() {
+                    $('#multiple-desk-filter').select2();
+                  });
+                </script>
+
+                <select id="multiple-affiliate-filter" style="width: 120px; display: inline-block;" multiple>
+<!--                    <option value="none"> all </option>-->
+                </select>
+                <script>
+                  $(document).ready(function() {
+                    $('#multiple-affiliate-filter').select2();
+                  });
+                </script>
+
+                <button class="btn btn-light" onclick="redirectWithQuery()">Apply</button>
+
+                <script>
+                  function redirectWithQuery() {
+                      const queryParams = new URLSearchParams();
+
+                        const selectedOptionsStatus = $('#multiple-status-filter').val();
+                        selectedOptionsStatus.forEach(option => {
+                          queryParams.append('status_id', option);
+                        });
+
+                      const selectedOptionsResponsible = $('#multiple-responsible-filter').val();
+                        selectedOptionsResponsible.forEach(option => {
+                          queryParams.append('responsible_id', option);
+                        });
+
+                      const selectedOptionsDepartment = $('#multiple-department-filter').val();
+                        selectedOptionsDepartment.forEach(option => {
+                          queryParams.append('department_id', option);
+                        });
+                      const selectedOptionsDesk = $('#multiple-desk-filter').val();
+                        selectedOptionsDesk.forEach(option => {
+                          queryParams.append('desk_id', option);
+                        });
+                      const selectedOptionsAffiliate = $('#multiple-affiliate-filter').val();
+                        selectedOptionsAffiliate.forEach(option => {
+                          queryParams.append('affiliate_id', option);
+                        });
+
+                        const queryString = queryParams.toString();
+                        const baseUrl = window.location.href.split('?')[0];
+                        const newUrl = `${baseUrl}?${queryString}`;
+                        window.location.href = newUrl;
                   }
+                </script>
 
-                  var selectElement = document.getElementById("status-filter");
-
-                  selectElement.addEventListener("change", function() {
-                    statusFunc();
-                    // statusFunc();
-                });
+                <button class="btn btn-light" onclick="clearFunc()">Clear filters</button>
+                  <script>
+                  function clearFunc() {
+                    const currentURL = new URL(window.location.href);
+                    currentURL.search = '';
+                    window.location.href = currentURL.toString();
+                  }
                   </script>
 
-                <select class="form-select" name="department" id="department-filter" style="width: 80px; display: inline-block;">
-                        <option value="none"> all </option>
-                  </select>
-                  <script>
-                  function departmentFunc() {
-                    var url = new URL(window.location.href);
-                    var id = document.getElementById('department-filter').value;
-                        if (id === 'none') {
-                        url.searchParams.delete('department_id');
-                    } else {
-                        url.searchParams.set('department_id', id);
-                    }
 
-                    window.location.href = url.toString();
-                  }
-
-                  var selectElement = document.getElementById("department-filter");
-                  selectElement.addEventListener("change", function() {
-                    departmentFunc();
-                });
-                  </script>
-
-                <select class="form-select" name="department" id="desk-filter" style="width: 80px; display: inline-block;">
-                        <option value="none"> all </option>
-                  </select>
-                  <script>
-                  function deskFunc() {
-                    var url = new URL(window.location.href);
-                    var id = document.getElementById('desk-filter').value;
-                        if (id === 'none') {
-                        url.searchParams.delete('desk_id');
-                    } else {
-                        url.searchParams.set('desk_id', id);
-                    }
-
-                    window.location.href = url.toString();
-                  }
-
-                  var selectElement = document.getElementById("desk-filter");
-                  selectElement.addEventListener("change", function() {
-                    deskFunc();
-                });
-                  </script>
-
-                   <select class="form-select" name="department" id="responsible-filter" style="width: 80px; display: inline-block;">
-                        <option value="none"> all </option>
-                  </select>
-                  <script>
-                  function responsibleFunc() {
-                    var url = new URL(window.location.href);
-                    var id = document.getElementById('responsible-filter').value;
-                        if (id === 'none') {
-                        url.searchParams.delete('responsible_id');
-                    } else {
-                        url.searchParams.set('responsible_id', id);
-                    }
-
-                    window.location.href = url.toString();
-                  }
-
-                  var selectElement = document.getElementById("responsible-filter");
-                  selectElement.addEventListener("change", function() {
-                    responsibleFunc();
-                });
-                  </script>
-                <select class="form-select" name="affiliate" id="affiliate-filter" style="width: 80px; display: inline-block;">
-                        <option value="none"> all </option>
-                  </select>
-                  <script>
-                  function affFunc() {
-                    var url = new URL(window.location.href);
-                    var id = document.getElementById('affiliate-filter').value;
-                        if (id === 'none') {
-                        url.searchParams.delete('affiliate_id');
-                    } else {
-                        url.searchParams.set('affiliate_id', id);
-                    }
-
-                    window.location.href = url.toString();
-                  }
-
-                  var selectElement = document.getElementById("affiliate-filter");
-                  selectElement.addEventListener("change", function() {
-                    affFunc();
-                });
-                  </script>
                   <button id="showButton" class="btn btn-light" onclick="showFunc()">Show hidden</button>
                   <button id="hideButton" class="btn btn-light" onclick="hideFunc()">Hide</button>
                   <script>
@@ -585,14 +594,6 @@ block content %}
                         document.getElementById('hideButton').style.display = 'none';
                         document.getElementById('showButton').style.display = 'inline-block';
                     }
-                  </script>
-                  <button class="btn btn-light" onclick="clearFunc()">Clear filters</button>
-                  <script>
-                  function clearFunc() {
-                    const currentURL = new URL(window.location.href);
-                    currentURL.search = '';
-                    window.location.href = currentURL.toString();
-                  }
                   </script>
               </div>
             <div class="ms-auto text-muted">
@@ -731,4 +732,6 @@ block content %}
   type="text/javascript"
   src="{{ url_for(__name__ ~ ':statics', path='js/list.js') }}"
 ></script>
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 {% endblock %}

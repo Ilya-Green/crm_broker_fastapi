@@ -1562,17 +1562,28 @@ class ClientsView(MyModelView):
             query = super().get_list_query().where(or_(Client.status_id.in_(exc_statuses), Client.status_id.is_(None)))
         else:
             query = super().get_list_query()
-
-        if "responsible_id" in self.query:
-            query = query.where(Client.responsible_id == self.query["responsible_id"][0])
-        if "status_id" in self.query:
-            query = query.where(Client.status_id == self.query["status_id"][0])
-        if "affiliate_id" in self.query:
-            query = query.where(Client.affiliate_id == self.query["affiliate_id"][0])
-        if "department_id" in self.query:
-            query = query.where(Client.department_id == self.query["department_id"][0])
-        if "desk_id" in self.query:
-            query = query.where(Client.desk_id == self.query["desk_id"][0])
+        for key, value in self.query.items():
+            if "status_id" in key:
+                status_ids = [v for v in value if v != 'none']
+                if status_ids:
+                    print('test')
+                    query = query.where(Client.status_id.in_(status_ids))
+            if "responsible_id" in key:
+                responsible_ids = [v for v in value if v != 'none']
+                if responsible_ids:
+                    query = query.where(Client.responsible_id.in_(responsible_ids))
+            if "affiliate_id" in key:
+                responsible_ids = [v for v in value if v != 'none']
+                if responsible_ids:
+                    query = query.where(Client.affiliate_id.in_(responsible_ids))
+            if "department_id" in key:
+                responsible_ids = [v for v in value if v != 'none']
+                if responsible_ids:
+                    query = query.where(Client.department_id.in_(responsible_ids))
+            if "desk_id" in key:
+                responsible_ids = [v for v in value if v != 'none']
+                if responsible_ids:
+                    query = query.where(Client.desk_id.in_(responsible_ids))
         if self.sys_admin:
             return query
         if self.head:
@@ -1596,16 +1607,28 @@ class ClientsView(MyModelView):
             query = super().get_count_query().where(or_(Client.status_id.in_(exc_statuses), Client.status_id.is_(None)))
         else:
             query = super().get_count_query()
-        if "responsible_id" in self.query:
-            query = query.where(Client.responsible_id == self.query["responsible_id"][0])
-        if "status_id" in self.query:
-            query = query.where(Client.status_id == self.query["status_id"][0])
-        if "affiliate_id" in self.query:
-            query = query.where(Client.affiliate_id == self.query["affiliate_id"][0])
-        if "department_id" in self.query:
-            query = query.where(Client.department_id == self.query["department_id"][0])
-        if "desk_id" in self.query:
-            query = query.where(Client.desk_id == self.query["desk_id"][0])
+        for key, value in self.query.items():
+            if "status_id" in key:
+                status_ids = [v for v in value if v != 'none']
+                if status_ids:
+                    print('test')
+                    query = query.where(Client.status_id.in_(status_ids))
+            if "responsible_id" in key:
+                responsible_ids = [v for v in value if v != 'none']
+                if responsible_ids:
+                    query = query.where(Client.responsible_id.in_(responsible_ids))
+            if "affiliate_id" in key:
+                responsible_ids = [v for v in value if v != 'none']
+                if responsible_ids:
+                    query = query.where(Client.affiliate_id.in_(responsible_ids))
+            if "department_id" in key:
+                responsible_ids = [v for v in value if v != 'none']
+                if responsible_ids:
+                    query = query.where(Client.department_id.in_(responsible_ids))
+            if "desk_id" in key:
+                responsible_ids = [v for v in value if v != 'none']
+                if responsible_ids:
+                    query = query.where(Client.desk_id.in_(responsible_ids))
         if self.sys_admin:
         #     if self.query:
         #         query = super().get_list_query()
