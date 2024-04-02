@@ -62,6 +62,20 @@
                                                 Create deposit
                                 </button>
 
+                                {% for field in model._extract_fields('DETAIL') %}
+                                        <td data-label="Value">
+                                            {% with data=obj[field.name] %}
+                                            {% if field.name == "autologin_link" %}
+                                                <a href="{{ data }}" target="_blank">
+                                                <button type="button" class="btn btn-primary btn-block me-2">
+                                                    <i class="fa-solid fa-key"></i>
+                                                    Login in
+                                                </button>
+                                                </a>
+                                                {% endif %}
+                                            {% endwith %}
+                                {% endfor %}
+
                                 <div class="modal modal-blur fade" id="modal-action-comment" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
         <div class="modal-content">
