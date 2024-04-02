@@ -1062,23 +1062,23 @@ class TradersView(MyModelView):
         form="""
             <div class="input-group input-group-sm mb-3">
                 <div class="input-group-prepend">
-                    <span class="input-group-text" id="main-balance-label">Main Balance, $:</span>
+                    <span class="input-group-text" id="main-balance-label">Balance, $:</span>
                 </div>
-                <input name="mainBalance" type="text" class="form-control" aria-label="Main Balance" aria-describedby="main-balance-label">
+                <input name="mainBalance" id="mainBalance" type="number" step="any" class="form-control" aria-label="Main Balance" aria-describedby="main-balance-label" placeholder="unchanged">
             </div>
             
             <div class="input-group input-group-sm mb-3">
                 <div class="input-group-prepend">
                     <span class="input-group-text" id="bonuses-label">Bonuses, $:</span>
                 </div>
-                <input name="bonuses" type="text" class="form-control" aria-label="Secondary Balance" aria-describedby="secondary-balance-label">
+                <input name="bonuses" id="bonuses" type="number" step="any" class="form-control" aria-label="Secondary Balance" aria-describedby="secondary-balance-label" placeholder="unchanged">
             </div>
             
             <div class="input-group input-group-sm mb-3">
                 <div class="input-group-prepend">
                     <span class="input-group-text" id="credFacilities-label">Credit Facilities, $:</span>
                 </div>
-                <input name="credFacilities" type="text" class="form-control" aria-label="Extra Balance" aria-describedby="extra-balance-label">
+                <input name="credFacilities" id="credFacilities" type="number" step="any" class="form-control" aria-label="Extra Balance" aria-describedby="extra-balance-label" placeholder="unchanged">
             </div>
             """,
     )
