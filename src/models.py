@@ -57,6 +57,8 @@ class Employee(SQLModel, table=True):
     department_id: Optional[int] = Field(foreign_key="department.id")
     department: "Department" = Relationship(back_populates="employee")
 
+    affiliate: "Affiliate" = Relationship(back_populates="employee")
+
     async def __admin_repr__(self, request: Request):
         return str(self.login)
 
@@ -103,6 +105,9 @@ class Affiliate(SQLModel, table=True):
 
     department_id: Optional[int] = Field(foreign_key="department.id")
     department: "Department" = Relationship(back_populates="affiliate2")
+
+    employee_id: Optional[int] = Field(foreign_key="employee.id")
+    employee: "Employee" = Relationship(back_populates="affiliate")
 
     clients: "Client" = Relationship(back_populates="affiliate")
 

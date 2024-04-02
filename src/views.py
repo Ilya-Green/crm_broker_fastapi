@@ -702,6 +702,7 @@ class AffiliatesView(MyModelView):
         Affiliate.clients,
         Affiliate.department,
         Affiliate.desk,
+        Affiliate.employee,
     ]
 
     exclude_fields_from_edit = [

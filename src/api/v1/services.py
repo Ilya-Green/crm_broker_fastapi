@@ -47,6 +47,7 @@ def api_client_create(data: ClientCreateIn) -> ClientCreateOut:
                             affiliate_id=auth.id,
                             department_id=auth.department_id,
                             desk_id=auth.desk_id,
+                            responsible_id=auth.employee,
                             status_id=1,
                             type_id=1
                             )
