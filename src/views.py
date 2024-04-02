@@ -330,6 +330,10 @@ class EmployeeView(MyModelView):
     ]
 
     exclude_fields_from_create = [Employee.actions, Employee.notes]
+    exclude_fields_from_edit = [
+        Employee.notes,
+        Employee.clients_responsible,
+    ]
 
     def get_list_query(self):
         if self.sys_admin:
@@ -593,6 +597,10 @@ class DepartmentsView(MyModelView):
         Department.clients,
     ]
 
+    exclude_fields_from_edit = [
+        Department.clients
+    ]
+
 
 class DesksView(MyModelView):
     responsive_table = True
@@ -676,7 +684,10 @@ class DesksView(MyModelView):
     ]
 
     exclude_fields_from_create = [Desk.creation_date]
-    exclude_fields_from_edit = [Desk.creation_date]
+    exclude_fields_from_edit = [
+        Desk.creation_date,
+        Desk.client
+    ]
 
 
 class AffiliatesView(MyModelView):
@@ -690,6 +701,10 @@ class AffiliatesView(MyModelView):
         Affiliate.clients,
         Affiliate.department,
         Affiliate.desk,
+    ]
+
+    exclude_fields_from_edit = [
+        Affiliate.clients,
     ]
 
     def is_accessible(self, request: Request) -> bool:
@@ -2177,6 +2192,10 @@ class StatusesView(MyModelView):
         Status.client,
     ]
 
+    exclude_fields_from_edit = [
+        Status.client,
+    ]
+
     responsive_table = True
     column_visibility = True
     search_builder = True
@@ -2204,6 +2223,10 @@ class RetainStatusesView(MyModelView):
         RetainStatus.name,
         RetainStatus.hide,
         # TraderField("traders"),
+        RetainStatus.traders,
+    ]
+
+    exclude_fields_from_edit = [
         RetainStatus.traders,
     ]
 
@@ -2255,6 +2278,10 @@ class TypesView(MyModelView):
         Type.id,
         Type.name,
         # LeadField("client"),
+        Type.client,
+    ]
+
+    exclude_fields_from_edit = [
         Type.client,
     ]
 
