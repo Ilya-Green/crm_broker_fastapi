@@ -937,6 +937,32 @@ class TradersView(MyModelView):
             len(pks)
         )
 
+    @action(
+        name="change_status",
+        id="changestatus",
+        text="Change status",
+        confirmation="Enter status id",
+        submit_btn_text="Yes, proceed",
+        submit_btn_class="btn-success",
+        #         <input name="id" class="form-control" id="floating-input" value="">
+        form="""<div class="input-group input-group-sm mb-3">,
+        <div class="input-group-prepend">
+        <span class="input-group-text" id="inputGroup-sizing-sm">id:</span>
+        </div>
+        <input  name="id" type="text" class="form-control" aria-label="Small" aria-describedby="inputGroup-sizing-sm">
+        </div>""",
+        data_bs_target="#modal-action-status"
+    )
+    async def change_status(self, request: Request, pks: List[Any]) -> str:
+        session: Session = request.state.session
+        for trader in await self.find_by_pks(request, pks):
+            trader.status_id = request.query_params["id"]
+            session.add(trader)
+        session.commit()
+        return "{} clients were successfully changed status to id: {}".format(
+            len(pks), request.query_params["id"]
+        )
+
     async def find_all(
         self,
         request: Request,
@@ -1151,6 +1177,10 @@ class TradersView(MyModelView):
                 return True
             if request.state.user["can_change_balance"]:
                 return True
+        if name == "change_status":
+            if request.state.user["sys_admin"]:
+                return True
+            return True
         if name == "create_deposit":
             if request.state.user["sys_admin"]:
                 return True
