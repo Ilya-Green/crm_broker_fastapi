@@ -296,22 +296,3 @@ const CURRENCIES_SYMBOLS = [
     // { id: 'shares', img: '/src/apps/client/ui/components/AssetsButton/images/shares.svg', title: 'STOCKS', symbols: COMPANY_SHARES_SYMBOLS },
     // { id: 'indices', img: '/src/apps/client/ui/components/AssetsButton/images/index.svg', title: 'INDEX', symbols: INDICES_SYMBOLS }
 ];
-
-const CHART_SYMBOL_INFO_MAP = {
-    ...CHART_SYMBOL_GROUPS.reduce((result, group) => {
-        const groupResult = group.symbols.reduce((result, symbol) => {
-            return {
-                ...result,
-                [symbol.name]: {
-                    ...symbol,
-                    groupId: group.id
-                }
-            };
-        }, {});
-
-        return {
-            ...result,
-            ...groupResult
-        };
-    }, {})
-};
