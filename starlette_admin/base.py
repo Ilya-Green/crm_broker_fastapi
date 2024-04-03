@@ -480,6 +480,8 @@ class BaseAdmin:
         obj = await model.find_by_pk(request, pk)
         if obj is None:
             raise HTTPException(HTTP_404_NOT_FOUND)
+        pt_is_on = PLATFORM_INTEGRATION_IS_ON
+        pt_url = PLATFORM_INTEGRATION_URL
         if request.method == "GET":
             return self.templates.TemplateResponse(
                 model.edit_template,
@@ -488,6 +490,8 @@ class BaseAdmin:
                     "model": model,
                     "raw_obj": obj,
                     "obj": await model.serialize(obj, request, RequestAction.EDIT),
+                    "pt_is_on": pt_is_on,
+                    "pt_utl": pt_url,
                 },
             )
         else:
