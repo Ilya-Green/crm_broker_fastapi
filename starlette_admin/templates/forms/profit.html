@@ -80,18 +80,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
 
     function recalculate_profit() {
-        if (closed_price.value !== null) {
-            var spreadValue = parseFloat(spread.value);
-            if (isNaN(spreadValue)) {
-                spreadValue = 0;
-            }
-            if (type.value === 'buy') {
-                profit.value = (RealTimePrice - opening_price.value) * amount_order.value * lotVolume + spreadValue;
-            } else {
-                profit.value = (opening_price.value - RealTimePrice) * amount_order.value * lotVolume + spreadValue;
-            }
-        }
-        else {
+        if (closed_price.value !== "") {
             var spreadValue = parseFloat(spread.value);
             if (isNaN(spreadValue)) {
                 spreadValue = 0;
@@ -100,6 +89,17 @@ document.addEventListener("DOMContentLoaded", function() {
                 profit.value = (closed_price.value - opening_price.value) * amount_order.value * lotVolume + spreadValue;
             } else {
                 profit.value = (opening_price.value - closed_price.value) * amount_order.value * lotVolume + spreadValue;
+            }
+        }
+        else {
+            var spreadValue = parseFloat(spread.value);
+            if (isNaN(spreadValue)) {
+                spreadValue = 0;
+            }
+            if (type.value === 'buy') {
+                profit.value = (RealTimePrice - opening_price.value) * amount_order.value * lotVolume + spreadValue;
+            } else {
+                profit.value = (opening_price.value - RealTimePrice) * amount_order.value * lotVolume + spreadValue;
             }
         }
     }
