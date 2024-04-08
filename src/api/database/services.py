@@ -6,7 +6,6 @@ from fastapi import File, UploadFile, HTTPException
 from sqlmodel import Session, select
 
 from src import engine
-from src.api.database.schemas import IntersectionsInput
 from src.models import Client, Affiliate
 
 
