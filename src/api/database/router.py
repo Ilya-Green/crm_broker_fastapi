@@ -5,7 +5,7 @@ import logging
 
 from starlette.responses import JSONResponse
 
-from src.api.database.services import api_upload_database, api_check_database, api_check_intersections
+from src.api.database.services import api_upload_database, api_check_database
 
 logger = logging.getLogger("database")
 
