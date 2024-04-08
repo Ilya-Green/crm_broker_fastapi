@@ -13,6 +13,7 @@ from starlette_admin.contrib.sqlmodel import Admin
 from starlette.middleware import Middleware
 from starlette.middleware.sessions import SessionMiddleware
 
+from .api.database.router import db
 from .api.services.api import statusesRouter
 from .provider import MyAuthProvider
 from sqlmodel import Session, select
@@ -165,6 +166,7 @@ admin.mount_to(app)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 app.include_router(affApiV1, prefix="/api",)
 app.include_router(statusesRouter, prefix="/api",)
+app.include_router(db, prefix="/api",)
 
 
 if APP_TYPE != "DEV":
