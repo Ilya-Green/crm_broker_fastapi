@@ -752,11 +752,6 @@ class AffiliatesView(MyModelView):
         Affiliate.clients,
     ]
 
-    def is_accessible(self, request: Request) -> bool:
-        if request.state.user["sys_admin"] is True:
-            return True
-        return False
-
 
 class TradersView(MyModelView):
     detail_template: str = "trader_detail.html"
