@@ -523,6 +523,10 @@ class RolesView(MyModelView):
         Role.roles_can_access,
         Role.clients_can_access,
         Role.clients_can_edit,
+        Role.affiliates_can_access,
+        Role.affiliates_can_view_details,
+        Role.affiliates_can_create,
+        Role.affiliates_can_edit,
 
         Role.retain,
         Role.orders_can_access,
