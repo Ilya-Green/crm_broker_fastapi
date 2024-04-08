@@ -692,6 +692,45 @@ class DesksView(MyModelView):
 
 
 class AffiliatesView(MyModelView):
+    def is_accessible(self, request: Request) -> bool:
+        self.id = request.state.user["id"]
+        self.desk_id = request.state.user["desk_id"]
+        self.department_id = request.state.user["department_id"]
+        self.desk_leader = request.state.user["desk_leader"]
+        self.department_leader = request.state.user["department_leader"]
+        self.head = request.state.user["head"]
+        self.sys_admin = request.state.user["sys_admin"]
+        # self.department_head = request.state.user["department_head"]
+
+        if request.state.user["sys_admin"] is True:
+            return True
+        if request.state.user["affiliates_can_access"] is True:
+            return True
+        return False
+
+    def can_view_details(self, request: Request) -> bool:
+        if request.state.user["affiliates_can_view_details"] is True:
+            return True
+
+    def can_edit(self, request: Request) -> bool:
+        if request.state.user["sys_admin"] is True:
+            return True
+        if request.state.user["affiliates_can_edit"] is True:
+            return True
+        return False
+
+    def can_create(self, request: Request) -> bool:
+        if request.state.user["sys_admin"] is True:
+            return True
+        if request.state.user["affiliates_can_create"] is True:
+            return True
+        return False
+
+    def can_delete(self, request: Request) -> bool:
+        if request.state.user["sys_admin"] is True:
+            return True
+        return False
+
     exclude_fields_from_create = [Affiliate.auth_key]
 
     fields = [
