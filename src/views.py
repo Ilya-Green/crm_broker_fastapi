@@ -713,6 +713,8 @@ class AffiliatesView(MyModelView):
         return False
 
     def can_view_details(self, request: Request) -> bool:
+        if request.state.user["sys_admin"] is True:
+            return True
         if request.state.user["affiliates_can_view_details"] is True:
             return True
 
