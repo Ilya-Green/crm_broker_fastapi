@@ -14,6 +14,7 @@ from starlette.middleware import Middleware
 from starlette.middleware.sessions import SessionMiddleware
 
 from .api.database.router import db
+from .api.pt_webhook.router import pt
 from .api.services.api import statusesRouter
 from .provider import MyAuthProvider
 from sqlmodel import Session, select
