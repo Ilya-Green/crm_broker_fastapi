@@ -205,6 +205,7 @@ class Trader(SQLModel, table=True):
     blocked: Optional[bool] = Field()
     isActive: Optional[bool] = Field()
     isVipStatus: Optional[bool] = Field()
+    orderisBlocked: Optional[bool] = Field()
     autologin: Optional[str] = Field()
     autologin_link: Optional[AnyHttpUrl] = Field()
     last_note: Optional[datetime] = Field(sa_column=Column(DateTime(timezone=True)))

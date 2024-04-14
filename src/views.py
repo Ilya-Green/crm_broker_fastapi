@@ -893,6 +893,7 @@ class TradersView(MyModelView):
         Trader.blocked,
         Trader.isActive,
         Trader.isVipStatus,
+        Trader.orderisBlocked,
         URLField("autologin_link"),
         # Trader.autologin_link,
         Trader.autologin,

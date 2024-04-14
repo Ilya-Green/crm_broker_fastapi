@@ -126,6 +126,7 @@ def update_platform_data():
                 blocked=user_data["blocked"],
                 isActive=user_data["isActive"],
                 isVipStatus=user_data["isVipStatus"],
+                orderisBlocked=user_data["orderisBlocked"],
                 autologin=user_data.get("autologin"),
                 autologin_link=f"https://{PLATFORM_INTEGRATION_URL}/autoologin?token=" + autologin if autologin else "",
                 status_id=1,
@@ -233,6 +234,7 @@ def update_platform_data_by_id(ids: list):
                     blocked=user_data["blocked"],
                     isActive=user_data["isActive"],
                     isVipStatus=user_data["isVipStatus"],
+                    orderisBlocked=user_data["orderisBlocked"],
                     autologin=user_data.get("autologin"),
                     autologin_link=f"https://{PLATFORM_INTEGRATION_URL}/autoologin?token=" + autologin if autologin else "",
                     status_id=1,
@@ -433,6 +435,7 @@ def edit_account_platform(obj: Any,):
             # "password": obj.password,
             "isActive": obj.isActive,
             "isVipStatus": obj.isVipStatus,
+            "orderisBlocked": obj.orderisBlocked,
             # "docs": {
             #     "others": []
             # },
