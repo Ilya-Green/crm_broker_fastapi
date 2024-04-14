@@ -27,7 +27,7 @@
 
 {% else %}
 
-    {% for v in (data if field.multiple else [data]) %}
+    {% for v in (data | sort(attribute='id', reverse=True) if field.multiple else [data]) %}
         {% set foreign_model = (field.identity | to_model) %}
             {% if v["_detail_repr"] %}
                             {{v["_detail_repr"] | safe }}
