@@ -31,7 +31,7 @@ from starlette_admin.contrib.sqla.helpers import build_query, build_order_clause
 from starlette_admin.fields import FileField, RelationField, BooleanField
 from .fields import PasswordField, CopyField, NotesField, EmailCopyField, StatusField, TraderField, ResponsibleField, \
     CustomPhoneField, LeadField, TraderStatusField, RoleField, AffiliateField, DeskField, EmployeesField, \
-    LeadWithCommentsField, OrderField, TransactionField, LeadCompactField
+    LeadWithCommentsField, OrderField, TransactionField, LeadCompactField, FloatRoundedField
 from starlette_admin.contrib.sqlmodel import ModelView
 from starlette.requests import Request
 from sqlalchemy.orm import Session, joinedload, sessionmaker
@@ -879,16 +879,16 @@ class TradersView(MyModelView):
         # Trader.date,
         Trader.country,
         Trader.created_at_tp,
-        Trader.balance,
+        FloatRoundedField("balance"),
         # StatusField("status"),
         # ResponsibleField("responsible"),
         # LeadWithCommentsField("client"),
         # OrderField("orders"),
         # TransactionField("transactions"),
         Trader.orders,
-        Trader.bonuses,
-        Trader.credFacilities,
-        Trader.mainBalance,
+        FloatRoundedField("bonuses"),
+        FloatRoundedField("credFacilities"),
+        FloatRoundedField("mainBalance"),
         Trader.accountStatus,
         Trader.blocked,
         Trader.isActive,
@@ -1416,12 +1416,12 @@ class OrdersView(MyModelView):
 
         Order.asset_name,
         Order.amount,
-        Order.opening_price,
-        Order.closed_price,
+        FloatRoundedField("opening_price"),
+        FloatRoundedField("closed_price"),
         Order.type,
-        FloatField("pledge", label="Used Margin"),
-        Order.profit,
-        Order.spread,
+        FloatRoundedField("pledge", label="Used Margin"),
+        FloatRoundedField("profit"),
+        FloatRoundedField("spread"),
         Order.is_closed,
         Order.created_at,
         Order.closed_at,

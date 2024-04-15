@@ -24,7 +24,7 @@ from starlette_admin import (
 )
 from typing import Optional, Any
 
-from starlette_admin.fields import CustomRelationField
+from starlette_admin.fields import CustomRelationField, FloatField
 
 
 @dataclass
@@ -68,6 +68,15 @@ class CustomPhoneField(StringField):
     class_: str = "field-phone form-control"
 
     render_function_key: str = "phone"
+
+
+
+@dataclass
+class FloatRoundedField(FloatField):
+    async def serialize_value(
+        self, request: Request, value: Any, action: RequestAction
+    ) -> float:
+        return round(float(value), 2)
 
 
 @dataclass
