@@ -811,7 +811,7 @@ class TradersView(MyModelView):
         return True
 
     def get_list_query(self):
-        update_platform_data()
+        # update_platform_data()
         if "hide" not in self.query:
             with Session(engine) as session:
                 statement = select(RetainStatus).where(RetainStatus.hide == False)
@@ -1037,10 +1037,16 @@ class TradersView(MyModelView):
             .unique()
             .all()
         )
-        # ids = []
-        # for trader in items:
-        #     ids.append(trader.id)
-        # update_platform_data_by_id(ids)
+        ids = []
+        for trader in items:
+            ids.append(trader.id)
+        update_platform_data_by_id(ids)
+        items = (
+            (await anyio.to_thread.run_sync(session.execute, stmt))
+            .scalars()
+            .unique()
+            .all()
+        )
         return items
 
     async def edit(self, request: Request, pk: Any, data: Dict[str, Any]) -> Any:
@@ -1286,7 +1292,7 @@ class TransactionsView(MyModelView):
             return True
 
     def can_edit(self, request: Request) -> bool:
-        update_platform_data()
+        # update_platform_data()
         if request.state.user["sys_admin"] is True:
             return True
         if request.state.user["head"] is True:
@@ -1347,6 +1353,53 @@ class TransactionsView(MyModelView):
             return obj
         except Exception as e:
             return self.handle_exception(e)
+
+    async def find_all(
+            self,
+            request: Request,
+            skip: int = 0,
+            limit: int = 100,
+            where: Union[Dict[str, Any], str, None] = None,
+            order_by: Optional[List[str]] = None,
+    ) -> Sequence[Any]:
+        session: Union[Session, AsyncSession] = request.state.session
+        stmt = self.get_list_query().offset(skip)
+        if limit > 0:
+            stmt = stmt.limit(limit)
+        if where is not None:
+            if isinstance(where, dict):
+                where = build_query(where, self.model)
+            else:
+                where = await self.build_full_text_search_query(
+                    request, where, self.model
+                )
+            stmt = stmt.where(where)  # type: ignore
+        stmt = stmt.order_by(*build_order_clauses(order_by or [], self.model))
+        if isinstance(session, AsyncSession):
+            items = (await session.execute(stmt)).scalars().unique().all()
+            ids = []
+            for order in items:
+                ids.append(order.user_id)
+            update_platform_data_by_id(ids)
+            items = (await session.execute(stmt)).scalars().unique().all()
+            return items
+        items = (
+            (await anyio.to_thread.run_sync(session.execute, stmt))
+            .scalars()
+            .unique()
+            .all()
+        )
+        ids = []
+        for order in items:
+            ids.append(order.user_id)
+        update_platform_data_by_id(ids)
+        items = (
+            (await anyio.to_thread.run_sync(session.execute, stmt))
+            .scalars()
+            .unique()
+            .all()
+        )
+        return items
 
 
 class OrdersView(MyModelView):
@@ -1442,7 +1495,7 @@ class OrdersView(MyModelView):
     ]
 
     def get_list_query(self):
-        update_orders()
+        # update_platform_data()
         query = super().get_list_query()
         if self.sys_admin:
             return query
@@ -1500,6 +1553,53 @@ class OrdersView(MyModelView):
             return obj
         except Exception as e:
             self.handle_exception(e)
+
+    async def find_all(
+            self,
+            request: Request,
+            skip: int = 0,
+            limit: int = 100,
+            where: Union[Dict[str, Any], str, None] = None,
+            order_by: Optional[List[str]] = None,
+    ) -> Sequence[Any]:
+        session: Union[Session, AsyncSession] = request.state.session
+        stmt = self.get_list_query().offset(skip)
+        if limit > 0:
+            stmt = stmt.limit(limit)
+        if where is not None:
+            if isinstance(where, dict):
+                where = build_query(where, self.model)
+            else:
+                where = await self.build_full_text_search_query(
+                    request, where, self.model
+                )
+            stmt = stmt.where(where)  # type: ignore
+        stmt = stmt.order_by(*build_order_clauses(order_by or [], self.model))
+        if isinstance(session, AsyncSession):
+            items = (await session.execute(stmt)).scalars().unique().all()
+            ids = []
+            for order in items:
+                ids.append(order.user_id)
+            update_platform_data_by_id(ids)
+            items = (await session.execute(stmt)).scalars().unique().all()
+            return items
+        items = (
+            (await anyio.to_thread.run_sync(session.execute, stmt))
+            .scalars()
+            .unique()
+            .all()
+        )
+        ids = []
+        for order in items:
+            ids.append(order.user_id)
+        update_platform_data_by_id(ids)
+        items = (
+            (await anyio.to_thread.run_sync(session.execute, stmt))
+            .scalars()
+            .unique()
+            .all()
+        )
+        return items
 
 
 
