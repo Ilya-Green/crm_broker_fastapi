@@ -168,6 +168,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 app.include_router(affApiV1, prefix="/api",)
 app.include_router(statusesRouter, prefix="/api",)
 app.include_router(db, prefix="/api",)
+app.include_router(pt, prefix="/api",)
 
 
 if APP_TYPE != "DEV":
