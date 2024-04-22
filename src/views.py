@@ -1390,8 +1390,8 @@ class TransactionsView(MyModelView):
             .all()
         )
         ids = []
-        for order in items:
-            ids.append(order.user_id)
+        for transaction in items:
+            ids.append(transaction.trader_id)
         update_platform_data_by_id(ids)
         items = (
             (await anyio.to_thread.run_sync(session.execute, stmt))
