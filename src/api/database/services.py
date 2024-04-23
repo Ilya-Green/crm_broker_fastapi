@@ -86,7 +86,7 @@ async def api_upload_database(
                 elif funnel_name is not None:
                     client.funnel_name = funnel_name
                 else:
-                    raise HTTPException(status_code=400, detail="phone not found")
+                    raise HTTPException(status_code=400, detail="funnel_name not found")
 
                 if 'description' in df.columns:
                     client.description = row['description']
