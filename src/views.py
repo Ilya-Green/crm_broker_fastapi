@@ -923,6 +923,7 @@ class TradersView(MyModelView):
         Trader.balance,
         Trader.transactions,
         Trader.last_note,
+        Trader.responsible_id,
     ]
     # exclude_fields_from_create = [
     #     Client.notes,
