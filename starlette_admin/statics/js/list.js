@@ -474,7 +474,7 @@ $("#searchInput").on("keydown", function (event) {
                                 //     query.append(this.name, $(this).val());
                                 // });
 
-                                    const url = window.location.origin + "/admin/api/client/action?" + query.toString();
+                                    const url = model.actionUrl + "?" + query.toString();
                                     fetch(url, {
                                         method: "POST",
                                         body: formData,
