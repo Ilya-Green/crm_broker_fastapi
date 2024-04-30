@@ -153,6 +153,111 @@
                                   .catch(error => {
                                     console.error('Error:', error);
                                   });
+
+                                  fetch('/admin/api/employee?skip=0&limit=100&order_by=id%20asc&include_relationships=0')
+                                  .then(response => response.json())
+                                  .then(data => {
+                                    const selectElement = document.getElementById('status-responsible');
+
+                                    data.items.forEach(item  => {
+                                      const optionElement = document.createElement('option');
+                                      optionElement.value = item.id;
+                                      optionElement.textContent = item.name;
+                                      selectElement.appendChild(optionElement);
+                                    });
+                                  })
+                                  .catch(error => {
+                                    console.error('Error:', error);
+                                  });
+                                </script>
+
+                                <button class="btn btn-primary btn-block me-2" type="button" href="#" data-bs-toggle="modal" data-bs-target="#modal-responsible" data-confirmation="Choose responsible" data-form="" data-name="change_responsible" data-submit-btn-text="Yes, proceed" data-submit-btn-class="btn-success">
+                                                Change Responsible
+                                </button>
+
+
+                                <div class="modal modal-blur fade" id="modal-responsible" tabindex="-1" role="dialog" aria-hidden="true">
+                                    <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-body">
+                                                <div id="actionConfirmationResponsible"></div></br>
+                                                <div id="modal-form-responsible"></div>
+                                                <select class="form-select" name="id" id="status-responsible">
+                                        </select>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-link link-secondary me-auto"
+                                                        data-bs-dismiss="modal">{{ _("Cancel") }}</button>
+                                                <button id="actionSubmitResponsible" type="button" class="btn btn-primary"
+                                                        data-bs-dismiss="modal">{{ _("Yes, Proceed") }}</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                                <script>
+                                    function submitActionResponsible(name, formData) {
+                                        $("#modal-loading").modal("show");
+                                        query = new URLSearchParams();
+                                          query.append("pks", "{{ obj[pk] }}");
+                                        query.append("name", name);
+
+                                        $('#modal-responsible :input').each(function() {
+                                            query.append(this.name, $(this).val());
+                                        });
+
+                                            const url = window.location.origin + "/admin/api/trader/action?" + query.toString();
+                                            fetch(url, {
+                                                method: "POST",
+                                                body: formData,
+                                            })
+                                          .then(async (response) => {
+                                              location.reload();
+                                            await new Promise((r) => setTimeout(r, 500));
+                                            $("#modal-loading").modal("hide");
+                                            if (response.ok) {
+                                              successAlert((await response.json())["msg"]);
+                                            } else {
+                                              if (response.status == 400) {
+                                                return Promise.reject((await response.json())["msg"]);
+                                              }
+                                              return Promise.reject("Something went wrong!");
+                                            }
+                                          })
+                                          .catch(async (error) => {
+                                            await new Promise((r) => setTimeout(r, 500));
+                                            dangerAlert(error);
+                                          });
+                                      }
+
+                                    $(document).ready(function(){
+                                    $("#modal-responsible").on("show.bs.modal", function (event) {
+                                        console.log('shown');
+                                        var button = $(event.relatedTarget);
+                                        var confirmation = button.data("confirmation");
+                                        var form = button.data("form");
+                                        var name = button.data("name");
+                                        var submit_btn_text = button.data("submit-btn-text");
+                                        var submit_btn_class = button.data("submit-btn-class");
+
+                                        var modal = $(this);
+                                        modal.find("#actionConfirmationResponsible").text(confirmation);
+                                        var modalForm = modal.find("#modal-form-responsible");
+                                        $('#modal-form').html(form);
+                                        var actionSubmit = modal.find("#actionSubmitResponsible");
+                                        actionSubmit.text(submit_btn_text);
+                                        actionSubmit.removeClass().addClass(`btn ${submit_btn_class}`);
+                                        actionSubmit.unbind();
+                                        actionSubmit.on("click", function (event) {
+                                          const formElement = modalForm.find("form");
+                                          const formData = formElement.length
+                                            ? new FormData(formElement.get(0))
+                                            : new FormData();
+                                          submitActionResponsible(name, formData);
+                                        });
+                                      });
+                                    });
                                 </script>
 
                                 <button class="btn btn-primary btn-block me-2" type="button" href="#" data-bs-toggle="modal" data-bs-target="#modal-action-comment" data-confirmation="Enter comment" data-form="<div class=&quot;input-group input-group-sm mb-3&quot;>,
