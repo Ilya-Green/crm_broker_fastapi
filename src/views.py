@@ -322,7 +322,9 @@ class EmployeeView(MyModelView):
         # DeskField("department"),
         # DeskField("desk"),
         Employee.clients_responsible,
+        Employee.traders_responsible,
         Employee.notes,
+        Employee.RetainNotes,
         # Employee.actions,
         Employee.role,
         Employee.department,
@@ -333,6 +335,8 @@ class EmployeeView(MyModelView):
     exclude_fields_from_edit = [
         Employee.notes,
         Employee.clients_responsible,
+        Employee.traders_responsible,
+        Employee.RetainNotes,
     ]
 
     def get_list_query(self):
