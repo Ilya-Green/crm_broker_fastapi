@@ -78,17 +78,19 @@
                                   </div>
 
                                     <script>
-                                    fetch('/admin/api/employee?include_relationships=0')
+                                    fetch('/admin/api/employee?include_relationships=1')
                                       .then(response => response.json())
                                       .then(data => {
                                           console.log(data)
                                           const responsibleSelect = document.getElementById('responsible-filter');
                                           const itemsFilter = data.items;
                                         itemsFilter.forEach(item => {
-                                          const optionElement = document.createElement('option');
-                                          optionElement.value = item.id;
-                                          optionElement.textContent = item.login.toUpperCase();
-                                            responsibleSelect.appendChild(optionElement)
+                                            if (item.role && item.role.retain === true) {
+                                                const optionElement = document.createElement('option');
+                                                optionElement.value = item.id;
+                                                optionElement.textContent = item.login.toUpperCase();
+                                                responsibleSelect.appendChild(optionElement)
+                                            }
                                         })
                                           function getQueryParam(param) {
                                                 const urlParams = new URLSearchParams(window.location.search);
