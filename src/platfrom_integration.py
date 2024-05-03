@@ -13,7 +13,7 @@ from src.config import PLATFORM_INTEGRATION_IS_ON, PLATFORM_INTEGRATION_URL
 from src.models import Trader, Client, Order, Transaction
 from starlette_admin.exceptions import ActionFailed, FormValidationError
 
-logger = logging.getLogger("api")
+logger = logging.getLogger("platform")
 
 
 def generate_password(length=8):
