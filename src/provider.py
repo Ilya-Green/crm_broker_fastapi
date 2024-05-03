@@ -11,6 +11,9 @@ from .models import Employee, Role, Desk, Department
 from . import engine
 
 
+logger = logging.getLogger("crm")
+
+
 class MyAuthProvider(AuthProvider):
     """
     This is for demo purpose, it's not a better
@@ -42,7 +45,11 @@ class MyAuthProvider(AuthProvider):
                 )
             request.session.update({"username": username})
             request.session.update({"password": password})
+            logger.info("User %s logged in successfully", username)
+            logger.info("Browser fingerprint: %s", request.headers.get('User-Agent'))
+            logger.info("User IP: %s", request.client.host)
             return response
+        logger.warning("Login failed for user: %s", username, password)
         raise LoginFailed("Invalid username or password")
 
     async def is_authenticated(self, request) -> bool:
