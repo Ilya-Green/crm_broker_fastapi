@@ -63,7 +63,7 @@ from .models import Employee, Role, Client, Desk, Affiliate, Department, Note, T
 from . import engine
 from .platfrom_integration import update_platform_data, edit_account_platform, change_account_password_platform, \
     update_order, edit_order_platform, update_orders, update_platform_data_by_id, create_transaction, \
-    change_account_balance_platform, register_account
+    change_account_balance_platform, register_account, register_account_crm
 
 logger = logging.getLogger("api")
 
@@ -1971,7 +1971,7 @@ class ClientsView(MyModelView):
                     session_1.add(client)
                     continue
                 else:
-                    new_trader = register_account(client)
+                    new_trader = register_account_crm(client)
                     new_trader.status_id = 1
                     session.add(new_trader)
                     client.trader_id = new_trader.id

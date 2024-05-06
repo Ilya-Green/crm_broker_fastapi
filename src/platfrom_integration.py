@@ -80,6 +80,100 @@ def register_account(client: Client):
 
 
 last_execution_time = None
+def register_account_crm(client: Client):
+    if PLATFORM_INTEGRATION_IS_ON:
+        url = f"https://{PLATFORM_INTEGRATION_URL}/api/client/user/autologin"
+        payload = {
+            "name": client.first_name,
+            "surname": client.second_name,
+            "email": client.email,
+            "password": generate_password(10),
+            "phone": client.phone_number,
+            "date": 1685823000002,
+            "country": 'RU',
+        }
+        headers = {
+            "Content-Type": "application/json"
+        }
+        response = requests.post(url, data=payload)
+        print(response.content)
+        if response.status_code == 403:
+            params = {'token': 'value1'}
+            response = requests.get(url=f'https://{PLATFORM_INTEGRATION_URL}/api/admin/user/all', params=params)
+            data = response.json()
+            for user_data in reversed(data):
+                if user_data["email"] == client.email or user_data["email"] == client.phone_number:
+                    autologin = user_data.get("autologin")
+                    new_trader = Trader(
+                        # id=user_data["id"],
+                        # name=user_data["name"],
+                        # email=user_data["email"],
+                        # phone_number=user_data["phone"],
+                        # balance=user_data["mainBalance"],
+                        # created_at_tp=datetime.fromtimestamp(user_data["createdAt"]/1000),
+                        id=user_data["id"],
+                        name=user_data["name"],
+                        surname=user_data["surname"],
+                        email=user_data["email"],
+                        phone_number=user_data["phone"],
+                        date=user_data["date"],
+                        # date=datetime.fromtimestamp(user_data["date"]/1000),
+                        password=user_data["password"],
+                        country=user_data["country"],
+                        accountNumber=user_data["accountNumber"],
+                        created_at_tp=user_data["createdAt"],
+                        # created_at_tp=datetime.fromtimestamp(user_data["createdAt"]/1000),
+                        balance=user_data["balance"],
+                        mainBalance=user_data["mainBalance"],
+                        bonuses=user_data["bonuses"],
+                        credFacilities=user_data["credFacilities"],
+                        accountStatus=user_data["accountStatus"],
+                        blocked=user_data["blocked"],
+                        isActive=user_data["isActive"],
+                        isVipStatus=user_data["isVipStatus"],
+                        autologin=user_data.get("autologin"),
+                        autologin_link=f"https://{PLATFORM_INTEGRATION_URL}/autoologin?token=" + autologin if autologin else "",
+                        status_id=1,
+                    )
+                    return new_trader
+                else:
+                    raise ActionFailed("Something went wrong")
+        user_data = json.loads(response.content.decode())
+        autologin = user_data.get("autologin")
+        new_trader = Trader(
+            # id=user_data["id"],
+            # name=user_data["name"],
+            # email=user_data["email"],
+            # phone_number=user_data["phone"],
+            # balance=user_data["mainBalance"],
+            # created_at_tp=datetime.fromtimestamp(user_data["createdAt"]/1000),
+            id=user_data["id"],
+            name=user_data["name"],
+            surname=user_data["surname"],
+            email=user_data["email"],
+            phone_number=user_data["phone"],
+            date=user_data["date"],
+            # date=datetime.fromtimestamp(user_data["date"]/1000),
+            password=user_data["password"],
+            country=user_data["country"],
+            accountNumber=user_data["accountNumber"],
+            created_at_tp=user_data["createdAt"],
+            # created_at_tp=datetime.fromtimestamp(user_data["createdAt"]/1000),
+            balance=user_data["balance"],
+            mainBalance=user_data["mainBalance"],
+            bonuses=user_data["bonuses"],
+            credFacilities=user_data["credFacilities"],
+            accountStatus=user_data["accountStatus"],
+            blocked=user_data["blocked"],
+            isActive=user_data["isActive"],
+            isVipStatus=user_data["isVipStatus"],
+            autologin=user_data.get("autologin"),
+            autologin_link=f"https://{PLATFORM_INTEGRATION_URL}/autoologin?token=" + autologin if autologin else "",
+            status_id=1,
+        )
+        return new_trader
+
+
 
 
 def update_platform_data():
