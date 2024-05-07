@@ -30,6 +30,37 @@ async def api_upload_database(
     if affiliate_id is not None and new_affiliate_name is not None:
         raise HTTPException(status_code=400, detail="make a choice: new affiliate or existing")
 
+    if 'first_name' in df.columns:
+        pass
+    if 'second_name' in df.columns:
+        pass
+    if 'name' in df.columns:
+        pass
+    elif 'first_name' not in df.columns and 'second_name' not in df.columns and 'name' not in df.columns:
+        raise HTTPException(status_code=400,
+                            detail="At least one of 'first_name', 'second_name', or 'name' must be present in the DataFrame columns.")
+
+    if 'email' in df.columns:
+        pass
+    else:
+        raise HTTPException(status_code=400, detail="email not found")
+
+    if 'phone_number' in df.columns:
+        pass
+    elif 'phone' in df.columns:
+        pass
+    else:
+        raise ValueError("Neither 'phone_number' nor 'phone' found")
+
+    if 'funnel_name' in df.columns:
+        pass
+    elif 'aff_funnel' in df.columns:
+        pass
+    elif funnel_name is not None:
+        pass
+    else:
+        raise HTTPException(status_code=400, detail="funnel_name not found")
+
     new_affiliate = None
     if new_affiliate_name:
         with Session(engine) as session:
