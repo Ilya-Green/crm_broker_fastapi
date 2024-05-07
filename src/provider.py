@@ -35,7 +35,7 @@ class MyAuthProvider(AuthProvider):
             raise FormValidationError(
                 {"username": "Ensure username has at least 03 characters"}
             )
-
+        form = await request.form()
         with Session(engine) as session:
             statement = select(Employee).where(Employee.login == username, Employee.password == password)
             result = session.exec(statement).first()
@@ -45,8 +45,14 @@ class MyAuthProvider(AuthProvider):
                 raise FormValidationError(
                     {"username": "the role must be assigned by the system administrator"}
                 )
+            fingerprint = form.get("fingerprint")
+            with Session(engine) as session:
+                result.session = fingerprint
+                session.add(result)
+                session.commit()
             request.session.update({"username": username})
             request.session.update({"password": password})
+            request.session.update({"session": fingerprint})
             logger.info("User %s logged in successfully", username)
             logger.info("Browser fingerprint: %s", request.headers.get('User-Agent'))
             logger.info("User IP: %s", request.client.host)
@@ -62,8 +68,9 @@ class MyAuthProvider(AuthProvider):
         # request.state.user = users.get(request.session["username"])
         username = request.session.get("username", None)
         password = request.session.get("password", None)
+        session_id = request.session.get("session", None)
         with Session(engine) as session:
-            user = select(Employee).where(Employee.login == username, Employee.password == password)
+            user = select(Employee).where(Employee.login == username, Employee.password == password, Employee.session == session_id)
             result = session.exec(user).first()
         if result:
             """

@@ -37,6 +37,7 @@ class Employee(SQLModel, table=True):
     password: str = Field(min_length=8)
 
     name: Optional[str] = Field()
+    session: Optional[str] = Field()
 
     role_id: Optional[int] = Field(foreign_key="role.id")
     role: "Role" = Relationship(back_populates="user")
