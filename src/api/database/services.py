@@ -128,7 +128,7 @@ async def api_upload_database(
                 new_records_count += 1
         session.commit()
 
-        clients_affiliate_id = defaultdict(str)
+        clients_affiliate_id = defaultdict(int)
 
         for client in duplicates:
             statement = select(Affiliate).where((Affiliate.id == client.affiliate_id))
@@ -173,7 +173,7 @@ async def api_check_database(
             else:
                 unique.append(row['email'])
 
-        clients_affiliate_id = defaultdict(str)
+        clients_affiliate_id = defaultdict(int)
 
         for client in duplicates:
             statement = select(Affiliate).where((Affiliate.id == client.affiliate_id))
