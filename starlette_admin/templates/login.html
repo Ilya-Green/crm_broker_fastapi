@@ -65,15 +65,16 @@
     </div>
 {% endblock %}
 {% block script %}
-<script type="text/javascript" src="{{ url_for(__name__ ~ ':statics', path='js/vendor/fp/fp.min.js') }}"></script>
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const fpPromise = FingerprintJS.load();
-        fpPromise.then(fp => {
-          fp.get().then(result => {
-              document.getElementById('fingerprintInput').value = result.visitorId;
-          });
-        });
-    });
+document.addEventListener("DOMContentLoaded", function() {
+  const fpPromise = import("{{ url_for(__name__ ~ ':statics', path='js/vendor/fp/fp.min.js') }}")
+    .then(FingerprintJS => FingerprintJS.load())
+
+  fpPromise
+    .then(fp => fp.get())
+    .then(result => {
+      document.getElementById('fingerprintInput').value = result.visitorId;
+    })
+});
 </script>
 {% endblock %}
