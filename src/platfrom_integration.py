@@ -1,3 +1,4 @@
+import datetime
 import json
 import logging
 import random
@@ -25,12 +26,12 @@ def register_account(client: Client):
     if PLATFORM_INTEGRATION_IS_ON:
         url = f"https://{PLATFORM_INTEGRATION_URL}/api/client/user/autologin"
         payload = {
-            "name": client.first_name,
-            "surname": client.second_name,
+            "name": client.first_name if client.first_name else "None",
+            "surname": client.second_name if client.second_name else "None",
             "email": client.email,
             "password": generate_password(10),
             "phone": client.phone_number,
-            "date": 1685823000002,
+            "date": int(datetime.datetime.now().timestamp() * 1000),
             "country": 'RU',
         }
         headers = {
@@ -84,12 +85,12 @@ def register_account_crm(client: Client):
     if PLATFORM_INTEGRATION_IS_ON:
         url = f"https://{PLATFORM_INTEGRATION_URL}/api/client/user/autologin"
         payload = {
-            "name": client.first_name,
-            "surname": client.second_name,
+            "name": client.first_name if client.first_name else "None",
+            "surname": client.second_name if client.second_name else "None",
             "email": client.email,
             "password": generate_password(10),
             "phone": client.phone_number,
-            "date": 1685823000002,
+            "date": int(datetime.datetime.now().timestamp() * 1000),
             "country": 'RU',
         }
         headers = {
