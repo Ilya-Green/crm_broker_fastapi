@@ -30,7 +30,7 @@ class ClientCreateIn(SQLModel):
     email: EmailStr = Field()
     phone_number: str = Field(min_length=4, default="+1111111111")
 
-    ip: Optional[IPvAnyAddress] = Field(default="1.1.1.1")
+    ip: Optional[str] = Field()
     country_code: Optional[str] = Field(default="ZA", min_length=2, max_length=2)
     funnel_name: Optional[str] = Field(max_length=30)
     funnel_link: Optional[AnyUrl] = Field()
