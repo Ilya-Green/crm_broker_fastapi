@@ -1963,7 +1963,7 @@ class ClientsView(MyModelView):
                 if current_trader:
                     statement = select(Client).where(Client.trader_id == current_trader.id)
                     linked_client = session.exec(statement).first()
-                    if linked_client.id != client.id:
+                    if linked_client and linked_client.id and linked_client.id != client.id:
                         return "Client {} already have trader account and is duplicate with {} lead".format(
                             client.id, linked_client.id
                         )
