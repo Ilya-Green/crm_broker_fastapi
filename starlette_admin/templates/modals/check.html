@@ -1,0 +1,39 @@
+<div class="modal modal-blur fade" id="modal-check" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="modal-status bg-danger"></div>
+            <div class="modal-body text-center py-4">
+                <textarea id="check-textarea" class="form-control mt-3" rows="30" readonly></textarea>
+                <button id="download-btn" class="btn btn-primary mt-3">Download txt</button>
+                <textarea id="stats-textarea" class="form-control mt-3" rows="5" readonly></textarea>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+var downloadBtn = document.getElementById('download-btn');
+downloadBtn.addEventListener('click', function () {
+    var textarea = document.getElementById('check-textarea');
+    var textToWrite = textarea.value;
+    var textFileAsBlob = new Blob([textToWrite], {type: 'text/plain'});
+    var fileNameToSaveAs = 'duplicates.txt';
+
+    var downloadLink = document.createElement('a');
+    downloadLink.download = fileNameToSaveAs;
+    downloadLink.innerHTML = 'Download File';
+    if (window.webkitURL != null) {
+        // Chrome allows the link to be clicked without actually adding it to the DOM.
+        downloadLink.href = window.webkitURL.createObjectURL(textFileAsBlob);
+    } else {
+        // Firefox requires the link to be added to the DOM before it can be clicked.
+        downloadLink.href = window.URL.createObjectURL(textFileAsBlob);
+        downloadLink.onclick = function (event) { document.body.removeChild(event.target); };
+        downloadLink.style.display = 'none';
+        document.body.appendChild(downloadLink);
+    }
+
+    downloadLink.click();
+});
+</script>

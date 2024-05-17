@@ -46,14 +46,76 @@
   </ol>
 </div>
 {% endblock %} {% block modal %} {% include "modals/loading.html" %} {% include
-"modals/error.html" %} {% include "modals/actions.html" %} {% endblock %} {%
-block content %}
+"modals/error.html" %} {% include "modals/actions.html" %}
+{% include "modals/check.html" %}
+{% endblock %} {%block content %}
 <div class="container-fluid">
   <div class="row">
     <div class="col-12">
       <div class="card">
         <div class="card-header">
-          <div id="btn_container" class="card-title"></div>
+          <div id="btn_container" class="card-title">
+              {% if request.state.user.sys_admin == True %}
+                <a id="importButton" class="btn btn-secondary" href="#">
+                    <i class="fas fa-file-import me-2" aria-hidden="true"></i>
+                    Check
+                </a>
+              <script>
+                document.getElementById("importButton").addEventListener("click", function(event) {
+                    event.preventDefault();
+
+                    var input = document.createElement('input');
+                    input.type = 'file';
+                    input.accept = '.xlsx';
+
+                    input.onchange = function() {
+                        var file = input.files[0];
+                        if (file) {
+                            var formData = new FormData();
+                            formData.append('file', file);
+
+                            fetch('/admin/client/check', {
+                                method: 'POST',
+                                body: formData
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                console.log(data);
+                                var formattedText = "Given Count: " + data.given_count + "\n" +
+                                                    "Unique Count: " + data.unique_count + "\n" +
+                                                    "Unique:\n" + data.unique.join("\n") +
+                                                    "Duplicates Count:"  + data.duplicates_count + "\n" +
+                                                    "Duplicates:\n" + data.duplicates.join("\n");
+                                var textarea = document.getElementById('check-textarea');
+                                textarea.value = formattedText;
+                                if (typeof data.duplicates_by_affiliate_id === 'object' && data.duplicates_by_affiliate_id !== null) {
+                                    var statisticsText = "Duplicate statistics:\n";
+                                    for (var key in data.duplicates_by_affiliate_id) {
+                                        if (data.duplicates_by_affiliate_id.hasOwnProperty(key)) {
+                                            statisticsText += key + ": " + data.duplicates_by_affiliate_id[key] + "\n";
+                                        }
+                                    }
+                                } else {
+                                    statisticsText = "Duplicate statistics:\nNo duplicates found.";
+                                }
+                                var statsTextarea = document.getElementById('stats-textarea');
+                                statsTextarea.value = statisticsText;
+                                $("#modal-check").modal('show');
+                            })
+                            .catch(error => {
+                                console.error('Error uploading file:', error);
+                                $("#modal-error").text(error);
+                                $("#modal-error").modal('show');
+                            });
+                        }
+                    };
+
+                    // Нажимаем на элемент input, чтобы открыть диалог выбора файла
+                    input.click();
+                });
+            </script>
+              {%endif%}
+          </div>
           <div class="card-actions">
             <div class="btn-list">
               <div class="dropdown" id="actions-dropdown" style="display: none">

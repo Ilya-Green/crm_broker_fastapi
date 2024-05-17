@@ -2,7 +2,10 @@ import json
 from json import JSONDecodeError
 from typing import Any, Awaitable, Callable, Dict, List, Optional, Sequence, Type, Union
 
+import pandas as pd
+from fastapi import UploadFile, File
 from jinja2 import ChoiceLoader, FileSystemLoader, PackageLoader
+from openpyxl.reader.excel import load_workbook
 from starlette.applications import Starlette
 from starlette.datastructures import FormData
 from starlette.exceptions import HTTPException
@@ -21,6 +24,7 @@ from starlette.status import (
 )
 from starlette.templating import Jinja2Templates
 
+from src.api.database.services import api_check_database
 from src.config import PLATFORM_INTEGRATION_IS_ON, PLATFORM_INTEGRATION_URL
 from starlette_admin._types import RequestAction
 from starlette_admin.auth import AuthMiddleware, AuthProvider
@@ -204,6 +208,12 @@ class BaseAdmin:
                     methods=["GET", "POST"],
                     name="edit",
                 ),
+                Route(
+                    "/client/check",
+                    endpoint=self.leads_check,
+                    methods=["POST"],
+                    name="check",
+                ),
             ]
         )
         if self.index_view.add_to_menu:
@@ -333,6 +343,10 @@ class BaseAdmin:
             }
         )
 
+    async def leads_check(self, request: Request) -> JSONResponse:
+        form = await request.form()
+        uploaded_file: UploadFile = form['file']
+        return await api_check_database(uploaded_file)
     async def handle_action(self, request: Request) -> Response:
         try:
             identity = request.path_params.get("identity")

@@ -4,6 +4,7 @@ from typing import Optional, List
 import pandas as pd
 from fastapi import File, UploadFile, HTTPException
 from sqlmodel import Session, select
+from starlette.responses import JSONResponse
 
 from src import engine
 from src.models import Client, Affiliate
@@ -156,7 +157,11 @@ async def api_check_database(
     if 'email' not in df.columns:
         if len(df.columns) != 1:
             raise HTTPException(status_code=400, detail="not found email column")
-        df.insert(0, 'email', '')
+        first_column_name = df.columns[0]
+        print(first_column_name)
+        df.rename(columns={first_column_name: 'email'}, inplace=True)
+        new_row = pd.DataFrame({'email': [first_column_name]})
+        df = pd.concat([df, new_row], ignore_index=True)
 
     df.columns = df.columns.str.lower()
 
@@ -186,13 +191,13 @@ async def api_check_database(
 
         total_count = df.shape[0]
 
-        return {
+        return JSONResponse({
             "given_count": total_count,
             "unique_count": len(unique_emails),
             "unique": unique_emails,
             "duplicates_count": len(duplicates_emails),
             "duplicates": duplicates_emails,
             "duplicates_by_affiliate_id": clients_affiliate_id
-        }
 
 
+        })
