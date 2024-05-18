@@ -134,7 +134,7 @@ async def api_upload_database(
         for client in duplicates:
             statement = select(Affiliate).where((Affiliate.id == client.affiliate_id))
             this_aff = session.exec(statement).first()
-            affiliate_name = f'{this_aff.name}: {this_aff.id}'
+            affiliate_name = f'{this_aff.name} id{this_aff.id}'
             clients_affiliate_id[affiliate_name] += 1
 
         duplicates_emails = [client.email for client in duplicates] if duplicates is not None else []
@@ -183,7 +183,7 @@ async def api_check_database(
         for client in duplicates:
             statement = select(Affiliate).where((Affiliate.id == client.affiliate_id))
             this_aff = session.exec(statement).first()
-            affiliate_name = f'{this_aff.name}: {this_aff.id}'
+            affiliate_name = f'{this_aff.name} id{this_aff.id}'
             clients_affiliate_id[affiliate_name] += 1
 
         unique_emails = [client for client in unique] if unique is not None else []
