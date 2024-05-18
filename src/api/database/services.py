@@ -7,7 +7,7 @@ from sqlmodel import Session, select
 from starlette.responses import JSONResponse
 
 from src import engine
-from src.models import Client, Affiliate
+from src.models import Client, Affiliate, Department, Desk, Employee
 
 
 async def api_upload_database(
@@ -61,6 +61,34 @@ async def api_upload_database(
         pass
     else:
         raise HTTPException(status_code=400, detail="funnel_name not found")
+
+    if department_id:
+        with Session(engine) as session:
+            statement = select(Department).where(Department.id == department_id)
+            existing_department = session.exec(statement).first()
+            if existing_department is None:
+                raise HTTPException(status_code=400, detail=f"Department with id: {department_id} not found")
+
+    if desk_id:
+        with Session(engine) as session:
+            statement = select(Desk).where(Desk.id == desk_id)
+            existing_desk = session.exec(statement).first()
+            if existing_desk is None:
+                raise HTTPException(status_code=400, detail=f"Desk with id: {desk_id} not found")
+
+    if responsible_id:
+        with Session(engine) as session:
+            statement = select(Employee).where(Employee.id == responsible_id)
+            existing_employee = session.exec(statement).first()
+            if existing_employee is None:
+                raise HTTPException(status_code=400, detail=f"Employee with id: {responsible_id} not found")
+
+    if affiliate_id:
+        with Session(engine) as session:
+            statement = select(Affiliate).where(Affiliate.id == affiliate_id)
+            existing_affiliate = session.exec(statement).first()
+            if existing_affiliate is None:
+                raise HTTPException(status_code=400, detail=f"Affiliate with id: {affiliate_id} not found")
 
     new_affiliate = None
     if new_affiliate_name:
