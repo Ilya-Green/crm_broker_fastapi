@@ -540,6 +540,14 @@ class RolesView(MyModelView):
         Role.can_change_balance,
     ]
 
+    exclude_fields_from_edit = [
+        Role.user
+    ]
+
+    exclude_fields_from_create = [
+        Role.user
+    ]
+
 
 class DepartmentsView(MyModelView):
     responsive_table = True
