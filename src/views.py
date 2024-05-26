@@ -29,6 +29,7 @@ from starlette_admin import (
 )
 from starlette_admin.contrib.sqla.helpers import build_query, build_order_clauses
 from starlette_admin.fields import FileField, RelationField, BooleanField
+from .config import PLATFORM_INTEGRATION_SYNC
 from .fields import PasswordField, CopyField, NotesField, EmailCopyField, StatusField, TraderField, ResponsibleField, \
     CustomPhoneField, LeadField, TraderStatusField, RoleField, AffiliateField, DeskField, EmployeesField, \
     LeadWithCommentsField, OrderField, TransactionField, LeadCompactField, FloatRoundedField
@@ -807,7 +808,8 @@ class TradersView(MyModelView):
 
     def can_edit(self, request: Request) -> bool:
         ids = [request.path_params.get("pk")]
-        update_platform_data_by_id(ids)
+        if PLATFORM_INTEGRATION_SYNC:
+            update_platform_data_by_id(ids)
         if request.state.user["sys_admin"] is True:
             return True
         if request.state.user["head"] is True:
@@ -1045,16 +1047,17 @@ class TradersView(MyModelView):
 
         if isinstance(session, AsyncSession):
             item = (await session.execute(stmt)).scalars().unique().all()
-        items = (
-            (await anyio.to_thread.run_sync(session.execute, stmt))
-            .scalars()
-            .unique()
-            .all()
-        )
-        ids = []
-        for trader in items:
-            ids.append(trader.id)
-        update_platform_data_by_id(ids)
+        if PLATFORM_INTEGRATION_SYNC:
+            items = (
+                (await anyio.to_thread.run_sync(session.execute, stmt))
+                .scalars()
+                .unique()
+                .all()
+            )
+            ids = []
+            for trader in items:
+                ids.append(trader.id)
+            update_platform_data_by_id(ids)
         items = (
             (await anyio.to_thread.run_sync(session.execute, stmt))
             .scalars()
@@ -1322,7 +1325,8 @@ class TransactionsView(MyModelView):
         return True
 
     def get_list_query(self):
-        update_platform_data()
+        if PLATFORM_INTEGRATION_SYNC:
+            update_platform_data()
         return super().get_list_query()
     #     if self.sys_admin:
     #         return super().get_list_query()
@@ -1390,23 +1394,25 @@ class TransactionsView(MyModelView):
             stmt = stmt.where(where)  # type: ignore
         stmt = stmt.order_by(*build_order_clauses(order_by or [], self.model))
         if isinstance(session, AsyncSession):
-            items = (await session.execute(stmt)).scalars().unique().all()
-            ids = []
-            for order in items:
-                ids.append(order.user_id)
-            update_platform_data_by_id(ids)
+            if PLATFORM_INTEGRATION_SYNC:
+                items = (await session.execute(stmt)).scalars().unique().all()
+                ids = []
+                for order in items:
+                    ids.append(order.user_id)
+                update_platform_data_by_id(ids)
             items = (await session.execute(stmt)).scalars().unique().all()
             return items
-        items = (
-            (await anyio.to_thread.run_sync(session.execute, stmt))
-            .scalars()
-            .unique()
-            .all()
-        )
-        ids = []
-        for transaction in items:
-            ids.append(transaction.trader_id)
-        update_platform_data_by_id(ids)
+        if PLATFORM_INTEGRATION_SYNC:
+            items = (
+                (await anyio.to_thread.run_sync(session.execute, stmt))
+                .scalars()
+                .unique()
+                .all()
+            )
+            ids = []
+            for transaction in items:
+                ids.append(transaction.trader_id)
+            update_platform_data_by_id(ids)
         items = (
             (await anyio.to_thread.run_sync(session.execute, stmt))
             .scalars()
@@ -1590,23 +1596,25 @@ class OrdersView(MyModelView):
             stmt = stmt.where(where)  # type: ignore
         stmt = stmt.order_by(*build_order_clauses(order_by or [], self.model))
         if isinstance(session, AsyncSession):
+            if PLATFORM_INTEGRATION_SYNC:
+                items = (await session.execute(stmt)).scalars().unique().all()
+                ids = []
+                for order in items:
+                    ids.append(order.user_id)
+                update_platform_data_by_id(ids)
             items = (await session.execute(stmt)).scalars().unique().all()
+            return items
+        if PLATFORM_INTEGRATION_SYNC:
+            items = (
+                (await anyio.to_thread.run_sync(session.execute, stmt))
+                .scalars()
+                .unique()
+                .all()
+            )
             ids = []
             for order in items:
                 ids.append(order.user_id)
             update_platform_data_by_id(ids)
-            items = (await session.execute(stmt)).scalars().unique().all()
-            return items
-        items = (
-            (await anyio.to_thread.run_sync(session.execute, stmt))
-            .scalars()
-            .unique()
-            .all()
-        )
-        ids = []
-        for order in items:
-            ids.append(order.user_id)
-        update_platform_data_by_id(ids)
         items = (
             (await anyio.to_thread.run_sync(session.execute, stmt))
             .scalars()

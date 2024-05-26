@@ -410,3 +410,9 @@ class Department(SQLModel, table=True):
 
     async def __admin_repr__(self, request: Request):
         return str(self.name)
+
+
+class WhitelistWebhook(SQLModel, table=True):
+    id: Optional[int] = Field(primary_key=True)
+    ipaddress: str = Field()
+
