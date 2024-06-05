@@ -14,7 +14,7 @@ from starlette.middleware import Middleware
 from starlette.middleware.sessions import SessionMiddleware
 
 from .api.database.router import db
-from .api.pt_webhook.router import pt
+from .api.pt_webhook.router import pt, update_whitelist_pt
 from .api.services.api import statusesRouter
 from .provider import MyAuthProvider
 from sqlmodel import Session, select
@@ -64,6 +64,7 @@ async def startup_event():
     if not database_exists(engine.url):
         create_database(engine.url)
     init_database()
+    await update_whitelist_pt()
     if APP_TYPE != "DEV":
         logger.warning(f"{APP_DOMAIN} : {APP_TYPE} : server_turned_on")
         url = f"https://api.telegram.org/bot{TG_TOKEN}/sendMessage?chat_id={TG_CHAT_ID}&text={APP_DOMAIN} : {APP_TYPE} : server_turned_on"

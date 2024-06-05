@@ -28,10 +28,10 @@ def create_trader_webhook(trader: Trader):
             with Session(engine) as session:
                 statement = select(Client).where(Client.trader_id == trader.id)
                 current_client = session.exec(statement).first()
-            if current_client:
-                current_client.type_id = 3
-                session.merge(current_client)
-                session.commit()
+                if current_client:
+                    current_client.type_id = 3
+                    session.merge(current_client)
+                    session.commit()
 
     with Session(engine) as session:
         session.merge(trader)
@@ -44,9 +44,16 @@ def create_order_webhook(order: Order):
         session.commit()
 
 
-def update_order_webhook(order: OrderUpdate):
+def update_order(order: Order, order_update: OrderUpdate):
+    for key, value in order_update.dict(exclude_unset=True).items():
+        setattr(order, key, value)
+
+
+def update_order_webhook(order_update: OrderUpdate):
     with Session(engine) as session:
-        session.merge(order)
+        order = session.query(Order).filter(Order.id == order_update.id).first()
+        update_order(order, order_update)
+        session.add(order)
         session.commit()
 
 
@@ -56,7 +63,14 @@ def create_transaction_webhook(transaction: Transaction):
         session.commit()
 
 
-def update_transaction_webhook(transaction: TransactionUpdate):
+def update_transaction(transaction: Transaction, transaction_update: TransactionUpdate):
+    for key, value in transaction_update.dict(exclude_unset=True).items():
+        setattr(transaction, key, value)
+
+
+def update_transaction_webhook(transaction_update: TransactionUpdate):
     with Session(engine) as session:
-        session.merge(transaction)
+        transaction = session.query(Transaction).filter(Transaction.id == transaction_update.id).first()
+        update_transaction(transaction, transaction_update)
+        session.add(transaction)
         session.commit()

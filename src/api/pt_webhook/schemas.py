@@ -7,7 +7,7 @@ from sqlmodel import SQLModel, Field
 class TransactionUpdate(SQLModel):
     id: str = Field(primary_key=True)
     content: Optional[str] = Field()
-    createdAt: datetime = Field()
+    createdAt: Optional[datetime] = Field()
     dirName: Optional[str] = Field()
     type: Optional[str] = Field()
     value: Optional[float] = Field()

@@ -60,7 +60,7 @@ async def synchronize_data():
 async def create_trader(trader: Trader):
     try:
         create_trader_webhook(trader)
-        return JSONResponse(content={"message": f"Successfully created trader id:{trader.id}"}, status_code=500)
+        return JSONResponse(content={"message": f"Successfully created trader id:{trader.id}"}, status_code=201)
     except Exception as e:
         return JSONResponse(content={"message": f"Произошла ошибка: {str(e)}"}, status_code=500)
 
@@ -69,7 +69,7 @@ async def create_trader(trader: Trader):
 async def update_trader(trader: Trader):
     try:
         create_trader_webhook(trader)
-        return JSONResponse(content={"message": f"Successfully updated trader id:{trader.id}"}, status_code=500)
+        return JSONResponse(content={"message": f"Successfully updated trader id:{trader.id}"}, status_code=201)
     except Exception as e:
         return JSONResponse(content={"message": f"Произошла ошибка: {str(e)}"}, status_code=500)
 
@@ -78,7 +78,7 @@ async def update_trader(trader: Trader):
 async def create_order(order: Order):
     try:
         create_order_webhook(order)
-        return JSONResponse(content={"message": f"Successfully created order id:{order.id}"}, status_code=500)
+        return JSONResponse(content={"message": f"Successfully created order id:{order.id}"}, status_code=201)
     except Exception as e:
         return JSONResponse(content={"message": f"Произошла ошибка: {str(e)}"}, status_code=500)
 
@@ -87,7 +87,7 @@ async def create_order(order: Order):
 async def update_order(order: OrderUpdate):
     try:
         update_order_webhook(order)
-        return JSONResponse(content={"message": f"Successfully created order id:{order.id}"}, status_code=500)
+        return JSONResponse(content={"message": f"Successfully created order id:{order.id}"}, status_code=201)
     except Exception as e:
         return JSONResponse(content={"message": f"Произошла ошибка: {str(e)}"}, status_code=500)
 
@@ -96,7 +96,7 @@ async def update_order(order: OrderUpdate):
 async def create_transaction(transaction: Transaction):
     try:
         create_transaction_webhook(transaction)
-        return JSONResponse(content={"message": f"Successfully created transaction id:{transaction.id}"}, status_code=500)
+        return JSONResponse(content={"message": f"Successfully created transaction id:{transaction.id}"}, status_code=201)
     except Exception as e:
         return JSONResponse(content={"message": f"Произошла ошибка: {str(e)}"}, status_code=500)
 
@@ -105,7 +105,7 @@ async def create_transaction(transaction: Transaction):
 async def update_transaction(transaction: TransactionUpdate):
     try:
         update_transaction_webhook(transaction)
-        return JSONResponse(content={"message": f"Successfully created transaction id:{transaction.id}"}, status_code=500)
+        return JSONResponse(content={"message": f"Successfully created transaction id:{transaction.id}"}, status_code=201)
     except Exception as e:
         return JSONResponse(content={"message": f"Произошла ошибка: {str(e)}"}, status_code=500)
 
