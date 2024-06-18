@@ -211,6 +211,7 @@ class Trader(SQLModel, table=True):
     autologin: Optional[str] = Field()
     autologin_link: Optional[AnyHttpUrl] = Field()
     last_note: Optional[datetime] = Field(sa_column=Column(DateTime(timezone=True)))
+    lastActive: Optional[datetime] = Field()
 
     status_id: Optional[int] = Field(foreign_key="retainstatus.id")
     status: "RetainStatus" = Relationship(back_populates="traders")

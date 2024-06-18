@@ -894,6 +894,7 @@ class TradersView(MyModelView):
         # Trader.date,
         Trader.country,
         Trader.created_at_tp,
+        Trader.lastActive,
         FloatRoundedField("balance"),
         # StatusField("status"),
         # ResponsibleField("responsible"),
