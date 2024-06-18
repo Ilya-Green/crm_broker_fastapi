@@ -14,9 +14,11 @@
     <a class="btn btn-outline-secondary" href="tel:{{ data }}">
       Call
     </a>
-    <button class="btn btn-outline-secondary" type="button" data-clipboard-target="#phone">
-      Copy
-    </button>
+    {% if request.state.user.phones_can_view == True %}
+      <button class="btn btn-outline-secondary" type="button" data-clipboard-target="#phone">
+        Copy
+      </button>
+    {% endif %}
   </div>
 </div>
 
