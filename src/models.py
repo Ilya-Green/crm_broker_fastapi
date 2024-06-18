@@ -82,6 +82,7 @@ class Role(SQLModel, table=True):
     can_change_balance: bool = Field(default=0)
     can_create_deposit: bool = Field(default=0)
     can_change_password: bool = Field(default=0)
+    phones_can_view: bool = Field(default=0)
     retain: bool = Field(default=0)
     orders_can_access: bool = Field(default=0)
     transactions_can_access: bool = Field(default=0)

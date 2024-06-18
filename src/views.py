@@ -539,6 +539,7 @@ class RolesView(MyModelView):
         Role.can_create_deposit,
         Role.can_change_password,
         Role.can_change_balance,
+        Role.phones_can_view
     ]
 
     exclude_fields_from_edit = [
@@ -1820,6 +1821,17 @@ class ClientsView(MyModelView):
             return query
         query = query.where(Client.department_id != 0).where(Client.desk_id != 0).where(Client.department_id == self.department_id).where(Client.desk_id == self.desk_id).where(Client.responsible_id == self.id)
         return query
+
+
+    async def serialize_field_value(
+        self, value: Any, field: BaseField, action: RequestAction, request: Request
+    ) -> Any:
+        if field.name == 'phone_number':
+            if request.state.user['phones_can_view'] is not True and action != RequestAction.DETAIL:
+                return await field.serialize_none_value(request, action)
+        if value is None:
+            return await field.serialize_none_value(request, action)
+        return await field.serialize_value(request, value, action)
 
     fields = [
 

@@ -1,6 +1,8 @@
 <div class="input-group">
   <div id="phone" class="form-control border-0" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-    {{ data }}
+    {% if request.state.user.phones_can_view == True %}
+        {{ data }}
+    {% endif %}
   </div>
   <div class="input-group-append">
     <a class="btn btn-outline-secondary" href="sip:{{ data }}">
