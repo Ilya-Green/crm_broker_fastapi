@@ -36,8 +36,8 @@ async def update_whitelist_pt():
     try:
         WHITELIST.clear()
         ips = update_whitelist()
-        WHITELIST.extend(ips)
         ips.append("127.0.0.1")
+        WHITELIST.extend(ips)
         return JSONResponse(content={"message": "Whitelist updated successfully"}, status_code=200)
     except HTTPException as e:
         raise e
