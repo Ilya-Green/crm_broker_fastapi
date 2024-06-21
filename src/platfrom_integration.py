@@ -11,7 +11,7 @@ from sqlmodel import Session, select
 
 from src import engine
 from src.config import PLATFORM_INTEGRATION_IS_ON, PLATFORM_INTEGRATION_URL
-from src.models import Trader, Client, Order, Transaction
+from src.models import Trader, Client, Order, Transaction, Output
 from starlette_admin.exceptions import ActionFailed, FormValidationError
 
 logger = logging.getLogger("platform")
@@ -651,3 +651,26 @@ def create_transaction(trader: Trader, value: int, type: str, description: str):
             print(response.content)
             logger.info(f'Неудачная попытка добавления транзакции: {trader} : {value}$ {type} {description}')
             print("Ошибка при выполнении запроса")
+
+def edit_output(id: str, status: str):
+    if PLATFORM_INTEGRATION_IS_ON:
+        url = f"https://{PLATFORM_INTEGRATION_URL}/api/admin/output/edit?token=token"
+        payload = json.dumps({
+            "id": id,
+            "status": status,
+        })
+
+        headers = {
+            'Content-Type': 'application/json'
+        }
+        response = requests.request("PUT", url, headers=headers, data=payload)
+        if response.status_code == 200:
+            print("Запрос успешно выполнен")
+            print(response.content)
+            logger.info(f'Изменён вывод: {id} : {status}')
+        else:
+            print(response.status_code)
+            print(response.content)
+            logger.info(f'Неудачная попытка изменения вывода: {id} : {status}')
+            print("Ошибка при выполнении запроса")
+            raise ActionFailed("Something went wrong")

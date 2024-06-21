@@ -225,6 +225,8 @@ class Trader(SQLModel, table=True):
 
     transactions: "Transaction" = Relationship(back_populates="trader")
 
+    outputs: "Output" = Relationship(back_populates="trader")
+
     notes: "RetainNote" = Relationship(back_populates="trader")
 
     async def __admin_repr__(self, request: Request):
@@ -250,6 +252,23 @@ class Transaction(SQLModel, table=True):
 
     async def __admin_repr__(self, request: Request):
         return str(self.value) + "$: " + str(self.type) + ": " + self.createdAt.strftime("%Y-%m-%d")
+
+
+class Output(SQLModel, table=True):
+    id: Optional[str] = Field(primary_key=True)
+    amount: Optional[float] = Field()
+    walletnum: Optional[str] = Field()
+    status: Optional[str] = Field()
+    createdAt: Optional[str] = Field()
+    createdAtDate: Optional[datetime] = Field()
+    visited: Optional[bool] = Field()
+    v: Optional[int] = Field()
+
+    trader_id: str = Field(foreign_key="trader.id")
+    trader: "Trader" = Relationship(back_populates="outputs")
+
+    async def __admin_repr__(self, request: Request):
+        return str(self.amount) + "$: " + str(self.status) + ": " + self.createdAtDate.strftime("%Y-%m-%d")
 
 
 class Order(SQLModel, table=True):

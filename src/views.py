@@ -60,11 +60,11 @@ from sqlalchemy import select as sqlalchemy_select
 
 from starlette_admin.helpers import html_params
 from .models import Employee, Role, Client, Desk, Affiliate, Department, Note, Trader, Order, Transaction, Status, \
-    RetainStatus, Type, RetainNote
+    RetainStatus, Type, RetainNote, Output
 from . import engine
 from .platfrom_integration import update_platform_data, edit_account_platform, change_account_password_platform, \
     update_order, edit_order_platform, update_orders, update_platform_data_by_id, create_transaction, \
-    change_account_balance_platform, register_account, register_account_crm
+    change_account_balance_platform, register_account, register_account_crm, edit_output
 
 logger = logging.getLogger("api")
 
@@ -1422,6 +1422,168 @@ class TransactionsView(MyModelView):
             .all()
         )
         return items
+
+
+class OutputsView(MyModelView):
+    # responsive_table = True
+    column_visibility = True
+    search_builder = True
+
+    def is_accessible(self, request: Request) -> bool:
+        referer_url = urlparse(request.headers.get("referer"))
+        query_dict = parse_qs(referer_url.query)
+        self.query = query_dict
+        self.id = request.state.user["id"]
+        self.desk_id = request.state.user["desk_id"]
+        self.department_id = request.state.user["department_id"]
+        self.desk_leader = request.state.user["desk_leader"]
+        self.department_leader = request.state.user["department_leader"]
+        self.head = request.state.user["head"]
+        self.sys_admin = request.state.user["sys_admin"]
+        self.retain = request.state.user["retain"]
+        self.transactions_can_access = request.state.user["transactions_can_access"]
+
+        with Session(engine) as session:
+            statement = select(Desk).where(Desk.department_id == request.state.user["department_id"])
+            desks = session.exec(statement).all()
+            # self.department_desks = desks
+            self.department_desks = [desk.id for desk in desks]
+        # self.role_name = request.state.user["id"]
+
+        if request.state.user["sys_admin"] is True:
+            return True
+        if request.state.user["outputs_can_access"] is True:
+            return True
+        return False
+
+    def can_create(self, request: Request) -> bool:
+        if request.state.user["sys_admin"] is True:
+            return True
+
+    def can_edit(self, request: Request) -> bool:
+        # update_platform_data()
+        if request.state.user["sys_admin"] is True:
+            return True
+        if request.state.user["head"] is True:
+            return True
+        if request.state.user["retain"] is True:
+            return True
+
+    def can_delete(self, request: Request) -> bool:
+        if request.state.user["sys_admin"] is True:
+            return True
+
+    def can_view_details(self, request: Request) -> bool:
+        return True
+
+    def get_list_query(self):
+        if PLATFORM_INTEGRATION_SYNC:
+            update_platform_data()
+        return super().get_list_query()
+
+    fields = [
+        Output.amount,
+        Output.status,
+        Output.walletnum,
+        Output.createdAtDate,
+        Output.trader
+    ]
+
+    async def create(self, request: Request, data: Dict[str, Any]) -> Any:
+        try:
+            data = await self._arrange_data(request, data)
+            await self.validate(request, data)
+            session: Union[Session, AsyncSession] = request.state.session
+            obj = await self._populate_obj(request, self.model(), data)
+            session.add(obj)
+            if isinstance(session, AsyncSession):
+                await session.commit()
+                await session.refresh(obj)
+            else:
+                await anyio.to_thread.run_sync(session.commit)
+                await anyio.to_thread.run_sync(session.refresh, obj)
+            return obj
+        except Exception as e:
+            return self.handle_exception(e)
+
+    async def find_all(
+            self,
+            request: Request,
+            skip: int = 0,
+            limit: int = 100,
+            where: Union[Dict[str, Any], str, None] = None,
+            order_by: Optional[List[str]] = None,
+    ) -> Sequence[Any]:
+        session: Union[Session, AsyncSession] = request.state.session
+        stmt = self.get_list_query().offset(skip)
+        if limit > 0:
+            stmt = stmt.limit(limit)
+        if where is not None:
+            if isinstance(where, dict):
+                where = build_query(where, self.model)
+            else:
+                where = await self.build_full_text_search_query(
+                    request, where, self.model
+                )
+            stmt = stmt.where(where)  # type: ignore
+        stmt = stmt.order_by(*build_order_clauses(order_by or [], self.model))
+        if isinstance(session, AsyncSession):
+            if PLATFORM_INTEGRATION_SYNC:
+                items = (await session.execute(stmt)).scalars().unique().all()
+                ids = []
+                for order in items:
+                    ids.append(order.user_id)
+                update_platform_data_by_id(ids)
+            items = (await session.execute(stmt)).scalars().unique().all()
+            return items
+        if PLATFORM_INTEGRATION_SYNC:
+            items = (
+                (await anyio.to_thread.run_sync(session.execute, stmt))
+                .scalars()
+                .unique()
+                .all()
+            )
+            ids = []
+            for transaction in items:
+                ids.append(transaction.trader_id)
+            update_platform_data_by_id(ids)
+        items = (
+            (await anyio.to_thread.run_sync(session.execute, stmt))
+            .scalars()
+            .unique()
+            .all()
+        )
+        return items
+
+
+    @action(
+        name="change_status",
+        text="Change status",
+        confirmation="Select status you want to set",
+        submit_btn_text="Yes, proceed",
+        submit_btn_class="btn-success",
+        #         <input name="id" class="form-control" id="floating-input" value="">
+        form="""
+
+            <div class="form-group">
+                <label for="selectOption">Select Option:</label>
+                <select class="form-control" id="outputStatus" name="outputStatus">
+                    <option value="new">New</option>
+                    <option value="done">Done</option>
+                    <option value="progress">In Progress</option>
+                    <option value="rejected">Rejected</option>
+                </select>
+            </div>
+
+            """,
+    )
+    async def change_status(self, request: Request, pks: List[Any]) -> str:
+        session: Session = request.state.session
+        for output_id in pks:
+            edit_output(output_id, request.query_params["outputStatus"])
+        return "{} deposits were successfully created".format(
+            len(pks)
+        )
 
 
 class OrdersView(MyModelView):
