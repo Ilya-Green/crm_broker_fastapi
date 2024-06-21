@@ -1989,9 +1989,10 @@ class ClientsView(MyModelView):
     async def serialize_field_value(
         self, value: Any, field: BaseField, action: RequestAction, request: Request
     ) -> Any:
-        if field.name == 'phone_number':
-            if request.state.user['phones_can_view'] is not True and action != RequestAction.DETAIL:
-                return await field.serialize_none_value(request, action)
+        if request.state.user['sys_admin'] is not True:
+            if field.name == 'phone_number':
+                if request.state.user['phones_can_view'] is not True and action != RequestAction.DETAIL:
+                    return await field.serialize_none_value(request, action)
         if value is None:
             return await field.serialize_none_value(request, action)
         return await field.serialize_value(request, value, action)
