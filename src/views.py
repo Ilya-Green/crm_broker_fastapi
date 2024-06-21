@@ -1844,7 +1844,6 @@ class ClientsView(MyModelView):
         CustomPhoneField("phone_number"),
         Client.status,
         Client.responsible,
-        Client.notes,
         # NotesField("notes"),
         # StatusField("status"),
         # ResponsibleField("responsible"),
@@ -1875,6 +1874,7 @@ class ClientsView(MyModelView):
         Client.trader,
         Client.responsible_id,
         Client.last_note,
+        Client.notes,
     ]
 
     exclude_fields_from_list = [
