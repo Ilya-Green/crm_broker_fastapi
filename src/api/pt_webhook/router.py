@@ -18,7 +18,7 @@ WHITELIST = ["127.0.0.1"]
 
 
 def check_ip_whitelist(request: Request):
-    client_ip = request.client.host
+    client_ip = request.headers.get('CF-Connecting-IP') or request.client.host
     if client_ip not in WHITELIST:
         raise HTTPException(status_code=404, detail="Not Found")
 
