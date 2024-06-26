@@ -4,6 +4,23 @@
     {% set current_user = (request | get_admin_user) %}
 {% endif %}
 {% block body %}
+<style>
+@media (min-width: 1600px) {
+    .container, .container-lg, .container-md, .container-sm, .container-xl, .container-xxl {
+        max-width: 1740px !important;
+}
+}
+@media screen and (max-width: 1920px) and (min-width: 768px) {
+    ul.navbar-nav {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        align-content: center !important;
+        justify-content: center !important;
+        align-items: center !important;
+    }
+}
+</style>
     <div class="page">
         <header class="navbar navbar-expand-md navbar-dark d-print-none">
             <div class="container-xl" style="margin-left: 220px;">
