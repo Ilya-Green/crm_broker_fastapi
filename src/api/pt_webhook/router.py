@@ -8,8 +8,8 @@ from starlette.responses import JSONResponse
 
 from src.api.pt_webhook.schemas import OrderUpdate, TransactionUpdate
 from src.api.pt_webhook.services import create_trader_webhook, create_order_webhook, create_transaction_webhook, \
-    update_whitelist, update_order_webhook, update_transaction_webhook
-from src.models import Trader, Order, Transaction
+    update_whitelist, update_order_webhook, update_transaction_webhook, create_output_webhook
+from src.models import Trader, Order, Transaction, Output
 from src.platfrom_integration import update_platform_data
 
 logger = logging.getLogger("database")
@@ -109,3 +109,20 @@ async def update_transaction(transaction: TransactionUpdate):
     except Exception as e:
         return JSONResponse(content={"message": f"Произошла ошибка: {str(e)}"}, status_code=500)
 
+
+@pt.post("/output/create")
+async def create_transaction(output: Output):
+    try:
+        create_output_webhook(output)
+        return JSONResponse(content={"message": f"Successfully created transaction id:{transaction.id}"}, status_code=201)
+    except Exception as e:
+        return JSONResponse(content={"message": f"Произошла ошибка: {str(e)}"}, status_code=500)
+
+
+@pt.post("/output/update")
+async def update_transaction(output: Output):
+    try:
+        create_output_webhook(output)
+        return JSONResponse(content={"message": f"Successfully created transaction id:{transaction.id}"}, status_code=201)
+    except Exception as e:
+        return JSONResponse(content={"message": f"Произошла ошибка: {str(e)}"}, status_code=500)

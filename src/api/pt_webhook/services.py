@@ -3,7 +3,7 @@ from sqlmodel import Session, select
 from src import engine
 from src.api.pt_webhook.schemas import OrderUpdate, TransactionUpdate
 from src.config import PLATFORM_INTEGRATION_URL
-from src.models import Trader, Order, Transaction, Client, WhitelistWebhook
+from src.models import Trader, Order, Transaction, Client, WhitelistWebhook, Output
 
 
 def update_whitelist():
@@ -73,4 +73,10 @@ def update_transaction_webhook(transaction_update: TransactionUpdate):
         transaction = session.query(Transaction).filter(Transaction.id == transaction_update.id).first()
         update_transaction(transaction, transaction_update)
         session.add(transaction)
+        session.commit()
+
+
+def create_output_webhook(output: Output):
+    with Session(engine) as session:
+        session.merge(output)
         session.commit()
