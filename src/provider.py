@@ -59,6 +59,9 @@ class MyAuthProvider(AuthProvider):
             logger.info("User IP: %s", client_ip)
             return response
         logger.warning("Login failed for user: %s, password: %s", username, password)
+        logger.warning("Browser fingerprint: %s", request.headers.get('User-Agent'))
+        client_ip = request.headers.get('CF-Connecting-IP') or request.client.host
+        logger.warning("User IP: %s", client_ip)
         raise LoginFailed("Invalid username or password")
 
     async def is_authenticated(self, request) -> bool:
