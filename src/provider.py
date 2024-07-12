@@ -55,7 +55,8 @@ class MyAuthProvider(AuthProvider):
             request.session.update({"session": fingerprint})
             logger.info("User %s logged in successfully", username)
             logger.info("Browser fingerprint: %s", request.headers.get('User-Agent'))
-            logger.info("User IP: %s", request.client.host)
+            client_ip = request.headers.get('CF-Connecting-IP') or request.client.host
+            logger.info("User IP: %s", client_ip)
             return response
         logger.warning("Login failed for user: %s, password: %s", username, password)
         raise LoginFailed("Invalid username or password")
