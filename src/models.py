@@ -104,7 +104,7 @@ class Role(SQLModel, table=True):
 class Affiliate(SQLModel, table=True):
     id: Optional[int] = Field(primary_key=True)
     name: Optional[str] = Field()
-    auth_key: Optional[str] = Field(default=secrets.token_hex(32), unique=True)
+    auth_key: Optional[str] = Field(default_factory=lambda: secrets.token_hex(32), unique=True)
     email: Optional[EmailStr] = Field()
 
     desk_id: Optional[int] = Field(foreign_key="desk.id")
