@@ -1,5 +1,8 @@
 import os
+from typing import Optional
+
 from dotenv import load_dotenv
+from pydantic import BaseSettings, Field
 
 load_dotenv()
 
@@ -31,3 +34,11 @@ if PLATFORM_INTEGRATION_SYNC == "1":
     PLATFORM_INTEGRATION_SYNC = True
 else:
     PLATFORM_INTEGRATION_SYNC = False
+
+
+class Settings(BaseSettings):
+    platform_integration_is_on: Optional[bool] = Field(env='PLATFORM_INTEGRATION_IS', default=0)
+    platform_integration_url: Optional[str] = Field(env='PLATFORM_INTEGRATION_URL')
+    platform_integration_sync: Optional[bool] = Field(env='PLATFORM_INTEGRATION_SYNC', default=0)
+    db_uri: Optional[str] = Field(env='DB_URI', default=0)
+    db_file: Optional[str] = Field(env='DB_FILE', default=0)
